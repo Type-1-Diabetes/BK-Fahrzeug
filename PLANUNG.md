@@ -118,6 +118,7 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 - Das Tablet darf nur: Meldungen für sein Fahrzeug anlegen, die Checkliste abhaken, offene Meldungen ansehen. Es darf nichts löschen und keine anderen Fahrzeuge sehen.
 - Geht ein Tablet verloren, sperrt der Admin es mit einem Klick. Ein neues Tablet bekommt einen neuen Code.
 - Das gleiche Fahrzeug-Menü kann auch auf einem Mac geöffnet werden (z. B. in der Wache).
+- Menü am Tablet: 4 Reiter wie im Mockup – Übersicht, Melden (Umschalter Mangel / Material), Checkliste, Verlauf.
 
 ## 5b. Modularer Aufbau
 
@@ -136,6 +137,16 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - Sobald wieder Netz da ist, wird sie verschickt. Auf iPhone und iPad passiert das beim nächsten Öffnen der App, nicht im Hintergrund (Apple erlaubt das nicht).
 - Die App zeigt klar an: „Noch nicht gesendet“ oder „Gesendet“.
 - Die letzten Daten (Fahrzeuge, Checklisten, offene Meldungen) sind auch offline lesbar.
+- Die Tablet-Module sind im Service Worker gespeichert, damit das Tablet auch ohne Netz startet. Eine Checkliste beginnen braucht einmal Netz, abhaken und abschließen geht danach offline.
+
+## 6a. Benachrichtigungen (Push)
+
+- Jeder MPGler und Admin schaltet sie pro Gerät ein (Mac: Einstellungen › Benachrichtigungen) und wählt, wobei er Bescheid bekommt.
+- Anlässe: neuer Mangel, Material angefordert, KTW nicht einsatzbereit, Checkliste zum Gegenzeichnen. Empfänger: Admins und MPGler der Wache des KTW, nicht wer es selbst ausgelöst hat.
+- Technik in der Demo: Ein neuer Eintrag im Verlauf löst einen Trigger aus (Migration 004). Der ruft die Edge Function `push-senden` auf, die per Web Push (VAPID) verschickt. Abgelaufene Geräte werden automatisch entfernt.
+- Geheimnisse liegen nur in Supabase (Edge Functions › Secrets und Vault), nie im Repo.
+- iPad/iPhone: nur in der installierten App (Home-Bildschirm), ab iOS 16.4.
+- Noch offen: Erinnerung und Meldung „Checkliste überfällig“ (braucht einen täglichen Job).
 
 ---
 
@@ -205,6 +216,8 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - Zielgeräte: **Mac-Monitore** und **iPads**. Android und Windows sollen auch funktionieren.
 - Das iPad wird mit dem Finger bedient: große Schaltflächen, im Querformat und Hochformat nutzbar.
 - Die App soll sich wie eine echte Apple-App anfühlen: schnell, ruhig, vertraute Bedienung.
+- **Hell ist fester Standard**, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel gibt es nur auf Wunsch am Mac (Einstellungen › Konto › Darstellung). Das Tablet ist immer hell.
+- Verbindliche Vorlage für die Oberfläche ist `mockup/ui-mockup.html`. Was davon abweicht, steht in `FORTSCHRITT.md`.
 - **Schrift:** Wir nutzen die Systemschrift. Sie ist immer da und sieht offline gleich aus. Soll später doch die Website-Schrift Source Sans rein, legen wir die Schriftdateien in `web/` ab und speichern sie per Service Worker auf dem Gerät. Dann funktioniert auch das ohne Netz. Nicht über Google Fonts laden.
 - Skills für die Umsetzung:
   - `/impeccable:impeccable` für UI, UX, Design und Layout
@@ -230,7 +243,8 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - [x] Export: PDF pro Checkliste, CSV für Meldungen
 - [x] Logo: in der Demo nur ein Platzhalter (Repo ist öffentlich)
 - [x] Benutzerverwaltung: Admins legen Accounts an und vergeben Rollen (MPGler, Admin) und Wachen
-- [ ] Push-Benachrichtigungen auf iPad/iPhone vor Ort testen (Apple macht das nur in installierten Apps, ab iOS 16.4, und es läuft nicht immer zuverlässig)
+- [x] Push-Versand eingerichtet (Abschnitt 6a), Function getestet
+- [ ] Push-Benachrichtigungen auf Mac und iPad/iPhone vor Ort testen (Apple macht das nur in installierten Apps, ab iOS 16.4, und es läuft nicht immer zuverlässig)
 
 ## 10a. Umfang: Demo und finale Version
 
