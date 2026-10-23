@@ -1,0 +1,41 @@
+/* Design-Grundlage: Farben, Schrift, Grundelemente. Hell ist Standard, Dunkel folgt dem System. */
+:root {
+  --navy: #12135a; --navy2: #1c1e73; --red: #e2001a; --brand: #0a6db5;
+  --bg: #f2f2f7; --bg2: #fff; --fill: rgba(120,120,128,.12); --fill2: rgba(120,120,128,.2);
+  --label: #0b0b1e; --label2: rgba(40,40,67,.66); --label3: rgba(60,60,67,.34); --sep: rgba(60,60,67,.22);
+  --tint: var(--navy2); --ok: #2fa84f; --ok-ink: #1d7a37; --bad: #e2001a; --bad-ink: #c00016; --warn: #f08a00; --warn-ink: #a85a00;
+  --bar: rgba(250,250,252,.94); --mac-side: #ececf1;
+  --b-blau: #1f6fd6; --b-orange: #f08a00; --b-rot: #e2001a; --b-gruen: #2fa84f; --b-gelb: #e6b800;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000; --bg2: #1c1c1e; --fill: rgba(118,118,128,.24); --fill2: rgba(118,118,128,.36);
+    --label: #fff; --label2: rgba(235,235,245,.64); --label3: rgba(235,235,245,.32); --sep: rgba(84,84,88,.6);
+    --tint: #8f9bff; --ok: #30d158; --ok-ink: #30d158; --bad: #ff453a; --bad-ink: #ff6961; --warn: #ff9f0a; --warn-ink: #ffb340;
+    --bar: rgba(22,22,24,.94); --mac-side: #232327; --navy2: #2a2d8f;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--label); font: 17px/1.35 var(--font);
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+input, textarea, select, .waehlbar { -webkit-user-select: text; user-select: text; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 55%, transparent); outline-offset: 1px; border-radius: 6px; }
+::selection { background: color-mix(in srgb, var(--brand) 28%, transparent); }
+[hidden] { display: none !important; }
+svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+h1, h2, h3 { margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.logo-platzhalter {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--navy2); color: #fff; font-weight: 800; font-size: 12px; letter-spacing: -.02em;
+}
+.logo-platzhalter.gross { width: 88px; height: 88px; font-size: 32px; }

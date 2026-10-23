@@ -1,0 +1,72 @@
+// Modul Einstellungen (Mac): jeder stellt selbst ein, wobei er benachrichtigt wird
+BK.modul('einstellungen', {
+  async start(root, ctx) {
+    const { el, api, leeren } = BK;
+    const PUSH = [
+      ['ampel_rot', 'ein KTW nicht einsatzbereit ist'],
+      ['neuer_mangel', 'ein neuer Mangel gemeldet wird'],
+      ['neues_material', 'Material angefordert wird'],
+      ['checkliste_fertig', 'eine Checkliste zum Gegenzeichnen bereit ist'],
+      ['checkliste_ueberfaellig', 'eine Checkliste überfällig ist'],
+    ];
+    const box = root.querySelector('[data-push]');
+    const werte = Object.fromEntries(PUSH.map(([k]) => [k, true]));  // ohne Eintrag: an
+
+    const sl = SettingsLayout.mount(root.querySelector('[data-sl]'), {
+      async onSave() {
+        try { for (const [k] of PUSH) await api.pushEinstellungSetzen(k, werte[k]); return true; }
+        catch (e) { alertDialog('Nicht gespeichert', e.message); return false; }
+      },
+      onDiscard: () => laden(),
+    });
+
+    async function laden() {
+      try { for (const z of await api.pushEinstellungen()) werte[z.schluessel] = z.an; } catch { /* Standard: alles an */ }
+      leeren(box).append(...PUSH.map(([k, t]) => el('label.cb', el('input', { type: 'checkbox', checked: werte[k], onchange: e => { werte[k] = e.target.checked; } }), t)));
+      if (sl) sl.clean();
+    }
+
+    // Dieses Gerät an- oder abmelden (Web Push über den Service Worker)
+    const geraet = root.querySelector('[data-geraet]');
+    const schluessel = b64 => Uint8Array.from(atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const installiert = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+    async function geraetZeigen() {
+      leeren(geraet);
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        return geraet.append(el('p', ios && !installiert
+          ? 'Auf dem iPad gehen Benachrichtigungen nur, wenn die App auf dem Home-Bildschirm liegt: Teilen › „Zum Home-Bildschirm“, dann von dort öffnen.'
+          : 'Dieser Browser kann keine Benachrichtigungen empfangen.'));
+      }
+      if (Notification.permission === 'denied') {
+        return geraet.append(el('p', 'Benachrichtigungen sind für diese Seite im Browser blockiert. Bitte in den Browser-Einstellungen erlauben.'));
+      }
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      const knopf = el('button', { type: 'button', class: sub ? 'pbtn' : 'pbtn def' }, sub ? 'Ausschalten' : 'Einschalten');
+      knopf.onclick = async () => {
+        knopf.disabled = true;
+        try {
+          if (sub) {
+            await api.pushAboLoeschen(sub.endpoint).catch(() => {});
+            await sub.unsubscribe();
+          } else {
+            if (await Notification.requestPermission() !== 'granted') return geraetZeigen();
+            const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: schluessel(BK_CONFIG.vapid) });
+            await api.pushAboSpeichern(neu);
+          }
+        } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+        geraetZeigen();
+      };
+      geraet.append(el('p', sub ? 'Benachrichtigungen kommen auf dieses Gerät.' : 'Auf diesem Gerät kommen noch keine Benachrichtigungen.'), knopf);
+    }
+    geraetZeigen().catch(e => geraet.append(el('p', e.message)));
+
+    leeren(root.querySelector('[data-konto]')).append(
+      el('span.l', 'Name'), el('div', ctx.ich.name || '–'),
+      el('span.l', 'Rolle'), el('div', ctx.ich.rolle === 'admin' ? 'Admin' : 'MPGler'),
+      el('span.l', 'App'), el('div', 'Version ' + (BK_CONFIG.version || '–')));
+    laden();
+  },
+});

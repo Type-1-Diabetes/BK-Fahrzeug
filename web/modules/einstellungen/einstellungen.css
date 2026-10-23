@@ -1,0 +1,6 @@
+/* Modul Einstellungen (Mac) */
+.es-liste { display: flex; flex-direction: column; gap: 10px; }
+.es-liste .cb { margin: 0; min-height: 24px; }
+.sl-main .grp { max-width: 560px; }
+.es-geraet { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.es-geraet p { margin: 0; flex: 1; min-width: 220px; color: var(--label2); line-height: 1.4; }

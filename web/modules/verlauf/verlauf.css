@@ -1,0 +1,5 @@
+/* Modul Verlauf (Tablet) */
+.vl-queue { margin-bottom: 8px; }
+.vl-queue .btn { min-height: 40px; font-size: 15px; }
+.pill.queue { background: var(--fill); color: var(--label2); }
+.pill.fehler { background: color-mix(in srgb, var(--bad) 13%, transparent); color: var(--bad-ink); }

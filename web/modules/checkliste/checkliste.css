@@ -1,0 +1,51 @@
+/* Modul Checkliste (Tablet): Bereiche links, Positionen rechts, wie das MPG-Dokument */
+.content:has(> .ckl) { padding: 0; overflow: hidden; display: flex; }
+.ckl { flex: 1; display: flex; min-height: 0; min-width: 0; }
+.ckl-side { width: 300px; flex: none; border-right: .5px solid var(--sep); overflow: auto; padding: 4px 14px 14px; }
+.ckl-side h2 { font-size: 20px; padding: 4px 0 2px; }
+.ckl-stand { display: flex; justify-content: space-between; font-size: 14px; color: var(--label2); margin-top: 10px; }
+.progress { height: 5px; border-radius: 3px; background: var(--fill); overflow: hidden; margin: 6px 0 12px; }
+.progress i { display: block; height: 100%; background: var(--navy2); transition: width .3s cubic-bezier(.2, .8, .2, 1); }
+.area { position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 12px 8px 20px; border-radius: 10px; font-size: 16px; width: 100%; text-align: left; }
+.area::before { content: ""; position: absolute; left: 7px; top: 12px; bottom: 12px; width: 4px; border-radius: 2px; background: var(--label3); }
+.area.blau::before { background: var(--b-blau); } .area.orange::before { background: var(--b-orange); } .area.rot::before { background: var(--b-rot); }
+.area.gruen::before { background: var(--b-gruen); } .area.gelb::before { background: var(--b-gelb); }
+.area.on { background: var(--navy2); color: #fff; }
+.area > span { margin-left: auto; font-size: 14px; color: var(--label2); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px; }
+.area.on > span { color: rgba(255,255,255,.8); }
+.area .abw { color: var(--warn-ink); font-weight: 600; }
+.area.on .abw { color: #fff; }
+.ckl-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.ckl-main .content { padding-top: 12px; }
+.ckl-kopf { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.ckl-kopf h2 { font-size: 26px; flex: 1; }
+.ckl-kopf .streifen { width: 6px; height: 28px; border-radius: 3px; background: var(--label3); }
+.ckl-kopf .streifen.blau { background: var(--b-blau); } .ckl-kopf .streifen.orange { background: var(--b-orange); } .ckl-kopf .streifen.rot { background: var(--b-rot); }
+.ckl-kopf .streifen.gruen { background: var(--b-gruen); } .ckl-kopf .streifen.gelb { background: var(--b-gelb); }
+.ckl-kopf .btn { min-height: 44px; font-size: 15px; }
+.ck { display: flex; align-items: center; gap: 14px; min-height: 62px; padding: 10px 16px; position: relative; width: 100%; text-align: left; }
+.ck-wrap + .ck-wrap::before { content: ""; position: absolute; left: 58px; right: 0; border-top: .5px solid var(--sep); }
+.ck-wrap { position: relative; }
+.ck .box { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 17px; color: #fff; background: var(--ok); }
+.ck .box.warn { background: var(--warn); }
+.ck .t { flex: 1; min-width: 0; }
+.ck .t b { display: block; font-weight: 400; }
+.ck .t span { display: block; font-size: 14px; color: var(--label2); margin-top: 2px; }
+.ck .soll { font-size: 15px; color: var(--label2); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.ck .soll strong { color: var(--warn-ink); }
+.ck-wrap.dev { background: color-mix(in srgb, var(--warn) 8%, var(--bg2)); }
+.ck-edit { display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; align-items: center; padding: 4px 16px 16px 58px; }
+.ck-edit > span { font-size: 15px; color: var(--label2); }
+.ck-edit .field { background: var(--fill); border-radius: 9px; padding: 8px 12px; min-height: 40px; font-size: 16px; }
+.ck-edit .acts { grid-column: 1 / -1; margin-top: 4px; }
+.ck-edit .acts .btn { min-height: 44px; font-size: 15px; }
+.bottombar { flex: none; display: flex; gap: 12px; align-items: center; padding: 12px 28px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: .5px solid var(--sep); background: var(--bar); }
+.bottombar .sp { flex: 1; }
+.ckl-start { margin: auto; max-width: 520px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px; }
+.ckl-start h1 { font-size: 30px; }
+.ckl-start p { margin: 0; color: var(--label2); line-height: 1.45; }
+.ckl-start .hinweis { color: var(--bad-ink); }
+@media (max-width: 900px) {
+  .ckl { flex-direction: column; }
+  .ckl-side { width: auto; max-height: 34vh; border-right: 0; border-bottom: .5px solid var(--sep); }
+}

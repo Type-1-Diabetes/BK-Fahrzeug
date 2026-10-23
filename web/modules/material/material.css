@@ -1,0 +1,12 @@
+/* Modul Material anfordern (Tablet) */
+.mat-kopf { display: flex; align-items: center; gap: 16px; }
+.mat-kopf .large { flex: 1; }
+.mat-spalten { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); gap: 0 28px; align-items: start; }
+@media (max-width: 900px) { .mat-spalten { grid-template-columns: 1fr; } }
+.mz { flex-wrap: wrap; }
+.mz .t { display: flex; flex-direction: column; gap: 4px; min-width: 200px; }
+.mz .t .field.klein { font-size: 15px; color: var(--label2); }
+.mz .grund { flex: none; width: 220px; }
+.mz .grund button { min-height: 36px; font-size: 14px; }
+.mz-weg { width: 44px; height: 44px; border-radius: 50%; color: var(--label2); display: grid; place-items: center; font-size: 18px; }
+.mz-neu { color: var(--tint); min-height: 52px; }

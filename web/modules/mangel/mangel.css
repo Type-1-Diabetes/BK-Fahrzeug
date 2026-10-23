@@ -1,0 +1,5 @@
+/* Modul Mangel melden (Tablet) */
+.mangel { max-width: 760px; margin: 0 auto; }
+.mangel-kopf { display: flex; align-items: center; gap: 16px; }
+.mangel-kopf .large { flex: 1; }
+.mangel .fblock[hidden] { display: none; }

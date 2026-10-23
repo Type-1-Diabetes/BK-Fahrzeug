@@ -1,0 +1,2 @@
+/* Modul Fahrzeuge (Mac): nutzt die Mac-Bausteine aus komponenten.css */
+.fz-grund { margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: color-mix(in srgb, var(--bad) 10%, var(--bg2)); color: var(--bad-ink); }
