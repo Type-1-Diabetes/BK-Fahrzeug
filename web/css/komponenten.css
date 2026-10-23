@@ -74,6 +74,8 @@ select.field { appearance: none; min-height: 36px; }
 .queue-badge { margin-top: 2px; font-size: 12px; font-weight: 600; color: var(--warn-ink); }
 .content { flex: 1; overflow: auto; padding: 0 28px 28px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 .large { font-size: 32px; font-weight: 700; padding: 6px 0 12px; }
+.reiter-wahl { max-width: 480px; margin: 4px auto 8px; }
+.reiter-wahl button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
 @media (max-width: 900px) {
   .brandmini span:last-child, .ftabs button { font-size: 0; }
   .ftabs button svg { font-size: 22px; }
@@ -89,6 +91,10 @@ select.field { appearance: none; min-height: 36px; }
 .si { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 10px; border-radius: 6px; text-align: left; }
 .si svg { color: var(--brand); font-size: 16px; }
 .si.on { background: var(--fill2); }
+.si .n { margin-left: auto; color: var(--label2); font-variant-numeric: tabular-nums; }
+.si .n.r { color: var(--bad-ink); font-weight: 600; }
+.av { width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--fill2); display: grid; place-items: center; font-size: 11px; font-weight: 600; color: var(--label); }
+.who > div { flex: 1; min-width: 0; }
 .who { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; font-size: 12px; color: var(--label2); }
 .who b { display: block; color: var(--label); }
 .tb { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 6px; color: var(--label2); font-size: 15px; }

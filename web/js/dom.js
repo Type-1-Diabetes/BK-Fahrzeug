@@ -1,6 +1,8 @@
 // Kleiner DOM-Baukasten. Text immer über textContent, nie über innerHTML.
 (function () {
   window.BK = window.BK || {};
+  // Hell ist Standard. Dunkel nur, wenn in den Einstellungen gewählt.
+  try { if (localStorage.getItem('bk_theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch { /* privat */ }
   // el('div.row', {onclick}, 'Text', kindElement)
   window.BK.el = function (tag, attrs, ...kinder) {
     const [name, ...klassen] = tag.split('.');

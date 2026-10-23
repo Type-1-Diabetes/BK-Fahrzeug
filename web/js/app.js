@@ -28,10 +28,22 @@
       ziel.innerHTML = html;  // nur eigene Moduldateien, keine Benutzereingaben
       aktiv = { name, def: module[name] };
       await module[name].start(ziel, { ...ctx, oeffnen: (n, x) => navigieren(n, x), extra });
+      umschalter(name, ziel);
     } catch (e) {
       ziel.append(el('div.leer', el('p', 'Dieser Bereich lässt sich gerade nicht laden.'), el('p.foot', e.message)));
     }
-    document.querySelectorAll('[data-modul]').forEach(b => b.classList.toggle('on', b.dataset.modul === name));
+    document.querySelectorAll('[data-modul]').forEach(b => b.classList.toggle('on', b.dataset.modul.split(',').includes(name)));
+  }
+
+  // Mehrere Module unter einem Reiter (z. B. Melden): Umschalter oben im Inhalt
+  function umschalter(name, ziel) {
+    const m = BK.MODULE.find(x => x.name === name);
+    if (!m || !m.tab || !ctx.ich.tablet_id) return;
+    const gruppe = erlaubteModule().filter(x => x.tab === m.tab);
+    if (gruppe.length < 2) return;
+    ziel.prepend(el('div.segc.reiter-wahl', { role: 'tablist', 'aria-label': m.tab }, gruppe.map(x =>
+      el('button', { type: 'button', role: 'tab', 'aria-selected': String(x.name === name), class: x.name === name ? 'on' : null,
+        onclick: () => x.name !== name && navigieren(x.name) }, icon(x.icon), x.label))));
   }
 
   function erlaubteModule() {
@@ -40,6 +52,17 @@
   }
 
   let navigieren = () => {};
+
+  // Reiter fürs Tablet: Module mit gleichem tab teilen sich einen Reiter
+  function reiter(liste) {
+    const aus = [];
+    for (const m of liste) {
+      const da = m.tab && aus.find(r => r.label === m.tab);
+      if (da) da.module.push(m.name);
+      else aus.push({ label: m.tab || m.label, icon: m.icon, module: [m.name] });
+    }
+    return aus;
+  }
 
   // Hülle iPad (Fahrzeug-Tablet) ------------------------------------------
   function tabletHuelle() {
@@ -51,8 +74,8 @@
     leeren(app).append(
       el('header.topnav',
         el('div.brandmini', el('span.logo-platzhalter', 'BK'), 'Blauer Kreis'),
-        el('nav.ftabs', { 'aria-label': 'Bereiche' }, liste.map(m =>
-          el('button', { type: 'button', dataset: { modul: m.name }, onclick: () => navigieren(m.name) }, icon(m.icon), m.label))),
+        el('nav.ftabs', { 'aria-label': 'Bereiche' }, reiter(liste).map(r =>
+          el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
         el('div.veh', el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue)),
       inhalt);
     BK.warteschlange.beiAenderung(l => {
@@ -72,16 +95,34 @@
     let bereich = null;
     for (const m of liste) {
       if (m.bereich !== bereich) { bereich = m.bereich; nav.append(el('h6', bereich)); }
-      nav.append(el('button.si', { type: 'button', dataset: { modul: m.name }, onclick: () => navigieren(m.name) }, icon(m.icon), m.label));
+      nav.append(el('button.si', { type: 'button', dataset: { modul: m.name }, onclick: () => navigieren(m.name) }, icon(m.icon), m.label, el('span.n', { dataset: { zahl: m.name } })));
     }
+    const kuerzel = (ctx.ich.name || '?').split(/[\s.]+/).filter(Boolean).map(t => t[0]).join('').slice(0, 2).toUpperCase();
     nav.append(el('div.who',
+      el('span.av', { 'aria-hidden': 'true' }, kuerzel),
       el('div', el('b', ctx.ich.name), el('span', ctx.ich.rolle === 'admin' ? 'Admin' : 'MPGler')),
       el('button.tb', { type: 'button', 'aria-label': 'Abmelden', title: 'Abmelden', onclick: abmelden }, icon('logout'))));
     app.className = 'huelle-mac';
     leeren(app).append(nav, inhalt);
-    navigieren = (name, extra) => { oeffnen(name, inhalt, extra); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ } };
+    navigieren = (name, extra) => { oeffnen(name, inhalt, extra); zaehlen(); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ } };
     const letztes = localStorage.getItem('bk_modul');
     navigieren(liste.some(m => m.name === letztes) ? letztes : liste[0].name);
+  }
+
+  // Zahlen in der Mac-Seitenleiste wie im Mockup (rot = wartet auf dich)
+  async function zaehlen() {
+    try {
+      const [meldungen, checklisten, fahrzeuge] = await Promise.all([
+        api.meldungen({ status: ['offen', 'in_bearbeitung'] }), api.checklisten({ offen: true }), api.fahrzeuge()]);
+      const setzen = (modul, n, rot) => {
+        const z = document.querySelector(`[data-zahl="${modul}"]`);
+        if (z) { z.textContent = n ? String(n) : ''; z.classList.toggle('r', !!rot); }
+      };
+      setzen('fahrzeuge', fahrzeuge.length);
+      setzen('maengel', meldungen.filter(m => m.art === 'mangel').length);
+      setzen('ausgabe', meldungen.filter(m => m.art === 'material').length);
+      setzen('gegenzeichnen', checklisten.filter(c => c.abgeschlossen_am).length, true);
+    } catch { /* Zahlen sind nur Zusatz */ }
   }
 
   async function abmelden() {

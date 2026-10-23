@@ -23,11 +23,16 @@ Stand: 23.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 
 „Ansicht ja“ heißt: mit Testdaten im Browser geprüft, ohne echten Mac-Login.
 
+## Abgleich mit dem Mockup
+
+- Hell ist fest Standard, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel nur am Mac unter Einstellungen › Konto › Darstellung.
+- Tablet: 4 Reiter wie im Mockup (Übersicht, Melden, Checkliste, Verlauf).
+- Mac-Seitenleiste mit Zahlen (rot = wartet auf dich) und Kürzel wie im Mockup.
+
 ## Abweichungen zum Mockup (bewusst)
 
-- Tablet hat 5 Reiter (Mangel und Material getrennt), Mockup 4 („Melden“).
 - „Mangel melden“ ist eine eigene Seite statt Blatt über der Übersicht.
-- Mac-Seitenleiste ohne Zähler-Badges.
+- Unter „Melden“ wechselt ein Umschalter zwischen Mangel und Material (im Mockup nicht gezeigt).
 - Fristen, Vorlagen, Benutzer und Wachen fehlen am Mac: kommen laut 10a erst auf den eigenen Webserver.
 - „Wache wechseln“ und Reiter „Module“ in der Fahrzeug-Übersicht fehlen (Verwaltung, später).
 

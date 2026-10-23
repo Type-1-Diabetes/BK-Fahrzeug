@@ -63,6 +63,20 @@ BK.modul('einstellungen', {
     }
     geraetZeigen().catch(e => geraet.append(el('p', e.message)));
 
+    // Darstellung: Hell ist Standard, gilt nur auf diesem Gerät
+    const themeKnoepfe = root.querySelectorAll('[data-theme-wahl] button');
+    const themeZeigen = () => themeKnoepfe.forEach(b => {
+      const an = (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'hell') === b.dataset.v;
+      b.classList.toggle('on', an); b.setAttribute('aria-checked', String(an));
+    });
+    themeKnoepfe.forEach(b => b.onclick = () => {
+      if (b.dataset.v === 'dark') document.documentElement.dataset.theme = 'dark';
+      else delete document.documentElement.dataset.theme;
+      try { b.dataset.v === 'dark' ? localStorage.setItem('bk_theme', 'dark') : localStorage.removeItem('bk_theme'); } catch { /* privat */ }
+      themeZeigen();
+    });
+    themeZeigen();
+
     leeren(root.querySelector('[data-konto]')).append(
       el('span.l', 'Name'), el('div', ctx.ich.name || '–'),
       el('span.l', 'Rolle'), el('div', ctx.ich.rolle === 'admin' ? 'Admin' : 'MPGler'),

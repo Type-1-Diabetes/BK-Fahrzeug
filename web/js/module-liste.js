@@ -4,8 +4,9 @@ window.BK = window.BK || {};
 window.BK.MODULE = [
   // Fahrzeug-Tablet (Reihenfolge = Tab-Leiste)
   { name: 'uebersicht', label: 'Übersicht', icon: 'home',   fuer: ['tablet'] },
-  { name: 'mangel',     label: 'Mangel',    icon: 'wrench', fuer: ['tablet'], schalter: 'mangel' },
-  { name: 'material',   label: 'Material',  icon: 'box',    fuer: ['tablet'], schalter: 'material' },
+  // Mangel und Material teilen sich den Reiter „Melden“ (wie im Mockup), oben ein Umschalter
+  { name: 'mangel',     label: 'Mangel melden',     icon: 'wrench', fuer: ['tablet'], schalter: 'mangel',   tab: 'Melden' },
+  { name: 'material',   label: 'Material anfordern', icon: 'box',   fuer: ['tablet'], schalter: 'material', tab: 'Melden' },
   { name: 'checkliste', label: 'Checkliste', icon: 'list',  fuer: ['tablet'], schalter: 'checkliste' },
   { name: 'verlauf',    label: 'Verlauf',   icon: 'clock',  fuer: ['tablet'], schalter: 'verlauf' },
 
