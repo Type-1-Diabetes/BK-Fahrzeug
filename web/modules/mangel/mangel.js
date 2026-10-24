@@ -47,7 +47,7 @@ BK.modul('mangel', {
           beschreibung: w.beschreibung,
           gemeldet_von: w.gemeldet_von,
         }, w.fotos || []);
-        await alertDialog('Mangel gemeldet', navigator.onLine
+        await alertDialog('Mängelmeldung gesendet', navigator.onLine
           ? 'Die MPGler sehen ihn jetzt in ihrer Liste.'
           : 'Kein Netz. Die Meldung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
         ctx.oeffnen('uebersicht');

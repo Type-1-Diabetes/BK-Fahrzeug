@@ -26,6 +26,9 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 
 ## Abgleich mit dem Mockup
 
+- Bezeichnungen: „Mängelmeldung“ und „Materialanforderung“ (Tablet), am Mac „Mängelmeldungen“ und „Materialanforderungen“.
+- Demo-Daten (Migration 006): Osdorf (KTW 4/1, 4/2, 4/3, 4/4, N-KTW 9/3), Bergedorf (KTW 3/4, 3/9, 4/5), 7 Geräte je KTW. Später frei anlegbar auf dem eigenen Webserver.
+
 - Hell ist fest Standard, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel nur am Mac unter Einstellungen › Konto › Darstellung.
 - Tablet: 4 Reiter wie im Mockup (Übersicht, Melden, Checkliste, Verlauf).
 - Mac-Seitenleiste mit Zahlen (rot = wartet auf dich) und Kürzel wie im Mockup.

@@ -314,7 +314,7 @@ Was davon erst mit dem eigenen Webserver kommt, steht in Abschnitt 12.
 
 Alles Konfigurieren bauen wir erst, wenn die App auf einem eigenen Webserver läuft, nicht im GitHub-Repo.
 
-**In der Demo stattdessen:** feste Testdaten aus einer Seed-Datei (z. B. 2 Wachen, 5 KTW, Vorlage „KTW Standard“, je ein Test-MPGler und Test-Admin, ein gekoppeltes Tablet). Die Verwaltungs-Bereiche am Mac zeigen diese Daten nur an. Die Tabellen bauen wir trotzdem schon so, dass das Konfigurieren später ohne Umbau dazukommt.
+**In der Demo stattdessen:** feste Testdaten aus einer Seed-Datei (Wachen Osdorf mit KTW 4/1, 4/2, 4/3, 4/4, N-KTW 9/3 und Bergedorf mit KTW 3/4, 3/9, 4/5; Geräte je KTW: AED, Absauggerät, Pulsoximeter, Thermometer, EKG, Fahrtrage, Raupenstuhl; Vorlage „KTW Standard“, je ein Test-MPGler und Test-Admin, ein gekoppeltes Tablet). **Später auf dem eigenen Webserver:** Wachen, Fahrzeuge und Geräte frei anlegen und ändern. Die Verwaltungs-Bereiche am Mac zeigen diese Daten nur an. Die Tabellen bauen wir trotzdem schon so, dass das Konfigurieren später ohne Umbau dazukommt.
 
 **Konfigurieren (Admin-Bereich)**
 - Wachen anlegen, ändern, archivieren

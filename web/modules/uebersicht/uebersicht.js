@@ -17,8 +17,8 @@ BK.modul('uebersicht', {
           el('div.ic', { class: 'ic ' + farbe }, icon(ic)), el('h3', titel), el('p', text))
       : null;
     root.querySelector('[data-kacheln]').append(
-      kachel('mangel', 'f-rot', 'wrench', 'Mangel melden', 'Etwas am KTW oder an einem Gerät ist defekt.'),
-      kachel('material', 'f-blau', 'box', 'Material anfordern', 'Etwas fehlt, ist verbraucht oder abgelaufen.'),
+      kachel('mangel', 'f-rot', 'wrench', 'Mängelmeldung', 'Etwas am KTW oder an einem Gerät ist defekt.'),
+      kachel('material', 'f-blau', 'box', 'Materialanforderung', 'Etwas fehlt, ist verbraucht oder abgelaufen.'),
       kachel('checkliste', 'f-navy', 'list', 'Checkliste', 'Vollzähligkeit prüfen.'));
 
     const liste = root.querySelector('[data-liste]');
@@ -35,7 +35,7 @@ BK.modul('uebersicht', {
         const farbe = m.status === 'erledigt' ? 'f-gruen' : m.art === 'material' ? 'f-blau' : m.status === 'offen' ? 'f-rot' : 'f-orange';
         liste.append(el('div.row',
           el('div', { class: 'ico ' + farbe }, icon(m.status === 'erledigt' ? 'check' : m.art === 'material' ? 'box' : 'wrench')),
-          el('div.t', el('b', titel), el('span', [m.art === 'material' ? 'Anforderung' : 'Mangel', timeAgo(m.erstellt_am), m.gemeldet_von].join(' · '))),
+          el('div.t', el('b', titel), el('span', [m.art === 'material' ? 'Materialanforderung' : 'Mängelmeldung', timeAgo(m.erstellt_am), m.gemeldet_von].join(' · '))),
           el('span', { class: 'pill ' + m.status }, STATUS[m.status])));
       }
     } catch (e) {

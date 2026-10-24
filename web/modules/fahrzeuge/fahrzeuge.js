@@ -95,7 +95,7 @@ BK.modul('fahrzeuge', {
         const ms = meldungen.filter(m => m.fahrzeug_id === f.id).slice(0, 50);
         inhalt.append(tabelle(['Status', 'Meldung', 'Art', 'Gemeldet', 'Von'],
           ms.map(m => el('tr', { onclick: () => ctx.oeffnen(m.art === 'material' ? 'ausgabe' : 'maengel') },
-            el('td', mac.pill(m.status)), el('td', mac.titel(m)), el('td', m.art === 'material' ? 'Material' : 'Mangel'), el('td', mac.kurz(m.erstellt_am)), el('td', m.gemeldet_von))),
+            el('td', mac.pill(m.status)), el('td', mac.titel(m)), el('td', m.art === 'material' ? 'Materialanforderung' : 'Mängelmeldung'), el('td', mac.kurz(m.erstellt_am)), el('td', m.gemeldet_von))),
           'Noch keine Meldungen.'));
       } else if (reiter === 'checklisten') {
         const cs = checklisten.filter(c => c.fahrzeug_id === f.id);

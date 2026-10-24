@@ -4,7 +4,7 @@
 
   // Text für einen Verlaufseintrag. m = Meldung (falls vorhanden)
   const AKTION = {
-    gemeldet: (d, m) => [m && m.art === 'material' ? 'Material angefordert' : 'Mangel gemeldet', 'wrench'],
+    gemeldet: (d, m) => [m && m.art === 'material' ? 'Materialanforderung' : 'Mängelmeldung', 'wrench'],
     status: d => [{ offen: 'Wieder offen', in_bearbeitung: 'In Bearbeitung', erledigt: 'Erledigt' }[d.nach] || 'Status geändert', d.nach === 'erledigt' ? 'check' : 'wrench'],
     bearbeitet: () => ['Bearbeitet', 'pen'],
     ausgegeben: () => ['Material ausgegeben', 'box'],
@@ -27,7 +27,7 @@
       const zeit = d => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
       const titelVon = e => e.typ === 'meldung'
-        ? (e.daten.art === 'material' ? `Material: ${e.daten.positionen.length} Artikel` : (e.daten.gegenstand || e.daten.geraet_frei || 'Mangel am Gerät'))
+        ? (e.daten.art === 'material' ? `Materialanforderung: ${e.daten.positionen.length} Artikel` : (e.daten.gegenstand || e.daten.geraet_frei || 'Mangel am Gerät'))
         : e.typ === 'checkliste_abschliessen' ? 'Checkliste abschließen' : 'Checkliste: Eintrag';
 
       abmelden = BK.warteschlange.beiAenderung(liste => {
