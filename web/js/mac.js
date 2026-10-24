@@ -7,7 +7,7 @@
     STATUS,
     pill: s => BK.el('span', { class: 'pill mp ' + s }, STATUS[s] || s),
     titel: m => m.art === 'material'
-      ? `Material: ${m.positionen.length} Artikel`
+      ? `Materialanforderung: ${m.positionen.length} Artikel`
       : (m.geraet ? m.geraet.name : (m.gegenstand || m.geraet_frei || 'Mangel')),
     kurz: d => {
       const t = new Date(d), heute = new Date();
@@ -25,9 +25,11 @@
         if (grund == null) return false;
         if (!grund.trim()) { await alertDialog('Grund fehlt', 'Bitte kurz schreiben, warum der KTW nicht fahren darf.'); return false; }
         await BK.api.ampelSetzen(fz.id, 'nicht_einsatzbereit', grund.trim().slice(0, 300));
+        showToast(`${fz.name} ist nicht einsatzbereit`);
       } else {
         if (!await confirmDialog(`${fz.name} wieder einsatzbereit?`, 'Das Tablet zeigt dann „Der KTW darf fahren.“')) return false;
         await BK.api.ampelSetzen(fz.id, 'einsatzbereit', null);
+        showToast(`${fz.name} ist wieder einsatzbereit`);
       }
       return true;
     },

@@ -23,7 +23,7 @@
       { key: 'reparatur_bemerkung', typ: 'textarea', label: 'Bemerkung', max: 500 },
     ] },
   ];
-  const AKTION = { gemeldet: 'Gemeldet', status: 'Status', bearbeitet: 'Bearbeitet', ampel: 'Ampel' };
+  const AKTION = { gemeldet: 'Gemeldet', status: 'Status', bearbeitet: 'Bearbeitet', ampel: 'Fahrzeugstatus' };
 
   BK.modul('maengel', {
     async start(root, ctx) {
@@ -33,9 +33,12 @@
       const ktw = root.querySelector('[data-ktw]');
       const suche = root.querySelector('[data-suche]');
       root.querySelector('[data-export]').append(icon('export'), 'Export');
-      let status = 'offen', alle = [], fahrzeuge = [], gewaehlt = null;
+      let status = 'offen', alle = [], fahrzeuge = [], gewaehlt = null, ungesichert = false;
+      const weiter = async () => !ungesichert || await confirmDialog('Änderungen verwerfen?', 'Du hast in dieser Mängelmeldung etwas geändert und noch nicht gesichert.');
+      window.addEventListener('beforeunload', e => { if (ungesichert && root.isConnected) e.preventDefault(); });
 
-      root.querySelectorAll('[data-status] button').forEach(b => b.onclick = () => {
+      root.querySelectorAll('[data-status] button').forEach(b => b.onclick = async () => {
+        if (!await weiter()) return;
         status = b.dataset.v;
         root.querySelectorAll('[data-status] button').forEach(x => x.classList.toggle('on', x === b));
         gewaehlt = null; zeichnen();
@@ -81,7 +84,8 @@
         inspektor();
       }
 
-      function waehlen(id) {
+      async function waehlen(id) {
+        if (id === gewaehlt || !await weiter()) return;
         gewaehlt = id;
         tbody.querySelectorAll('tr[data-id]').forEach(tr => tr.classList.toggle('sel', tr.dataset.id === id));
         inspektor();
@@ -89,7 +93,7 @@
 
       function feld(f, werte) {
         const w = werte[f.key];
-        const setz = v => { werte[f.key] = v; };
+        const setz = v => { werte[f.key] = v; ungesichert = true; insp.querySelector('[data-ungesichert]').hidden = false; };
         switch (f.typ) {
           case 'check': return el('label.cb', el('input', { type: 'checkbox', checked: !!w, onchange: e => setz(e.target.checked) }), f.text);
           case 'datum': return el('input.tf', { type: 'date', value: w || '', 'aria-label': f.label, onchange: e => setz(e.target.value || null) });
@@ -102,6 +106,7 @@
 
       async function inspektor() {
         const m = alle.find(x => x.id === gewaehlt);
+        ungesichert = false;
         leeren(insp);
         if (!m) return insp.append(el('div.mleer', 'Mängelmeldung links auswählen.'));
         const fz = fzVon(m);
@@ -119,13 +124,14 @@
             el('span.l', f.label), el('div', feld(f, werte), f.hinweis ? el('div.feld-hinweis', f.hinweis) : null)]))]),
           el('div.ih', 'Verlauf'), verlauf,
           el('div.acts',
+            el('span.ungesichert', { dataset: { ungesichert: '' }, hidden: true }, 'Nicht gesichert'),
             el('button.pbtn', { type: 'button', onclick: async () => {
               try { if (await mac.ampelAendern(fz, mac.titel(m))) laden(true); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
             } }, fz.ampel === 'einsatzbereit' ? 'KTW nicht einsatzbereit …' : 'KTW einsatzbereit …'),
-            el('button.pbtn', { type: 'button', onclick: () => sichern(m, werte, null) }, 'Sichern'),
+            el('button.pbtn', { type: 'button', title: 'Sichern (⌘S / Strg+S)', dataset: { sichern: '' }, onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, null)) }, 'Sichern'),
             m.status === 'erledigt'
-              ? el('button.pbtn.def', { type: 'button', onclick: () => sichern(m, werte, 'in_bearbeitung') }, 'Wieder öffnen')
-              : el('button.pbtn.def', { type: 'button', onclick: () => sichern(m, werte, 'erledigt') }, 'Als erledigt markieren')));
+              ? el('button.pbtn.def', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'in_bearbeitung')) }, 'Wieder öffnen')
+              : el('button.pbtn.def', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'erledigt')) }, 'Als erledigt markieren')));
 
         for (const f of m.fotos || []) api.fotoUrl(f.pfad)
           .then(u => fotos.append(el('a', { href: u, target: '_blank', rel: 'noopener', title: 'Foto groß öffnen' }, el('img', { src: u, alt: 'Foto zum Mangel' }))))
@@ -142,16 +148,19 @@
         let s = neuerStatus || m.status;
         if (!neuerStatus && werte.einsatzbereit_am) s = 'erledigt';
         else if (!neuerStatus && s === 'offen' && Object.values(werte).some(Boolean)) s = 'in_bearbeitung';
-        if (s === 'erledigt' && m.status !== 'erledigt' && !await confirmDialog('Als erledigt markieren?', 'Das Team sieht den Mangel dann 7 Tage als erledigt.')) return;
+        if (s === 'erledigt' && m.status !== 'erledigt' && !await confirmDialog('Als erledigt markieren?', 'Das Team sieht die Mängelmeldung dann 7 Tage als erledigt.')) return false;
         for (const k of Object.keys(werte)) if (typeof werte[k] === 'string') werte[k] = werte[k].trim().slice(0, 500) || null;
         try {
           await api.meldungBearbeiten(m.id, s, werte);
+          ungesichert = false;
+          showToast(s === 'erledigt' && m.status !== 'erledigt' ? 'Mangel erledigt' : s !== m.status && s === 'in_bearbeitung' && m.status === 'erledigt' ? 'Mangel wieder offen' : 'Gesichert');
           const fz = fzVon(m);
           if (s === 'erledigt' && fz.ampel === 'nicht_einsatzbereit' && await confirmDialog(`${fz.name} ist noch nicht einsatzbereit`, 'Soll der KTW wieder fahren dürfen?')) {
             await api.ampelSetzen(fz.id, 'einsatzbereit', null);
+            showToast(`${fz.name} ist wieder einsatzbereit`);
           }
           await laden(true);
-        } catch (e) { alertDialog('Nicht gespeichert', e.message); }
+        } catch (e) { alertDialog('Nicht gespeichert', e.message); return false; }
       }
 
       root.querySelector('[data-export]').onclick = () => {
@@ -162,6 +171,11 @@
         if (!exportCSV('maengel-' + new Date().toISOString().slice(0, 10) + '.csv', zeilen)) alertDialog('Nichts zu exportieren', 'Die Liste ist leer.');
       };
 
+      // ⌘S / Strg+S sichert die offene Mängelmeldung
+      root.addEventListener('keydown', e => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); insp.querySelector('[data-sichern]')?.click(); }
+      });
+      BK.beiNeu(() => { if (!ungesichert) laden(true); });
       laden();
     },
   });

@@ -64,7 +64,8 @@ BK.modul('material', {
       try {
         const vomMac = !!ctx.ich.rolle;
         await (vomMac ? api.meldungAnlegen : api.meldungMelden)({ art: 'material', fahrzeug_id: fz.id, gemeldet_von: name.value.trim(), positionen });
-        await alertDialog('Materialanforderung gesendet', vomMac ? 'Sie steht jetzt in der Liste und auf dem Tablet des KTW.' : navigator.onLine
+        if (vomMac) showToast(`Materialanforderung für ${fz.name} gesendet`);
+        else await erfolg('Materialanforderung gesendet', navigator.onLine
           ? 'Die MPGler sehen die Anforderung jetzt in ihrer Liste.'
           : 'Kein Netz. Die Anforderung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
         ctx.oeffnen('uebersicht');

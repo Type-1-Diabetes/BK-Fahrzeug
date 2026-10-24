@@ -11,11 +11,14 @@ BK.modul('fahrzeuge', {
     const jetzt = new Date();
     const zeitraum = `${jetzt.getFullYear()}-Q${Math.floor(jetzt.getMonth() / 3) + 1}`;
     const quartalsende = new Date(jetzt.getFullYear(), Math.floor(jetzt.getMonth() / 3) * 3 + 3, 0);
+    let ampelVorher = null, geaendert = new Set();
     let fahrzeuge = [], meldungen = [], checklisten = [], tablets = [], wache = '', gewaehlt = (ctx.extra && ctx.extra.fahrzeug) || null, reiter = 'meldungen';
 
     async function laden() {
       try {
         [fahrzeuge, meldungen, checklisten] = await Promise.all([api.fahrzeuge(), api.meldungen({ seitTagen: 365 }), api.checklisten()]);
+        if (ampelVorher) geaendert = new Set(fahrzeuge.filter(f => ampelVorher[f.id] && ampelVorher[f.id] !== f.ampel).map(f => f.id));
+        ampelVorher = Object.fromEntries(fahrzeuge.map(f => [f.id, f.ampel]));
         fahrzeuge.sort((a, b) => a.wache.name.localeCompare(b.wache.name, 'de') || a.name.localeCompare(b.name, 'de', { numeric: true }));
       } catch (e) { leeren(liste).append(el('div.mleer', 'Liste lässt sich nicht laden: ' + e.message)); return; }
       if (ctx.ich.rolle === 'admin') tablets = await api.tablets().catch(() => []);
@@ -57,7 +60,7 @@ BK.modul('fahrzeuge', {
         const mg = offeneVon(f, 'mangel').length, mt = offeneVon(f, 'material').length;
         const [ck, ckText] = checkStand(f);
         const rot = f.ampel !== 'einsatzbereit';
-        raster.append(el('button', { type: 'button', class: 'fz-kachel' + (rot ? ' rot' : ''), onclick: () => { gewaehlt = f.id; reiter = 'meldungen'; zeichnen(); } },
+        raster.append(el('button', { type: 'button', class: 'fz-kachel' + (rot ? ' rot' : '') + (geaendert.has(f.id) ? ' aufleuchten' : ''), onclick: () => { gewaehlt = f.id; reiter = 'meldungen'; zeichnen(); } },
           el('div.fz-kopf', el('b', f.name), el('span', { class: 'amp klein ' + f.ampel }, rot ? 'Nicht einsatzbereit' : 'Einsatzbereit')),
           rot && f.ampel_grund ? el('div.fz-grund-k', f.ampel_grund) : el('div.fz-kz', f.kennzeichen || ''),
           el('dl.fz-zahlen',
@@ -86,7 +89,7 @@ BK.modul('fahrzeuge', {
           } }, BK.icon(f.ampel === 'einsatzbereit' ? 'alert' : 'check'), f.ampel === 'einsatzbereit' ? 'Nicht einsatzbereit melden' : 'Wieder einsatzbereit'),
           el('span.fz-trenner'),
           el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('mangel', f, laden) }, BK.icon('wrench'), 'Mängelmeldung erstellen'),
-          el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('material', f, laden) }, BK.icon('box'), 'Material anfordern')),
+          el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('material', f, laden) }, BK.icon('box'), 'Materialanforderung erstellen')),
         el('div.kpis',
           el('div.kpi', el('span', 'Offene Mängel'), el('b', { class: mg.length ? 'red' : null }, String(mg.length))),
           el('div.kpi', el('span', 'Offene Materialanforderungen'), el('b', String(mt.length))),
@@ -139,6 +142,7 @@ BK.modul('fahrzeuge', {
       }
     }
 
+    BK.beiNeu(() => laden());
     laden();
   },
 });

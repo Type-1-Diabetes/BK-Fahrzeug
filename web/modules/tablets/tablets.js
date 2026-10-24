@@ -67,7 +67,7 @@ BK.modul('tablets', {
               el('button.pbtn.rot', { type: 'button', onclick: async () => {
                 const sperren = !t.gesperrt;
                 if (sperren && !await confirmDialog('Tablet sperren?', `„${t.name}“ kann danach nichts mehr sehen oder melden.`)) return;
-                try { await api.tabletSperren(t.id, sperren); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+                try { await api.tabletSperren(t.id, sperren); showToast(`${t.name} ${sperren ? 'gesperrt' : 'entsperrt'}`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
               } }, t.gesperrt ? 'Entsperren' : 'Sperren'))));
         }
       } catch (e) {
@@ -91,6 +91,7 @@ BK.modul('tablets', {
       catch (e) { alertDialog('Hat nicht geklappt', e.message); }
     };
 
+    BK.beiNeu(() => { if (overlay.hidden) laden(); });
     laden();
   },
   stop() { clearInterval(warten); },

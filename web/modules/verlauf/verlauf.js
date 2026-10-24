@@ -8,7 +8,7 @@
     status: d => [{ offen: 'Wieder offen', in_bearbeitung: 'In Bearbeitung', erledigt: 'Erledigt' }[d.nach] || 'Status geändert', d.nach === 'erledigt' ? 'check' : 'wrench'],
     bearbeitet: () => ['Bearbeitet', 'pen'],
     ausgegeben: () => ['Material ausgegeben', 'box'],
-    teilweise_ausgegeben: () => ['Material teilweise ausgegeben', 'box'],
+    teilweise_ausgegeben: () => ['Material zum Teil ausgegeben', 'box'],
     ampel: d => [d.ampel === 'einsatzbereit' ? 'Einsatzbereit gesetzt' : 'Nicht einsatzbereit gesetzt', d.ampel === 'einsatzbereit' ? 'check' : 'alert'],
     checkliste_begonnen: () => ['Checkliste begonnen', 'list'],
     checkliste_abgeschlossen: () => ['Checkliste abgeschlossen', 'list'],
@@ -27,7 +27,7 @@
       const zeit = d => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
       const titelVon = e => e.typ === 'meldung'
-        ? (e.daten.art === 'material' ? `Materialanforderung: ${e.daten.positionen.length} Artikel` : (e.daten.gegenstand || e.daten.geraet_frei || 'Mangel am Gerät'))
+        ? (e.daten.art === 'material' ? `Materialanforderung: ${e.daten.positionen.length} Artikel` : (e.daten.gegenstand || e.daten.geraet_frei || 'Mängelmeldung'))
         : e.typ === 'checkliste_abschliessen' ? 'Checkliste abschließen' : 'Checkliste: Eintrag';
 
       abmelden = BK.warteschlange.beiAenderung(liste => {

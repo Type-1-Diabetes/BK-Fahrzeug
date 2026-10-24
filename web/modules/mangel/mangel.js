@@ -49,9 +49,10 @@ BK.modul('mangel', {
           beschreibung: w.beschreibung,
           gemeldet_von: w.gemeldet_von,
         }, w.fotos || []);
-        await alertDialog('Mängelmeldung gesendet', vomMac ? 'Sie steht jetzt in der Liste und auf dem Tablet des KTW.' : navigator.onLine
-          ? 'Die MPGler sehen ihn jetzt in ihrer Liste.'
-          : 'Kein Netz. Die Meldung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
+        if (vomMac) showToast(`Mängelmeldung für ${fz.name} gesendet`);
+        else await erfolg('Mängelmeldung gesendet', navigator.onLine
+          ? 'Die MPGler sehen sie jetzt in ihrer Liste.'
+          : 'Kein Netz. Sie ist auf dem Tablet gespeichert und geht raus, sobald wieder Netz da ist.', navigator.onLine ? 2000 : 4000);
         ctx.oeffnen('uebersicht');
       } catch (e) {
         knopf.disabled = false;

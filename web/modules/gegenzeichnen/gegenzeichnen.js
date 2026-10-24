@@ -90,11 +90,11 @@ BK.modul('gegenzeichnen', {
           el('button.pbtn', { type: 'button', onclick: async () => {
             const grund = await promptDialog('Zurück ans Team?', 'Das Team sieht den Grund auf dem Tablet und kann die Checkliste ändern.', { placeholder: 'z. B. Bereich Sauerstoff bitte nochmal prüfen', confirmLabel: 'Zurückgeben' });
             if (grund == null) return;
-            try { await api.checklisteZurueck(c.id, grund.trim().slice(0, 300)); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+            try { await api.checklisteZurueck(c.id, grund.trim().slice(0, 300)); showToast('Checkliste ist zurück beim Team'); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
           } }, 'Zurück ans Team'),
           el('button.pbtn.def', { type: 'button', onclick: async () => {
             if (!await confirmDialog('Gegenzeichnen?', `${c.fahrzeug.name}, ${quartal(c.zeitraum)}. Dein Name und die Uhrzeit werden gespeichert.`)) return;
-            try { await api.checklisteGegenzeichnen(c.id); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+            try { await api.checklisteGegenzeichnen(c.id); showToast(`${c.fahrzeug.name} gegengezeichnet`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
           } }, 'Gegenzeichnen')) : '');
     }
 
@@ -112,6 +112,7 @@ BK.modul('gegenzeichnen', {
       if (!exportCSV(`checkliste-${c.fahrzeug.name.replace(/\W+/g, '-')}-${c.zeitraum}.csv`, zeilen)) alertDialog('Nichts zu exportieren', 'Die Vorlage lässt sich nicht laden.');
     };
 
+    BK.beiNeu(() => laden());
     laden();
   },
 });

@@ -1,7 +1,10 @@
 /* Kleine Helfer. Übernommen aus der Website Schrietz (admin/js/ui-helpers.js), gekürzt.
    timeAgo()   — relative Zeit ("vor 5 Min.")
    copyText()  — Text kopieren
-   exportCSV() — Objekt-Liste als CSV herunterladen (Semikolon, für Excel) */
+   exportCSV() — Objekt-Liste als CSV herunterladen (Semikolon, für Excel)
+   showToast() — kurze Meldung unten, verschwindet von selbst
+   mitStatus() — Knopf zeigt „läuft“ und danach kurz einen Haken
+   erfolg()    — große Bestätigung mit Haken (Tablet), schließt sich selbst */
 (function () {
   window.timeAgo = function (ts) {
     const t = typeof ts === 'number' ? ts : new Date(ts).getTime();
@@ -20,6 +23,54 @@
 
   window.copyText = async function (text) {
     try { await navigator.clipboard.writeText(String(text)); return true; } catch { return false; }
+  };
+
+  const HAKEN = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
+
+  let toastBox = null;
+  window.showToast = function (text, art) {
+    if (!toastBox) {
+      toastBox = document.createElement('div');
+      toastBox.className = 'toasts';
+      toastBox.setAttribute('role', 'status');
+      toastBox.setAttribute('aria-live', 'polite');
+      document.body.append(toastBox);
+    }
+    const t = document.createElement('div');
+    t.className = 'toast' + (art === 'fehler' ? ' fehler' : '');
+    if (art !== 'fehler') t.innerHTML = HAKEN;  // festes Symbol, kein Benutzertext
+    t.append(document.createTextNode(String(text)));
+    toastBox.append(t);
+    setTimeout(() => { t.classList.add('weg'); setTimeout(() => t.remove(), 250); }, 2600);
+  };
+
+  // fn läuft einmal, Doppelklicks zählen nicht. Gibt das Ergebnis von fn zurück.
+  window.mitStatus = async function (knopf, fn) {
+    if (knopf.classList.contains('laedt')) return;
+    knopf.classList.add('laedt'); knopf.disabled = true;
+    try {
+      const r = await fn();
+      if (r !== false && knopf.isConnected) { knopf.classList.add('fertig'); setTimeout(() => knopf.classList.remove('fertig'), 900); }
+      return r;
+    } finally { knopf.classList.remove('laedt'); knopf.disabled = false; }
+  };
+
+  window.erfolg = function (titel, text, ms) {
+    return new Promise(ok => {
+      const o = document.createElement('div');
+      o.className = 'erfolg';
+      o.setAttribute('role', 'status');
+      const kreis = document.createElement('div');
+      kreis.className = 'erfolg-kreis';
+      kreis.innerHTML = HAKEN;
+      const h = document.createElement('h2'); h.textContent = titel;
+      const p = document.createElement('p'); p.textContent = text || '';
+      o.append(kreis, h, p);
+      const zu = () => { o.classList.add('weg'); setTimeout(() => { o.remove(); ok(); }, 200); };
+      o.onclick = zu;
+      document.body.append(o);
+      setTimeout(zu, ms || 2000);
+    });
   };
 
   window.exportCSV = function (dateiname, zeilen) {

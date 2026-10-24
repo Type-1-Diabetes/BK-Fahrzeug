@@ -15,7 +15,7 @@ BK.modul('einstellungen', {
 
     const sl = SettingsLayout.mount(root.querySelector('[data-sl]'), {
       async onSave() {
-        try { for (const [k] of PUSH) await api.pushEinstellungSetzen(k, werte[k]); return true; }
+        try { for (const [k] of PUSH) await api.pushEinstellungSetzen(k, werte[k]); showToast('Gespeichert'); return true; }
         catch (e) { alertDialog('Nicht gespeichert', e.message); return false; }
       },
       onDiscard: () => laden(),

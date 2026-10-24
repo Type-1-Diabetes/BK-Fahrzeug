@@ -41,7 +41,7 @@ BK.modul('ausgabe', {
       const erhalten = {};
       const b = m.bearbeitung || {};
       akte.append(
-        el('div.hd', el('h2', 'Material für ' + m.fahrzeug.name), mac.pill(m.status)),
+        el('div.hd', el('h2', 'Materialanforderung ' + m.fahrzeug.name), mac.pill(m.status)),
         el('div.sub2', `Angefordert ${mac.kurz(m.erstellt_am)} von ${m.gemeldet_von}` + (b.ausgegeben_von ? ` · ausgegeben durch ${b.ausgegeben_von} am ${BK.datum(b.ausgegeben_am, false)}` : '')),
         el('table.tab', { style: 'margin-top:14px' },
           el('thead', el('tr', el('th', 'Artikel'), el('th', 'Größe'), el('th.num', 'Angefordert'), el('th', 'Grund'), el('th.num', 'Ausgegeben'))),
@@ -53,13 +53,13 @@ BK.modul('ausgabe', {
           }))),
         fertig ? '' : el('div.foot.aus-hinweis', 'Fehlt etwas im Lager? Menge in „Ausgegeben“ anpassen.'),
         fertig ? '' : el('div.acts',
-          el('button.pbtn.def.gross', { type: 'button', onclick: () => ausgeben(m, erhalten, true) }, BK.icon('check'), 'Als ausgegeben markieren')));
+          el('button.pbtn.def.gross', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => ausgeben(m, erhalten, true)) }, BK.icon('check'), 'Als ausgegeben markieren')));
     }
 
     async function ausgeben(m, erhalten, erledigt) {
       const positionen = m.positionen.map(p => ({ id: p.id, erhalten: erhalten[p.id] ?? (erledigt ? p.menge : null) }));
-      try { await api.materialAusgeben(m.id, positionen, erledigt); await laden(); }
-      catch (e) { alertDialog('Nicht gespeichert', e.message); }
+      try { await api.materialAusgeben(m.id, positionen, erledigt); showToast(`Material für ${m.fahrzeug.name} ausgegeben`); await laden(); }
+      catch (e) { alertDialog('Nicht gespeichert', e.message); return false; }
     }
 
     root.querySelector('[data-export]').onclick = () => {
@@ -70,6 +70,7 @@ BK.modul('ausgabe', {
       if (!exportCSV('material-' + new Date().toISOString().slice(0, 10) + '.csv', zeilen)) alertDialog('Nichts zu exportieren', 'Die Liste ist leer.');
     };
 
+    BK.beiNeu(() => laden());
     laden();
   },
 });

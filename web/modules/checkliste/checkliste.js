@@ -150,7 +150,7 @@ BK.modul('checkliste', {
         try {
           await api.checklisteAbschliessen(offen.id, m1.value.trim(), m2.value.trim());
           try { localStorage.removeItem(SPEICHER); } catch { /* egal */ }
-          await alertDialog('Checkliste abgeschlossen', 'Der MPGler zeichnet sie jetzt gegen.');
+          await erfolg('Checkliste abgeschlossen', 'Der MPGler zeichnet sie jetzt gegen.');
           ctx.oeffnen('uebersicht');
         } catch (e) { knopf.disabled = false; alertDialog('Nicht gespeichert', e.message); }
       } }, 'Abschließen');

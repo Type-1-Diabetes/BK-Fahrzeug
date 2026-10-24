@@ -70,21 +70,33 @@
   }
 
   // Lesen mit Offline-Vorrat: ohne Netz kommen die zuletzt geladenen Daten
+  // Ist ein Vorrat da und der Server langsamer als 250 ms, kommt sofort der Vorrat.
+  // Weichen die frischen Daten ab, meldet „bk:neu“ das der offenen Ansicht. Kurz nach dem Speichern wird immer frisch geladen.
+  let geschrieben = 0, neuTimer = null;
+  const neuMelden = () => { clearTimeout(neuTimer); neuTimer = setTimeout(() => document.dispatchEvent(new Event('bk:neu')), 60); };
   async function lesen(tabelle, abfrage) {
     const pfad = `/rest/v1/${tabelle}?${abfrage}`;
-    try {
-      const d = await mitLogin(pfad);
-      try { localStorage.setItem(CACHE + pfad, JSON.stringify(d)); } catch { /* voll */ }
+    let alt = null;
+    try { alt = localStorage.getItem(CACHE + pfad); } catch { /* privat */ }
+    let ausVorrat = false;
+    const frisch = mitLogin(pfad).then(d => {
+      const s = JSON.stringify(d);
+      try { localStorage.setItem(CACHE + pfad, s); } catch { /* voll */ }
+      if (ausVorrat && s !== alt) neuMelden();
       return d;
-    } catch (e) {
-      if (!e.offline) throw e;
-      const alt = localStorage.getItem(CACHE + pfad);
-      if (alt) return JSON.parse(alt);
-      throw e;
+    });
+    if (alt == null || Date.now() - geschrieben < 5000) {
+      try { return await frisch; } catch (e) { if (e.offline && alt != null) return JSON.parse(alt); throw e; }
     }
+    const r = await Promise.race([frisch.then(d => ({ d }), e => ({ e })), new Promise(ok => setTimeout(ok, 250))]);
+    if (r && 'd' in r) return r.d;
+    if (r && r.e && !r.e.offline) throw r.e;
+    ausVorrat = true;
+    frisch.catch(() => {});
+    return JSON.parse(alt);
   }
 
-  const rpc = (name, args = {}) => mitLogin(`/rest/v1/rpc/${name}`, { method: 'POST', body: JSON.stringify(args) });
+  const rpc = (name, args = {}) => { geschrieben = Date.now(); return mitLogin(`/rest/v1/rpc/${name}`, { method: 'POST', body: JSON.stringify(args) }); };
 
   function cacheLeeren() {
     try { Object.keys(localStorage).filter(k => k.startsWith(CACHE) || k === 'bk_ich').forEach(k => localStorage.removeItem(k)); } catch { /* privat */ }
@@ -127,7 +139,7 @@
       if (fahrzeugId) f.push('fahrzeug_id=eq.' + fahrzeugId);
       if (status) f.push('status=in.(' + [].concat(status).join(',') + ')');
       if (art) f.push('art=eq.' + art);
-      if (seitTagen) f.push('erstellt_am=gte.' + new Date(Date.now() - seitTagen * 864e5).toISOString());
+      if (seitTagen) f.push('erstellt_am=gte.' + new Date(Date.now() - seitTagen * 864e5).toISOString().slice(0, 10));  // nur Tag: gleicher Vorrat-Schlüssel
       return lesen('meldungen', f.join('&'));
     },
     // Tablet: Meldung in die Warteschlange, wird gesendet sobald Netz da ist

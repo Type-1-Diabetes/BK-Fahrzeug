@@ -11,6 +11,17 @@
   // Module melden sich hiermit an (in modules/<name>/<name>.js)
   BK.modul = (name, def) => { module[name] = def; };
 
+  // Neue Daten vom Server (api.js): nur die offene Ansicht lädt neu
+  let neuHoerer = null;
+  BK.beiNeu = fn => { neuHoerer = fn; };
+  document.addEventListener('bk:neu', () => { if (neuHoerer && !document.querySelector('._ad-open, .blatt-overlay')) neuHoerer(); });
+
+  // HTML der Module einmal holen und merken
+  const htmlVorrat = {};
+  const htmlVon = name => htmlVorrat[name] || (htmlVorrat[name] = fetch(`modules/${name}/${name}.html`).then(r => r.ok ? r.text() : '').catch(e => { delete htmlVorrat[name]; throw e; }));
+  // Nach dem Start die übrigen Module still laden, damit der Wechsel sofort geht
+  const vorladen = liste => setTimeout(() => liste.forEach(m => { laden(m.name).catch(() => {}); htmlVon(m.name).catch(() => {}); }), 800);
+
   function laden(name) {
     if (module[name]) return Promise.resolve();
     document.head.append(el('link', { rel: 'stylesheet', href: `modules/${name}/${name}.css` }));
@@ -22,9 +33,9 @@
   async function oeffnen(name, ziel, extra) {
     if (aktiv && aktiv.def.stop) { try { aktiv.def.stop(); } catch { /* egal */ } }
     leeren(ziel);
+    neuHoerer = null;
     try {
-      await laden(name);
-      const html = await fetch(`modules/${name}/${name}.html`).then(r => r.ok ? r.text() : '');
+      const [, html] = await Promise.all([laden(name), htmlVon(name)]);
       ziel.innerHTML = html;  // nur eigene Moduldateien, keine Benutzereingaben
       aktiv = { name, def: module[name] };
       await module[name].start(ziel, { ...ctx, oeffnen: (n, x) => navigieren(n, x), extra });
@@ -52,7 +63,7 @@
     document.body.append(overlay);
     try {
       await laden(name);
-      inhalt.innerHTML = await fetch(`modules/${name}/${name}.html`).then(r => r.ok ? r.text() : '');  // nur eigene Moduldateien
+      inhalt.innerHTML = await htmlVon(name);  // nur eigene Moduldateien
       await module[name].start(inhalt, { ...ctx, fahrzeug, oeffnen: () => schliessen(true) });
     } catch (e) { inhalt.append(el('div.leer', el('p', 'Das Formular lässt sich gerade nicht laden.'), el('p.foot', e.message))); }
   };
@@ -106,6 +117,7 @@
     });
     navigieren = (name, extra) => oeffnen(name, inhalt, extra);
     navigieren(liste[0].name);
+    vorladen(liste);
     api.tabletPing().catch(() => {});
   }
 
@@ -129,6 +141,7 @@
     navigieren = (name, extra) => { oeffnen(name, inhalt, extra); zaehlen(); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ } };
     const letztes = localStorage.getItem('bk_modul');
     navigieren(liste.some(m => m.name === letztes) ? letztes : liste[0].name);
+    vorladen(liste);
   }
 
   // Zahlen in der Mac-Seitenleiste wie im Mockup (rot = wartet auf dich)

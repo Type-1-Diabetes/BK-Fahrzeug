@@ -305,3 +305,59 @@ input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .blatt .mangel-kopf, .blatt .mat-kopf { padding-right: 40px; }
 @keyframes blatt-ein { from { background: rgba(0,0,0,0); } }
 @keyframes blatt-hoch { from { transform: translateY(12px); opacity: 0; } }
+
+/* Rückmeldung: Toast unten, Knopf läuft/fertig, große Bestätigung (Tablet) */
+.toasts { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.toast {
+  display: flex; align-items: center; gap: 8px; padding: 9px 16px 9px 12px; border-radius: 99px; font-size: 14px; font-weight: 500;
+  background: color-mix(in srgb, var(--label) 88%, transparent); color: var(--bg2); box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  animation: toast-ein .28s cubic-bezier(.2,.8,.2,1);
+}
+.toast svg { color: var(--ok); font-size: 17px; stroke-width: 2.4; }
+.toast.fehler { background: var(--bad); color: #fff; padding-left: 16px; }
+.toast.weg { opacity: 0; transform: translateY(6px); transition: opacity .2s ease-in, transform .2s ease-in; }
+@keyframes toast-ein { from { opacity: 0; transform: translateY(12px) scale(.96); } }
+:root[data-theme="dark"] .toast:not(.fehler) { background: #3a3a3c; color: #fff; }
+
+.laedt { position: relative; color: transparent !important; pointer-events: none; }
+.laedt > * { visibility: hidden; }
+.laedt::after {
+  content: ""; position: absolute; inset: 0; margin: auto; width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid currentColor; border-color: var(--label3) var(--label3) var(--label2) var(--label2); animation: dreh .7s linear infinite;
+}
+.pbtn.def.laedt::after, .pbtn.stopp.laedt::after, .pbtn.los.laedt::after, .btn.laedt::after { border-color: rgba(255,255,255,.4) rgba(255,255,255,.4) #fff #fff; }
+.btn.laedt::after { width: 20px; height: 20px; }
+.fertig { animation: fertig .9s ease-out; }
+@keyframes dreh { to { transform: rotate(360deg); } }
+@keyframes fertig { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
+
+.erfolg {
+  position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: center;
+  animation: erfolg-ein .2s ease-out;
+}
+.erfolg-kreis { width: 96px; height: 96px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 54px; animation: erfolg-pop .45s cubic-bezier(.2,1.4,.4,1); }
+.erfolg-kreis svg { stroke-width: 2.6; stroke-dasharray: 24; stroke-dashoffset: 24; animation: haken .35s .18s ease-out forwards; }
+.erfolg h2 { font-size: 26px; margin-top: 8px; }
+.erfolg p { margin: 0; max-width: 420px; color: var(--label2); font-size: 17px; line-height: 1.4; }
+.erfolg.weg { opacity: 0; transition: opacity .2s ease-in; }
+@keyframes erfolg-ein { from { opacity: 0; } }
+@keyframes erfolg-pop { from { transform: scale(.5); opacity: 0; } }
+@keyframes haken { to { stroke-dashoffset: 0; } }
+
+/* Geänderter Status leuchtet kurz auf */
+.aufleuchten { animation: aufleuchten 1.6s ease-out 2; }
+@keyframes aufleuchten { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 55%, transparent); } 70%, 100% { box-shadow: 0 0 0 12px transparent; } }
+
+.ungesichert { margin-right: auto; align-self: center; color: var(--warn-ink); font-size: 12px; font-weight: 600; }
+
+/* Platzhalter, solange beim ersten Mal noch keine Daten da sind */
+.vlist:empty, .fz-liste:empty, .huelle-tablet .list:empty {
+  min-height: 180px; background-repeat: no-repeat;
+  background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--bg2) 70%, transparent), transparent),
+    repeating-linear-gradient(var(--fill) 0 44px, transparent 44px 56px);
+  background-size: 40% 100%, calc(100% - 28px) 100%; background-position: -40% 0, 14px 14px;
+  animation: platzhalter 1.2s ease-in-out infinite;
+}
+@keyframes platzhalter { to { background-position: 140% 0, 14px 14px; } }
+@media (prefers-reduced-motion: reduce) { .erfolg-kreis svg { stroke-dashoffset: 0; } }

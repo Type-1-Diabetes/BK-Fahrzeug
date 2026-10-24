@@ -5,3 +5,12 @@
 .tile .ic { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-size: 26px; }
 .tile h3 { margin-top: auto; font-size: 20px; }
 .tile p { margin: 0; font-size: 15px; color: var(--label2); }
+.tun { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 14px 16px 14px 18px; border-radius: 16px; background: var(--bg2); }
+.tun:empty { display: none; }
+.tun-ic { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 20px; }
+.tun.ok .tun-ic { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-ink); }
+.tun.warn .tun-ic { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn-ink); }
+.tun .t { flex: 1; min-width: 0; }
+.tun .t b { display: block; font-size: 17px; }
+.tun .t span { display: block; color: var(--label2); font-size: 15px; margin-top: 2px; }
+.tun .btn { min-height: 44px; padding: 0 16px; font-size: 15px; }
