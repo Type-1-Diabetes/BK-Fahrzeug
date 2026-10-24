@@ -1,6 +1,6 @@
 # Fortschritt Demo
 
-Stand: 23.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md` (Abschnitt 2a, 10a).
+Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md` (Abschnitt 2a, 10a).
 
 ## Fertig
 
@@ -17,6 +17,7 @@ Stand: 23.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 | Material ausgeben (erhaltene Menge, teilweise/ganz, CSV) | Mac | fertig | Ansicht ja, Speichern nicht |
 | Gegenzeichnen (Abweichungen, zurück ans Team, PDF über Drucken, CSV) | Mac | fertig | Ansicht ja, Gegenzeichnen nicht |
 | Tablets (anlegen, Code, sperren) | Mac | fertig | früher getestet |
+| Tablet einrichten: Link `…/?koppeln`, Code, dann App installieren; Mac meldet „Tablet ist gekoppelt“ | beide | fertig | Link, Code, Installieren-Seite ja; Erfolgsmeldung am Mac nur mit Login, nicht getestet |
 | Einstellungen (Benachrichtigungen pro Person, Gerät einschalten, Konto) | Mac | fertig | Ansicht ja |
 | Benachrichtigungen versenden (Trigger, Edge Function push-senden) | Server | fertig | bis zur Function, ohne echtes Gerät |
 | Offline: Warteschlange, Tablet-Module im Service Worker | iPad | fertig | nur online getestet |
@@ -43,3 +44,4 @@ Stand: 23.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 3. Fotos nach 30 Tagen löschen (geplanter Job in Supabase).
 4. Erinnerung, wenn die Checkliste fällig ist.
 5. „Neues Tablet“: KTW-Auswahl als richtige Liste statt Nummer.
+6. Tablet einrichten auf echtem iPad und Android testen (Installieren, Code in der App).

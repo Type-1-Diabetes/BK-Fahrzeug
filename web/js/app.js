@@ -134,7 +134,10 @@
   // Start ohne Rolle: Anmelden (Personal) oder Tablet koppeln -------------
   // Eine Karte mit Umschalter: Anmelden (Personal) oder Tablet koppeln
   function startSeite(hinweis, modus) {
-    modus = modus || localStorage.getItem('bk_startmodus') || 'anmelden';
+    // Link „…/?koppeln“ für Tablets: nur Code-Eingabe, kein Umschalter
+    const nurKoppeln = new URLSearchParams(location.search).has('koppeln');
+    const tablet = window.pwaIsStandalone() && navigator.maxTouchPoints > 0;
+    modus = nurKoppeln ? 'koppeln' : modus || localStorage.getItem('bk_startmodus') || (tablet ? 'koppeln' : 'anmelden');
     try { localStorage.setItem('bk_startmodus', modus); } catch { /* privat */ }
     app.className = 'huelle-start';
     const fehler = el('p.ffehler', { role: 'alert' }, hinweis || '');
@@ -145,7 +148,7 @@
     const inhalt = modus === 'koppeln' ? koppelFormular(fehler) : anmeldeFormular(fehler);
     leeren(app).append(el('div.login',
       el('div.login-kopf', el('span.logo-platzhalter.gross', 'BK'), el('h1', 'BK Fahrzeug'), el('p', 'Blauer Kreis · Krankenbeförderung')),
-      el('div.login-karte', wahl, inhalt.form, fehler)));
+      el('div.login-karte', nurKoppeln ? null : wahl, inhalt.form, fehler)));
     inhalt.fokus.focus();
   }
 
@@ -193,14 +196,19 @@
         if (e.key === 'ArrowRight' && i < 5) felder[i + 1].focus();
       });
     });
+    let direkt = false;  // „Ohne Installation weiter“: im Browser koppeln
     const form = el('form', { onsubmit: async e => {
       e.preventDefault();
       if (knopf.disabled && code().length !== 6) return;
       fehler.textContent = '';
       knopf.disabled = true;
       try {
+        // Kann der Browser installieren und teilt er den Speicher mit der App (Chrome, Edge)? Dann hier koppeln.
+        // Safari (iPad, Mac) trennt den Speicher: dort erst installieren und den Code in der App eingeben.
+        if (!window.pwaIsStandalone() && !direkt && !('BeforeInstallPromptEvent' in window)) return installSeite(null);
         await api.tabletVorbereiten();
-        await api.tabletKoppeln(code());
+        const fz = await api.tabletKoppeln(code());
+        if (!window.pwaIsStandalone() && !direkt) return installSeite(fz.fahrzeug);
         await starten();
       } catch (err) {
         fehler.textContent = err.offline ? 'Zum Koppeln braucht das Tablet Internet.' : err.message;
@@ -212,8 +220,32 @@
       el('p.login-text', 'Gib den Code aus der Verwaltung ein. Danach zeigt dieses Tablet nur noch seinen KTW.'),
       el('div.code', felder.slice(0, 3), el('i', { 'aria-hidden': 'true' }), felder.slice(3)),
       knopf,
-      el('p.login-hinweis', 'Der Code gilt 24 Stunden und nur einmal.'));
+      el('p.login-hinweis', 'Der Code gilt 24 Stunden und nur einmal.'),
+      window.pwaIsStandalone() ? null : el('button.login-link', { type: 'button', onclick: () => {
+        if (code().length !== 6) { fehler.textContent = 'Bitte erst den Code eingeben.'; return felder[0].focus(); }
+        direkt = true; form.requestSubmit();
+      } }, 'Ohne Installation weiter'));
     return { form, fokus: felder[0] };
+  }
+
+  // Nach dem Code: App installieren. fahrzeug = schon gekoppelt (Chrome, Edge), null = Code in der App eingeben (Safari).
+  function installSeite(fahrzeug) {
+    app.className = 'huelle-start';
+    const status = el('p.login-text', { id: 'pwaStatus' });
+    const knopf = el('button.btn', { type: 'button', id: 'pwaInstallBtn', onclick: () => window.pwaInstall() }, 'App installieren');
+    const anleitung = el('div', { id: 'pwaGuide', hidden: !!('BeforeInstallPromptEvent' in window) },
+      el('ol.install-schritte', { id: 'pwaGuideList' }));
+    const titel = fahrzeug ? `Gekoppelt mit ${fahrzeug}` : 'Jetzt die App installieren';
+    const text = fahrzeug
+      ? 'Installiere jetzt die App. Danach öffnest du nur noch das App-Symbol, es zeigt direkt diesen KTW.'
+      : 'Installiere die App wie unten beschrieben. Öffne sie dann über das neue Symbol und gib dort denselben Code noch einmal ein.';
+    leeren(app).append(el('div.login',
+      el('div.login-kopf', el('span.logo-platzhalter.gross', 'BK'), el('h1', titel), el('p', text)),
+      el('div.login-karte', status, knopf, anleitung,
+        fahrzeug ? el('button.login-link', { type: 'button', onclick: () => starten() }, 'Im Browser weiter')
+                 : el('button.login-link', { type: 'button', onclick: () => startSeite('', 'koppeln') }, 'Zurück zum Code'))));
+    window.pwaRenderSettings();
+    if (!('BeforeInstallPromptEvent' in window)) knopf.hidden = true;
   }
 
   const koppelSeite = hinweis => startSeite(hinweis, 'koppeln');

@@ -1,4 +1,5 @@
 // Modul Tablets (Admin): anlegen, Code anzeigen, neu koppeln, sperren
+let warten = null;  // Prüfen, ob das neue Tablet gekoppelt ist
 BK.modul('tablets', {
   async start(root) {
     const { el, api, leeren } = BK;
@@ -6,15 +7,37 @@ BK.modul('tablets', {
     const overlay = root.querySelector('[data-code]');
     let fahrzeuge = [];
 
-    function codeZeigen(titel, code) {
+    const link = new URL('./?koppeln', location.href).href;
+
+    // Code zeigen und prüfen, bis das Tablet gekoppelt ist
+    function codeZeigen(titel, code, tabletId) {
       root.querySelector('[data-titel]').textContent = titel;
       root.querySelector('[data-wert]').textContent = code.slice(0, 3) + ' ' + code.slice(3);
+      root.querySelector('[data-link]').textContent = link;
       root.querySelector('[data-kopieren]').onclick = () => copyText(code);
+      root.querySelector('[data-link-kopieren]').onclick = () => copyText(link);
+      const stand = root.querySelector('[data-stand]');
+      stand.textContent = 'Wartet auf das Tablet …';
+      stand.classList.remove('ok');
       overlay.hidden = false;
       root.querySelector('[data-fertig]').focus();
+      clearInterval(warten);
+      if (!tabletId) return;
+      warten = setInterval(async () => {
+        try {
+          const t = (await api.tablets()).find(x => x.id === tabletId);
+          if (!t || !t.gekoppelt_am) return;
+          clearInterval(warten);
+          stand.textContent = 'Tablet ist gekoppelt.';
+          stand.classList.add('ok');
+          if (typeof showToast === 'function') showToast(t.name + ' ist gekoppelt');
+          laden();
+        } catch { /* nächster Versuch */ }
+      }, 3000);
     }
-    root.querySelector('[data-fertig]').onclick = () => { overlay.hidden = true; laden(); };
-    overlay.addEventListener('keydown', e => { if (e.key === 'Escape') { overlay.hidden = true; laden(); } });
+    const schliessen = () => { clearInterval(warten); overlay.hidden = true; laden(); };
+    root.querySelector('[data-fertig]').onclick = schliessen;
+    overlay.addEventListener('keydown', e => { if (e.key === 'Escape') schliessen(); });
 
     function status(t) {
       if (t.gesperrt) return ['offen', 'Gesperrt'];
@@ -39,7 +62,7 @@ BK.modul('tablets', {
             el('td',
               el('button.pbtn', { type: 'button', onclick: async () => {
                 if (!await confirmDialog('Neuen Code erzeugen?', `„${t.name}“ wird vom aktuellen Gerät getrennt und muss neu gekoppelt werden.`)) return;
-                try { codeZeigen('Neuer Code für ' + t.name, await api.tabletNeuerCode(t.id)); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+                try { codeZeigen('Neuer Code für ' + t.name, await api.tabletNeuerCode(t.id), t.id); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
               } }, 'Neuer Code'),
               el('button.pbtn.rot', { type: 'button', onclick: async () => {
                 const sperren = !t.gesperrt;
@@ -60,10 +83,15 @@ BK.modul('tablets', {
       if (!fz) return;
       const name = await promptDialog('Name des Tablets', 'So erscheint es in der Liste.', { value: 'iPad ' + fz.name, confirmLabel: 'Anlegen' });
       if (!name || !name.trim()) return;
-      try { codeZeigen('Neues Tablet für ' + fz.name, await api.tabletAnlegen(fz.id, name.trim())); }
+      try {
+        const code = await api.tabletAnlegen(fz.id, name.trim());
+        const neu = (await api.tablets()).find(t => t.fahrzeug_id === fz.id && t.name === name.trim() && !t.gekoppelt_am);
+        codeZeigen('Neues Tablet für ' + fz.name, code, neu && neu.id);
+      }
       catch (e) { alertDialog('Hat nicht geklappt', e.message); }
     };
 
     laden();
   },
+  stop() { clearInterval(warten); },
 });

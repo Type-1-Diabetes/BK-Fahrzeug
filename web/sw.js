@@ -1,7 +1,7 @@
 /* Service Worker: App-Dateien offline verfügbar, Web-Push.
    Aufbau angelehnt an die Website Schrietz (admin/sw.js), erweitert um den Offline-Modus.
    Bei Änderungen an App-Dateien VERSION erhöhen, dann holt sich jedes Gerät die neuen Dateien. */
-const VERSION = 'bk-v7';
+const VERSION = 'bk-v8';
 const DATEIEN = [
   './', 'index.html', 'manifest.webmanifest', 'icons/icon.svg',
   'css/basis.css', 'css/komponenten.css',
