@@ -265,7 +265,7 @@
           onclick: () => m !== modus && startSeite('', m) }, t)));
     const inhalt = modus === 'koppeln' ? koppelFormular(fehler) : anmeldeFormular(fehler);
     leeren(app).append(el('div.login',
-      el('div.login-kopf', BK.banner(), el('h1', 'BK Fahrzeug'), el('p', 'Mängel, Material und Checklisten für die KTW')),
+      el('div.login-kopf', BK.logo('gross'), el('h1', 'BK Fahrzeug'), el('p', 'Blauer Kreis · Krankenbeförderung')),
       el('div.login-karte', nurKoppeln ? null : wahl, inhalt.form, fehler)));
     inhalt.fokus.focus();
   }

@@ -10,6 +10,19 @@
     <tbody data-liste></tbody>
   </table>
 </div>
+<div class="code-overlay" data-neu-blatt hidden>
+  <div class="code-box neu-box" role="dialog" aria-modal="true" aria-labelledby="neuTitel">
+    <h2 id="neuTitel">Neues Tablet</h2>
+    <p>Für welchen KTW ist das Tablet?</p>
+    <div class="neu-ktw" role="radiogroup" aria-label="KTW" data-neu-ktw></div>
+    <label class="neu-label" for="neuName">Name in der Liste</label>
+    <input class="tf neu-name" id="neuName" maxlength="60" autocomplete="off" data-neu-name>
+    <div class="code-acts">
+      <button type="button" class="pbtn" data-neu-abbrechen>Abbrechen</button>
+      <button type="button" class="pbtn def" data-neu-weiter disabled>Code erzeugen</button>
+    </div>
+  </div>
+</div>
 <div class="code-overlay" data-code hidden>
   <div class="code-box" role="dialog" aria-modal="true" aria-labelledby="codeTitel">
     <h2 id="codeTitel" data-titel></h2>

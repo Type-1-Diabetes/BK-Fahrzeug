@@ -113,3 +113,8 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 
 - Mac (MPGler/Admin): Einstellungen › App. Installieren-Knopf (Chrome, Edge) oder Anleitung (Safari: Ablage › Zum Dock hinzufügen). Getestet im Browser: Anleitung klappt auf.
 - Tablet: Knopf „App installieren“ in der Kopfzeile, solange es nicht als App läuft. Blatt mit Knopf bzw. Anleitung. Safari: in der App einmal mit neuem Code koppeln. Nicht auf echtem iPad getestet.
+
+## Stand 24.10.2026 (bk-v28)
+
+- Anmelden: oben wieder das runde Logo statt Banner (`BK.banner()` bleibt für später).
+- Tablets › Neues Tablet: ein Blatt statt zwei Eingabefenstern. KTW nach Wache antippen, Hinweis „hat schon …“, Name wird vorbelegt („iPad KTW …“), dann „Code erzeugen“ und wie bisher Link und Code. Erledigt Offen-Punkt 5. Getestet bis zur Auswahl, kein Tablet angelegt.

@@ -99,20 +99,52 @@ BK.modul('tablets', {
     };
     pinZeigen();
 
+    // Neues Tablet: KTW antippen (nach Wache), Name ist vorbelegt, dann Code
+    const neuBlatt = root.querySelector('[data-neu-blatt]');
+    const neuKtw = root.querySelector('[data-neu-ktw]');
+    const neuName = root.querySelector('[data-neu-name]');
+    const neuWeiter = root.querySelector('[data-neu-weiter]');
+    let neuFz = null, nameGeaendert = false;
+    const neuZu = () => { neuBlatt.hidden = true; };
+    root.querySelector('[data-neu-abbrechen]').onclick = neuZu;
+    neuBlatt.addEventListener('keydown', e => { if (e.key === 'Escape') neuZu(); if (e.key === 'Enter' && !neuWeiter.disabled) neuWeiter.click(); });
+    neuBlatt.addEventListener('mousedown', e => { if (e.target === neuBlatt) neuZu(); });
+    neuName.oninput = () => { nameGeaendert = true; neuWeiter.disabled = !neuFz || !neuName.value.trim(); };
+
     root.querySelector('[data-neu]').onclick = async () => {
       if (!fahrzeuge.length) return alertDialog('Keine Fahrzeuge', 'Es gibt noch keinen KTW, dem ein Tablet zugeordnet werden kann.');
-      const liste = fahrzeuge.map((f, i) => `${i + 1} = ${f.name}`).join(', ');
-      const wahl = await promptDialog('Für welchen KTW?', 'Nummer eingeben: ' + liste, { value: '1', confirmLabel: 'Weiter' });
-      const fz = fahrzeuge[Number(wahl) - 1];
-      if (!fz) return;
-      const name = await promptDialog('Name des Tablets', 'So erscheint es in der Liste.', { value: 'iPad ' + fz.name, confirmLabel: 'Anlegen' });
-      if (!name || !name.trim()) return;
-      try {
-        const code = await api.tabletAnlegen(fz.id, name.trim());
-        const neu = (await api.tablets()).find(t => t.fahrzeug_id === fz.id && t.name === name.trim() && !t.gekoppelt_am);
-        codeZeigen('Neues Tablet für ' + fz.name, code, neu && neu.id);
+      let tablets = [];
+      try { tablets = await api.tablets(); } catch { /* ohne Hinweis „hat schon ein Tablet“ */ }
+      neuFz = null; nameGeaendert = false; neuName.value = ''; neuWeiter.disabled = true;
+      leeren(neuKtw);
+      const wachen = [...new Set(fahrzeuge.map(f => f.wache ? f.wache.name : ''))];
+      for (const w of wachen) {
+        if (w) neuKtw.append(el('div.neu-wache', w));
+        for (const f of fahrzeuge.filter(x => (x.wache ? x.wache.name : '') === w)) {
+          const hat = tablets.find(t => t.fahrzeug_id === f.id && !t.gesperrt && t.gekoppelt_am);
+          neuKtw.append(el('label.rb.neu-zeile',
+            el('input', { type: 'radio', name: 'neu_ktw', value: f.id, onchange: () => {
+              neuFz = f;
+              if (!nameGeaendert) neuName.value = 'iPad ' + f.name;
+              neuWeiter.disabled = !neuName.value.trim();
+            } }),
+            el('span', f.name), hat ? el('span.neu-hat', 'hat schon ' + hat.name) : null));
+        }
       }
-      catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+      neuBlatt.hidden = false;
+      neuKtw.querySelector('input')?.focus();
+    };
+
+    neuWeiter.onclick = async () => {
+      const fz = neuFz, name = neuName.value.trim();
+      if (!fz || !name) return;
+      neuWeiter.disabled = true;
+      try {
+        const code = await api.tabletAnlegen(fz.id, name);
+        const neu = (await api.tablets()).find(t => t.fahrzeug_id === fz.id && t.name === name && !t.gekoppelt_am);
+        neuZu();
+        codeZeigen('Neues Tablet für ' + fz.name, code, neu && neu.id);
+      } catch (e) { neuWeiter.disabled = false; alertDialog('Hat nicht geklappt', e.message); }
     };
 
     BK.beiNeu(() => { if (overlay.hidden) laden(); });

@@ -14,3 +14,12 @@
 .tablets-inhalt table.tab td { height: 52px; padding-top: 8px; padding-bottom: 8px; vertical-align: middle; border-bottom: .5px solid var(--sep); }
 .tablets-inhalt table.tab tbody tr:nth-child(even) td { background: none; }
 .tablets-inhalt td .pbtn { vertical-align: middle; }
+/* Neues Tablet: KTW nach Wache zum Antippen */
+.neu-ktw { max-height: 46vh; overflow: auto; border-radius: 10px; background: var(--fill); padding: 4px 0; }
+.neu-wache { padding: 10px 14px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--label2); }
+.neu-zeile { display: flex; width: 100%; min-height: 36px; padding: 0 14px; gap: 10px; }
+.neu-zeile:hover { background: color-mix(in srgb, var(--label) 6%, transparent); }
+.neu-zeile:has(input:checked) { background: color-mix(in srgb, var(--navy2) 10%, transparent); font-weight: 600; }
+.neu-hat { margin-left: auto; font-size: 12px; color: var(--warn-ink); font-weight: 400; }
+.neu-label { display: block; margin: 14px 0 6px; font-size: 12px; color: var(--label2); }
+.neu-box .neu-name { height: 28px; }
