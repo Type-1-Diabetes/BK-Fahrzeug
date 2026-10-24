@@ -1,5 +1,6 @@
 /* Modul Checkliste (Tablet): Bereiche links, Positionen rechts, wie das MPG-Dokument */
-.content:has(> .ckl) { padding: 0; overflow: hidden; display: flex; }
+.content:has(> .ckl) { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.content:has(> .ckl) > .reiter-wahl { flex: none; width: calc(100% - 32px); margin: 4px auto 8px; }
 .ckl { flex: 1; display: flex; min-height: 0; min-width: 0; }
 .ckl-side { width: 300px; flex: none; border-right: .5px solid var(--sep); overflow: auto; padding: 4px 14px 14px; }
 .ckl-side h2 { font-size: 20px; padding: 4px 0 2px; }

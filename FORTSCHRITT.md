@@ -219,3 +219,4 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - `sollliste`: Soll-Ausstattung aus der Vorlage zum Nachschauen, nach Bereichen, mit Suche, Soll-Zahl und „Wo“. Haken nur lokal auf dem Tablet (localStorage), nichts wird gesendet, „Haken entfernen“ setzt zurück.
 - Übersicht-Kachel und Hinweise heißen „Fahrzeug Überprüfung“.
 - Offen: auf dem iPad prüfen.
+- Fix: Umschalter „Fahrzeug Überprüfung / Checkliste“ stand auf der Überprüfungsseite links senkrecht (Flex-Zeile), jetzt immer waagerecht oben.
