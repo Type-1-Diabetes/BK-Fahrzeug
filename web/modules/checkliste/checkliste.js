@@ -30,10 +30,10 @@ BK.modul('checkliste', {
         try { await api.checklisteStarten(zeitraum); ctx.oeffnen('checkliste'); }
         catch (e) { knopf.disabled = false; knopf.classList.remove('laedt'); alertDialog('Hat nicht geklappt', e.offline ? 'Zum Beginnen braucht das Tablet einmal Netz. Danach geht alles auch offline.' : e.message); }
       } }, 'Checkliste beginnen');
-      const anzahl = bereiche.reduce((n, b) => n + b.positionen.length, 0);
-      return meldung('Überprüfung Vollzähligkeit',
-        [el('p', `${zeitraumText(zeitraum)}, fällig bis ${frist.bis} · ${anzahl} Positionen in ${bereiche.length} Bereichen.`),
-          wartet ? el('p', `Die letzte Checkliste (${zeitraumText(wartet.zeitraum)}) wartet auf die Gegenzeichnung.`) : el('p', 'Die App speichert, wann ihr beginnt und wann ihr abschließt.')],
+      return meldung('Fahrzeug Überprüfung',
+        [el('p', '§ 20 Abs. 2 HmbRDG Überprüfung von Krankentransportwagen'),
+          el('p', `${zeitraumText(zeitraum)}, fällig bis ${frist.bis}`),
+          wartet ? el('p', `Die letzte Checkliste (${zeitraumText(wartet.zeitraum)}) wartet auf die Gegenzeichnung.`) : null],
         knopf);
     }
 
@@ -192,7 +192,7 @@ BK.modul('checkliste', {
       const tag = d => new Date(d).toLocaleDateString('de-DE');
       const kv = (k, v) => el('div', el('span', k), el('b', v || '–'));
       leeren(main).append(el('div.content',
-        el('div.ckl-kopf', el('div.ckl-titel', el('h2', 'Abschließen'), el('span', 'Überprüfung Vollzähligkeit'))),
+        el('div.ckl-kopf', el('div.ckl-titel', el('h2', 'Abschließen'), el('span', 'Fahrzeug Überprüfung'))),
         // Kopf wie Seite 1 der Papierliste
         el('div.ckl-blatt',
           kv('Datum der Überprüfung', tag(offen.begonnen_am)),

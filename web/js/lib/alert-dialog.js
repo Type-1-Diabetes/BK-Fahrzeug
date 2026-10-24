@@ -4,6 +4,7 @@
    await confirmDialog('Titel', 'Beschreibung')        → true / false
    await promptDialog('Titel', 'Beschreibung', {value}) → Text / null (Abbruch)
    await alertDialog('Titel', 'Beschreibung')           → nach „OK“
+   await speichernDialog('Titel', 'Beschreibung')      → 'speichern' / 'verwerfen' / null (Abbruch)
 ═══════════════════════════════════════════════════════ */
 (function () {
     const HTML = `
@@ -16,6 +17,7 @@
             </div>
             <div class="_ad-footer">
                 <button type="button" id="_adCancel"  class="_ad-btn-cancel">Abbrechen</button>
+                <button type="button" id="_adExtra"   class="_ad-btn-cancel">Nicht speichern</button>
                 <button type="button" id="_adConfirm" class="_ad-btn-confirm">Bestätigen</button>
             </div>
         </div>
@@ -46,6 +48,8 @@
             var inputEl    = document.getElementById('_adInput');
             var cancelBtn  = document.getElementById('_adCancel');
             var confirmBtn = document.getElementById('_adConfirm');
+            var extraBtn   = document.getElementById('_adExtra');
+            extraBtn.style.display = opts.extra ? '' : 'none';
 
             titleEl.textContent = opts.title || '';
             descEl.textContent  = opts.desc || '';
@@ -66,20 +70,24 @@
                 overlay.classList.remove('_ad-open');
                 cancelBtn.removeEventListener('click', onCancel);
                 confirmBtn.removeEventListener('click', onConfirm);
+                extraBtn.removeEventListener('click', onExtra);
                 overlay.removeEventListener('click', onOverlay);
                 inputEl.removeEventListener('keydown', onKey);
                 _adResolve = null;
                 if (opts.input) resolve(ok ? inputEl.value : null);
+                else if (opts.extra) resolve(ok === 'extra' ? 'verwerfen' : ok ? 'speichern' : null);
                 else resolve(ok);
             }
             function onCancel()  { cleanup(false); }
             function onConfirm() { cleanup(true);  }
+            function onExtra()   { cleanup('extra'); }
             function onOverlay(e) { if (e.target === overlay) cleanup(false); }
             function onKey(e) { if (e.key === 'Enter') { e.preventDefault(); cleanup(true); } }
 
             _adResolve = cleanup;
             cancelBtn.addEventListener('click', onCancel);
             confirmBtn.addEventListener('click', onConfirm);
+            extraBtn.addEventListener('click', onExtra);
             overlay.addEventListener('click', onOverlay);
             inputEl.addEventListener('keydown', onKey);
         });
@@ -91,6 +99,9 @@
     window.promptDialog = function (title, description, opts) {
         opts = opts || {};
         return open({ title: title, desc: description, input: true, value: opts.value, placeholder: opts.placeholder, confirmLabel: opts.confirmLabel, typ: opts.typ, inputmode: opts.inputmode });
+    };
+    window.speichernDialog = function (title, description) {
+        return open({ title: title, desc: description, extra: true, confirmLabel: 'Speichern' });
     };
     window.alertDialog = function (title, description) {
         return open({ title: title, desc: description, cancel: false });

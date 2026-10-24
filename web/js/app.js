@@ -32,7 +32,11 @@
     });
   }
 
+  // Ungespeicherte Eingaben: Modul setzt BK.vorVerlassen (liefert true = darf weg)
+  BK.vorVerlassen = null;
   async function oeffnen(name, ziel, extra) {
+    if (BK.vorVerlassen && !(await BK.vorVerlassen())) return false;
+    BK.vorVerlassen = null;
     if (aktiv && aktiv.def.stop) { try { aktiv.def.stop(); } catch { /* egal */ } }
     leeren(ziel);
     neuHoerer = null;
@@ -53,7 +57,11 @@
     const inhalt = el('div.blatt-inhalt');
     const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, icon('x'));
     const overlay = el('div.blatt-overlay', el('div.blatt', { role: 'dialog', 'aria-modal': 'true', 'aria-label': fahrzeug.name }, zu, inhalt));
-    const schliessen = gesendet => {
+    const vorher = BK.vorVerlassen;
+    BK.vorVerlassen = null;
+    const schliessen = async gesendet => {
+      if (!gesendet && BK.vorVerlassen && !(await BK.vorVerlassen())) return;
+      BK.vorVerlassen = vorher;
       overlay.remove(); document.removeEventListener('keydown', esc);
       if (module[name].stop) try { module[name].stop(); } catch { /* egal */ }
       if (gesendet && fertig) fertig();
@@ -100,8 +108,9 @@
   }
 
   // Fahrzeugstatus live: alle 10 s und beim Zurückkommen in die App. Bei Änderung lädt die offene Ansicht neu.
-  let ampelStand = null, ampelTimer = null, letzterPing = 0;
+  let ampelStand = null, ampelTimer = null, letzterPing = 0, verlaufStand = null;
   function statusBeobachten() {
+    verlaufStand = null;
     const pruefen = async () => {
       if (!ctx || document.visibilityState !== 'visible' || !navigator.onLine) return;
       // Tablet meldet sich höchstens jede Minute als online (auch nach dem Wiederöffnen)
@@ -128,6 +137,15 @@
         }
       }
       ampelStand = neu;
+      // Meldungen, Checklisten usw. von anderen Geräten: Ansicht neu laden
+      let v;
+      try { v = await api.letzteAenderung(); } catch { return; }
+      if (verlaufStand != null && v !== verlaufStand) {
+        api.frischLesen();
+        if (neuHoerer && !document.querySelector('._ad-open, .blatt-overlay')) neuHoerer();
+        if (!ctx.ich.tablet_id) zaehlen();
+      }
+      verlaufStand = v;
     };
     clearInterval(ampelTimer);
     ampelTimer = setInterval(pruefen, 10000);
@@ -241,7 +259,7 @@
       el('button.tb', { type: 'button', 'aria-label': 'Abmelden', title: 'Abmelden', onclick: abmelden }, icon('logout'))));
     app.className = 'huelle-mac';
     leeren(app).append(nav, inhalt);
-    navigieren = (name, extra) => { oeffnen(name, inhalt, extra); zaehlen(); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ } };
+    navigieren = async (name, extra) => { if (await oeffnen(name, inhalt, extra) === false) return; zaehlen(); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ } };
     const letztes = localStorage.getItem('bk_modul');
     navigieren(liste.some(m => m.name === letztes) ? letztes : liste[0].name);
     vorladen(liste);

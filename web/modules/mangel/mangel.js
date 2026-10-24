@@ -34,6 +34,9 @@ BK.modul('mangel', {
 
     const formBox = root.querySelector('[data-formular]');
     const form = BK.formular.bauen(formBox, FELDER);
+    let gesendet = false;
+    BK.vorVerlassen = async () => gesendet || !Object.values(form.werte()).some(v => v && String(v).trim())
+      || await confirmDialog('Mängelmeldung nicht gesendet', 'Du hast schon etwas eingetragen. Ohne Senden geht es verloren. Trotzdem verlassen?');
     // Kopfzeile wie auf dem Blatt direkt unter „Art“
     formBox.firstElementChild.after(root.querySelector('[data-kopf]'));
     const knopf = root.querySelector('[data-senden]');
@@ -60,6 +63,7 @@ BK.modul('mangel', {
         else await erfolg('Mängelmeldung gesendet', navigator.onLine
           ? 'Die MPGler sehen sie jetzt in ihrer Liste.'
           : 'Kein Netz. Sie ist auf dem Tablet gespeichert und geht raus, sobald wieder Netz da ist.', navigator.onLine ? 2000 : 4000);
+        gesendet = true;
         ctx.oeffnen('uebersicht');
       } catch (e) {
         knopf.disabled = false; knopf.classList.remove('laedt');

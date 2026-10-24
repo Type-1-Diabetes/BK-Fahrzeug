@@ -2,7 +2,7 @@
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
 .tile { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-height: 150px; padding: 20px; border-radius: 16px; background: var(--bg2); text-align: left; }
 .tile:active { background: var(--fill2); }
-.tile .ic { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-size: 26px; }
+.tile .ic { width: 60px; height: 60px; border-radius: 15px; display: grid; place-items: center; color: #fff; font-size: 32px; }
 .tile h3 { margin-top: auto; font-size: 20px; }
 .tile p { margin: 0; font-size: 15px; color: var(--label2); }
 .tun { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 14px 16px 14px 18px; border-radius: 16px; background: var(--bg2); }

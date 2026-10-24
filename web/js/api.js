@@ -72,7 +72,7 @@
   // Lesen mit Offline-Vorrat: ohne Netz kommen die zuletzt geladenen Daten
   // Ist ein Vorrat da und der Server langsamer als 250 ms, kommt sofort der Vorrat.
   // Weichen die frischen Daten ab, meldet „bk:neu“ das der offenen Ansicht. Kurz nach dem Speichern wird immer frisch geladen.
-  let geschrieben = 0, neuTimer = null;
+  let geschrieben = 0, erzwingen = 0, neuTimer = null;
   const neuMelden = () => { clearTimeout(neuTimer); neuTimer = setTimeout(() => document.dispatchEvent(new Event('bk:neu')), 60); };
   async function lesen(tabelle, abfrage) {
     const pfad = `/rest/v1/${tabelle}?${abfrage}`;
@@ -85,7 +85,7 @@
       if (ausVorrat && s !== alt) neuMelden();
       return d;
     });
-    if (alt == null || Date.now() - geschrieben < 5000) {
+    if (alt == null || Date.now() - Math.max(geschrieben, erzwingen) < 5000) {
       try { return await frisch; } catch (e) { if (e.offline && alt != null) return JSON.parse(alt); throw e; }
     }
     const r = await Promise.race([frisch.then(d => ({ d }), e => ({ e })), new Promise(ok => setTimeout(ok, 250))]);
@@ -144,6 +144,10 @@
     // Nur Fahrzeugstatus, immer frisch vom Server (für die Live-Anzeige)
     ampeln: () => mitLogin('/rest/v1/fahrzeuge?aktiv=eq.true&select=id,name,ampel,ampel_grund'),
     zuletztGeschrieben: () => geschrieben,
+    // Andere Geräte haben etwas geändert: die nächsten Sekunden immer frisch vom Server lesen
+    frischLesen: () => { erzwingen = Date.now(); },
+    // Neuester Verlaufseintrag (RLS: nur was diese Rolle sehen darf). Ändert er sich, gibt es Neues.
+    letzteAenderung: () => mitLogin('/rest/v1/verlauf?select=id&order=id.desc&limit=1').then(d => (d[0] || {}).id || 0),
     fahrzeuge: () => lesen('fahrzeuge', 'aktiv=eq.true&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,wache:wachen(id,name)&order=name'),
     geraete: fahrzeugId => lesen('geraete', `fahrzeug_id=eq.${fahrzeugId}&select=id,name,seriennummer,hersteller,pruefart,pruefung_bis&order=name`),
     ampelSetzen: (fahrzeugId, ampel, grund) => rpc('ampel_setzen', { p_fahrzeug: fahrzeugId, p_ampel: ampel, p_grund: grund || null }),

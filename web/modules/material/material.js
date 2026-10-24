@@ -11,7 +11,9 @@ BK.modul('material', {
     const MAX = 30;
     const GRUND = [['verbraucht', 'Verbraucht'], ['abgelaufen', 'Abgelaufen']];
     const zeilen = [];  // { artikel, groesse, menge, grund }
-    let bereiche = [], namen = [], weg = 'suchen', filter = '';
+    let bereiche = [], namen = [], weg = 'suchen', filter = '', gesendet = false;
+    BK.vorVerlassen = async () => gesendet || !zeilen.some(z => z.artikel.trim())
+      || await confirmDialog('Materialanforderung nicht gesendet', 'Du hast schon Artikel eingetragen. Ohne Senden gehen sie verloren. Trotzdem verlassen?');
     const suche = root.querySelector('[data-katalog-suche]');
     suche.oninput = () => { filter = suche.value.trim().toLowerCase(); zeichnenListe(); };
 
@@ -137,6 +139,7 @@ BK.modul('material', {
         else await erfolg('Materialanforderung gesendet', navigator.onLine
           ? 'Die MPGler sehen die Anforderung jetzt in ihrer Liste.'
           : 'Kein Netz. Die Anforderung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
+        gesendet = true;
         ctx.oeffnen('uebersicht');
       } catch (e) {
         knopf.disabled = false; knopf.classList.remove('laedt');

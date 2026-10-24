@@ -189,3 +189,19 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Ausgeblendete KTW (u. a. N-KTW 9/3) bleiben ausgeblendet, über „Neues Tablet“ mit gleichem Namen wieder aufnehmbar.
 - Migration 019 eingespielt (geprüft).
 - Offen: im Browser prüfen.
+
+## Speichern, Live, Filter, Druck (2026-10-24)
+- „Sichern“ heißt überall „Speichern“. Neuer Dialog `speichernDialog` (Speichern / Nicht speichern / Abbrechen).
+- Verlassen mit ungespeicherten Eingaben fragt nach: `BK.vorVerlassen` (in `oeffnen` und beim Blatt). Mängel (Mac): speichern oder verwerfen; Vorlage, Ausgabe: verwerfen-Rückfrage; Tablet-Mängelmeldung/Materialanforderung: Rückfrage, wenn schon etwas eingetragen und nicht gesendet.
+- „Telefonisch“ groß (Formular und Druck). Touch: Beschriftung in `.kv` auf 44 px Zeilenhöhe.
+- Live: alle 10 s neuester Verlaufseintrag (`api.letzteAenderung`). Neu → frisch laden (`api.frischLesen`) und offene Ansicht neu laden (nicht bei ungespeicherten Eingaben). Gilt Mac ↔ Tablet.
+- Filter „Alle“ bei Mängeln und Materialanforderungen; Material jetzt Alle / Offen / In Bearbeitung / Ausgegeben.
+- Materialanforderung: Tabellenköpfe brechen um (schmale Fenster/Tablets).
+- Druck: ohne Dok./Version/„Freigegeben von GL“, ohne Fußzeile; Material ohne „Blauer Kreis / Medi KT / Räume“ und „* nur ankreuzen“, Spalten ausgeschrieben.
+- Tablet-Kacheln: Icons 60 px.
+- Offen: im Browser prüfen (zwei Geräte für Live).
+
+## Tablet-Feinschliff (2026-10-24)
+- Material: Zeile bricht nicht mehr um, X steht rechts.
+- Checkliste-Start: Titel „Fahrzeug Überprüfung“, Untertitel „§ 20 Abs. 2 HmbRDG Überprüfung von Krankentransportwagen“, ohne Positionszahl und ohne Hinweis zum Speichern.
+- Melden-Umschalter: Icons 22 px.

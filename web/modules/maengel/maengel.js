@@ -3,8 +3,8 @@
   // Felder der Bearbeitung als Beschreibung. Gespeichert in meldungen.bearbeitung (jsonb).
   const ABSCHNITTE = [
     { titel: 'Teamleitung / Geschäftsführung informiert', felder: [
-      { key: 'info_tl_wie', typ: 'wahl', label: 'TL', optionen: ['telefonisch', 'E-Mail'] },
-      { key: 'info_gf_wie', typ: 'wahl', label: 'GF', optionen: ['telefonisch', 'E-Mail', 'Fax'] },
+      { key: 'info_tl_wie', typ: 'wahl', label: 'TL', optionen: [['telefonisch', 'Telefonisch'], 'E-Mail'] },
+      { key: 'info_gf_wie', typ: 'wahl', label: 'GF', optionen: [['telefonisch', 'Telefonisch'], 'E-Mail', 'Fax'] },
     ] },
     { titel: 'Gesichtet', felder: [
       { key: 'gesichtet_name', typ: 'text', label: 'Name', max: 80 },
@@ -19,7 +19,7 @@
       { key: 'extern_durch', typ: 'text', label: 'Reparatur extern durch', max: 120, wenn: w => w.reparatur === 'extern' },
       { key: 'termin', typ: 'termin', label: 'Termin am', wenn: w => w.reparatur === 'extern' },
       { key: 'kv', typ: 'check', label: 'KV', text: 'angefordert', wenn: w => w.reparatur === 'extern' },
-      { key: 'einsatzbereit_am', typ: 'datum', label: 'Wieder einsatzbereit am', hinweis: 'Mit Datum wird der Mangel beim Sichern erledigt.', wenn: w => w.reparatur === 'instand' },
+      { key: 'einsatzbereit_am', typ: 'datum', label: 'Wieder einsatzbereit am', hinweis: 'Mit Datum wird der Mangel beim Speichern erledigt.', wenn: w => w.reparatur === 'instand' },
       { key: 'reparatur_bemerkung', typ: 'textarea', label: 'Bemerkung', max: 500 },
     ] },
     { titel: 'Mängelbericht für richtig befunden', hinweis: 'Datum und Unterschrift nur durch Leitstelle, FDL oder BL.', felder: [
@@ -46,8 +46,15 @@
       const ktw = root.querySelector('[data-ktw]');
       const suche = root.querySelector('[data-suche]');
       root.querySelector('[data-export]').append(icon('export'), 'Export');
-      let status = 'offen', alle = [], fahrzeuge = [], gewaehlt = null, ungesichert = false;
-      const weiter = async () => !ungesichert || await confirmDialog('Änderungen verwerfen?', 'Du hast in dieser Mängelmeldung etwas geändert und noch nicht gesichert.');
+      let status = 'offen', alle = [], fahrzeuge = [], gewaehlt = null, ungesichert = false, speichernAktuell = null;
+      // Vor dem Wechseln oder Schließen: speichern, verwerfen oder bleiben
+      const weiter = async () => {
+        if (!ungesichert) return true;
+        const a = await speichernDialog('Änderungen speichern?', 'Du hast in dieser Mängelmeldung etwas geändert.');
+        if (a === 'verwerfen') { ungesichert = false; return true; }
+        return a === 'speichern' && (await speichernAktuell()) !== false;
+      };
+      BK.vorVerlassen = weiter;
       window.addEventListener('beforeunload', e => { if (ungesichert && root.isConnected) e.preventDefault(); });
 
       root.querySelectorAll('[data-status] button').forEach(b => b.onclick = async () => {
@@ -62,7 +69,7 @@
 
       const gefiltert = () => {
         const q = suche.value.trim().toLowerCase();
-        return alle.filter(m => m.status === status && (!ktw.value || m.fahrzeug_id === ktw.value)
+        return alle.filter(m => (status === 'alle' || m.status === status) && (!ktw.value || m.fahrzeug_id === ktw.value)
           && (!q || [mac.titel(m), m.beschreibung, m.gemeldet_von, m.fahrzeug.name].join(' ').toLowerCase().includes(q)));
       };
       const fzVon = m => fahrzeuge.find(f => f.id === m.fahrzeug_id) || { id: m.fahrzeug_id, name: m.fahrzeug.name, ampel: 'einsatzbereit' };
@@ -154,6 +161,7 @@
         if (!m) return;
         const fz = fzVon(m);
         const werte = altUebernehmen({ ...(m.bearbeitung || {}) });
+        speichernAktuell = () => sichern(m, werte, null);
         const fotos = el('div.fotos-m');
         const verlauf = el('div.tl');
         insp.append(mac.zuKnopf(schliessen),
@@ -170,13 +178,13 @@
           el('div.ih', 'Verlauf'), verlauf,
           druckMangel(m, werte),
           el('div.acts',
-            el('span.ungesichert', { dataset: { ungesichert: '' }, hidden: true }, 'Nicht gesichert'),
-            el('button.pbtn', { type: 'button', title: 'Drucken oder als PDF sichern (⌘P / Strg+P)', onclick: () => window.print() }, 'Drucken'),
+            el('span.ungesichert', { dataset: { ungesichert: '' }, hidden: true }, 'Nicht gespeichert'),
+            el('button.pbtn', { type: 'button', title: 'Drucken oder als PDF speichern (⌘P / Strg+P)', onclick: () => window.print() }, 'Drucken'),
             mac.loeschKnopf('Mängelmeldung', () => api.meldungLoeschen(m.id), () => { ungesichert = false; gewaehlt = null; laden(true); }),
             el('button.pbtn', { type: 'button', onclick: async () => {
               try { if (await mac.ampelAendern(fz, mac.titel(m))) laden(true); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
             } }, fz.ampel === 'einsatzbereit' ? 'KTW nicht einsatzbereit …' : 'KTW einsatzbereit …'),
-            el('button.pbtn', { type: 'button', title: 'Sichern (⌘S / Strg+S)', dataset: { sichern: '' }, onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, null)) }, 'Sichern'),
+            el('button.pbtn', { type: 'button', title: 'Speichern (⌘S / Strg+S)', dataset: { sichern: '' }, onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, null)) }, 'Speichern'),
             m.status === 'erledigt'
               ? el('button.pbtn.def', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'in_bearbeitung')) }, 'Wieder öffnen')
               : el('button.pbtn.def', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'erledigt')) }, 'Als erledigt markieren')));
@@ -212,8 +220,8 @@
             el('div.dr-reihe', BK.linie('Gemeldet durch:', m.gemeldet_von), BK.linie('Unterschrift:', 'digital, ' + BK.datum(m.erstellt_am)))),
           el('div.dr-box',
             el('div', el('h4', 'Teamleitung / Geschäftführung informiert'),
-              el('div.dr-reihe', el('b', 'TL'), BK.kreuz(w.info_tl_wie === 'telefonisch', 'telefonisch'), BK.kreuz(w.info_tl_wie === 'E-Mail', 'e-Mail'),
-                el('b', 'GF'), BK.kreuz(w.info_gf_wie === 'telefonisch', 'telefonisch'), BK.kreuz(w.info_gf_wie === 'E-Mail', 'e-Mail'), BK.kreuz(w.info_gf_wie === 'Fax', 'Fax'))),
+              el('div.dr-reihe', el('b', 'TL'), BK.kreuz(w.info_tl_wie === 'telefonisch', 'Telefonisch'), BK.kreuz(w.info_tl_wie === 'E-Mail', 'E-Mail'),
+                el('b', 'GF'), BK.kreuz(w.info_gf_wie === 'telefonisch', 'Telefonisch'), BK.kreuz(w.info_gf_wie === 'E-Mail', 'E-Mail'), BK.kreuz(w.info_gf_wie === 'Fax', 'Fax'))),
             el('div', el('h4', 'Gesichtet'),
               el('div.dr-reihe', BK.linie('Name:', w.gesichtet_name), BK.kreuz(!!w.fotografiert, 'Schaden Fotografiert'), BK.linie('Datum:', tag(w.gesichtet_datum))),
               el('div', 'Bemerkung:'), el('div.dr-text.klein', w.gesichtet_bemerkung || '')),
@@ -238,7 +246,7 @@
         try {
           await api.meldungBearbeiten(m.id, s, werte);
           ungesichert = false;
-          showToast(s === 'erledigt' && m.status !== 'erledigt' ? 'Mangel erledigt' : s !== m.status && s === 'in_bearbeitung' && m.status === 'erledigt' ? 'Mangel wieder offen' : 'Gesichert');
+          showToast(s === 'erledigt' && m.status !== 'erledigt' ? 'Mangel erledigt' : s !== m.status && s === 'in_bearbeitung' && m.status === 'erledigt' ? 'Mangel wieder offen' : 'Gespeichert');
           const fz = fzVon(m);
           if (s === 'erledigt' && fz.ampel === 'nicht_einsatzbereit' && await confirmDialog(`${fz.name} ist noch nicht einsatzbereit`, 'Soll der KTW wieder fahren dürfen?')) {
             await api.ampelSetzen(fz.id, 'einsatzbereit', null);
@@ -256,7 +264,7 @@
         if (!exportCSV('maengel-' + new Date().toISOString().slice(0, 10) + '.csv', zeilen)) alertDialog('Nichts zu exportieren', 'Die Liste ist leer.');
       };
 
-      // ⌘S / Strg+S sichert die offene Mängelmeldung
+      // ⌘S / Strg+S speichert die offene Mängelmeldung
       root.addEventListener('keydown', e => {
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); insp.querySelector('[data-sichern]')?.click(); }
       });

@@ -78,7 +78,8 @@ select.field { appearance: none; min-height: 36px; }
 .content { flex: 1; overflow: auto; padding: 0 28px 28px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 .large { font-size: 32px; font-weight: 700; padding: 6px 0 12px; }
 .reiter-wahl { max-width: 480px; margin: 4px auto 8px; }
-.reiter-wahl button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.reiter-wahl button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+.reiter-wahl button svg { font-size: 22px; }
 @media (max-width: 900px) {
   .brandmini span:last-child, .ftabs button { font-size: 0; }
   .ftabs button svg { font-size: 22px; }
@@ -151,7 +152,7 @@ table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 ._ad-title { font-weight: 600; font-size: 17px; }
 ._ad-desc { color: var(--label2); margin-top: 6px; font-size: 15px; }
 ._ad-input { width: 100%; margin-top: 12px; padding: 10px 12px; border-radius: 9px; border: 0; background: var(--fill); font: inherit; color: var(--label); }
-._ad-footer { display: flex; gap: 10px; margin-top: 18px; }
+._ad-footer { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 ._ad-footer button { flex: 1; min-height: 44px; border-radius: 10px; font-weight: 600; }
 ._ad-btn-cancel { background: var(--fill); color: var(--tint); }
 ._ad-btn-confirm { background: var(--navy2); color: #fff; }
@@ -297,8 +298,6 @@ textarea.tf { height: auto; min-height: 48px; padding: 5px 7px; resize: vertical
   .dr-logo { width: 26mm; text-align: center; } .dr-logo img { width: 16mm; height: 16mm; }
   .dr-titel { text-align: center; } .dr-titel b { display: block; font-size: 13pt; } .dr-titel span, .dr-titel u { display: block; }
   .dr-titel span { font-weight: 600; }
-  .dr-dok { width: 52mm; text-align: right; font-size: 9pt; } .dr-dok span { display: block; }
-  .dr-fuss { display: flex; justify-content: space-between; border-top: 1px solid #000; margin-top: 8mm; padding-top: 1.5mm; font-size: 8.5pt; }
   .dr-box { border: 1px solid #000; }
   .dr-box > div { padding: 2mm 3mm; } .dr-box > div + div { border-top: 1px solid #000; }
   .dr-box h4 { margin: 0 0 1.5mm; text-align: center; font: 400 13pt/1.2 "Times New Roman", serif; }
@@ -557,6 +556,10 @@ button.veh:active { background: var(--fill); }
   /* Kästchen und Optionsfelder größer, ganze Zeile bleibt antippbar */
   .huelle-mac .cb input, .huelle-mac input.cbx, .huelle-mac .rb input { width: 22px; height: 22px; }
   .huelle-mac .cb, .huelle-mac .rb { min-height: 44px; }
+  /* Beschriftung links auf Höhe der 44-px-Felder, Kästchen mittig zum Text */
+  .huelle-mac .kv > label, .huelle-mac .kv > span.l { line-height: 44px; }
+  .huelle-mac .kv > div { min-height: 44px; }
+  .huelle-mac .cb, .huelle-mac .rb { line-height: 1.2; }
   /* Auswahllisten, Dialoge, Blätter */
   .auswahl-liste .auswahl-option, .auswahl-liste.klein .auswahl-option { min-height: 44px; font-size: 16px; padding: 0 12px; }
   .blatt-zu { width: 44px; height: 44px; top: 8px; right: 8px; }

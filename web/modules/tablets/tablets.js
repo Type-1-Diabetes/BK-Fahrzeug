@@ -148,7 +148,7 @@ BK.modul('tablets', {
       if (fz && fz.wache) neuWache.value = fz.wache.id;
       root.querySelector('[data-neu-titel]').textContent = t ? 'Tablet bearbeiten' : 'Neues Tablet';
       root.querySelector('[data-neu-text]').textContent = t ? 'Änderungen gelten auch für den KTW.' : 'Jedes Tablet gehört fest zu einem KTW.';
-      neuWeiter.textContent = t ? 'Sichern' : 'Code erzeugen';
+      neuWeiter.textContent = t ? 'Speichern' : 'Code erzeugen';
       nameGeaendert = !!t;
       neuKtw.value = fz ? fz.name : '';
       neuKz.value = fz ? fz.kennzeichen || '' : '';
@@ -166,7 +166,7 @@ BK.modul('tablets', {
       try {
         if (bearbeiten) {
           await api.tabletBearbeiten(bearbeiten.id, name, ktw, neuWache.value, neuKz.value.trim());
-          neuZu(); showToast(name + ' gesichert'); laden();
+          neuZu(); showToast(name + ' gespeichert'); laden();
           return;
         }
         if (modus === 'da') {

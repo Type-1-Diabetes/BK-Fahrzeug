@@ -105,15 +105,13 @@
   };
 
   // Druckblatt wie im Organisationshandbuch: Kopf mit Logo, Titel, Dok. und Version, Fußzeile. Nur im Druck sichtbar.
-  BK.druckblatt = ({ bereich, titel, dok, version }, ...inhalt) => {
+  BK.druckblatt = ({ bereich, titel }, ...inhalt) => {
     const { el } = BK;
     return el('div.druck',
       el('table.dr-kopf', el('tbody', el('tr',
         el('td.dr-logo', el('img', { src: 'icons/logo-256.png', alt: 'Blauer Kreis' })),
-        el('td.dr-titel', el('b', 'Organisationshandbuch'), el('span', bereich), el('u', titel)),
-        el('td.dr-dok', el('span', 'Dok.: ' + dok), el('span', 'Version: ' + version + ' Freigegeben von GL'))))),
-      ...inhalt,
-      el('div.dr-fuss', el('span', `Dok.: ${dok} v. ${version}`), el('b', 'Gemeinsam qualitätsorientiert in die Zukunft')));
+        el('td.dr-titel', el('b', 'Organisationshandbuch'), el('span', bereich), el('u', titel))))),
+      ...inhalt);
   };
   // Ankreuzfeld wie auf dem Papier: ○ leer, ● gewählt
   BK.kreuz = (an, text) => BK.el('span.dr-wahl', BK.el('i', { class: an ? 'an' : null }), text);

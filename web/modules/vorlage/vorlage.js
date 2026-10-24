@@ -12,7 +12,8 @@
       const tbody = root.querySelector('[data-positionen]');
       const insp = root.querySelector('[data-insp]');
       let vorlage = null, bereiche = [], bereichId = null, positionId = null, ungesichert = false;
-      const weiter = async () => !ungesichert || await confirmDialog('Änderungen verwerfen?', 'Die Position ist noch nicht gesichert.');
+      const weiter = async () => !ungesichert || await confirmDialog('Änderungen verwerfen?', 'Die Position ist noch nicht gespeichert.');
+      BK.vorVerlassen = weiter;
       const bereich = () => bereiche.find(b => b.id === bereichId);
 
       async function laden() {
@@ -91,18 +92,18 @@
         const soll = el('input.tf.sm', { type: 'number', min: 0, max: 999, value: p.soll, oninput: merk, 'aria-label': 'Soll' });
         const pruef = el('select.tf', { onchange: merk, 'aria-label': 'Prüfung' }, ...Object.entries(PRUEF).map(([k, t]) => el('option', { value: k, selected: p.pruefart === k }, t)));
         const optional = el('input', { type: 'checkbox', checked: p.optional, onchange: merk });
-        const hinweis = el('span.ungesichert', { hidden: true }, 'Nicht gesichert');
-        const sichern = el('button.pbtn.def', { type: 'button', title: 'Sichern (⌘S / Strg+S)', dataset: { sichern: '' }, onclick: e => mitStatus(e.currentTarget, async () => {
+        const hinweis = el('span.ungesichert', { hidden: true }, 'Nicht gespeichert');
+        const sichern = el('button.pbtn.def', { type: 'button', title: 'Speichern (⌘S / Strg+S)', dataset: { sichern: '' }, onclick: e => mitStatus(e.currentTarget, async () => {
           const daten = { artikel: artikel.value.trim(), hinweis: text.value.trim() || null, soll: Number(soll.value), pruefart: pruef.value, optional: optional.checked };
           if (!daten.artikel) { alertDialog('Artikel fehlt', 'Bitte eintragen, was geprüft wird.'); return false; }
           if (!Number.isInteger(daten.soll) || daten.soll < 0 || daten.soll > 999) { alertDialog('Soll prüfen', 'Bitte eine Zahl von 0 bis 999.'); return false; }
           try {
             const id = await api.positionSpeichern(positionId === 'neu' ? null : positionId, b.id, daten);
-            showToast(positionId === 'neu' ? `${daten.artikel} hinzugefügt` : 'Gesichert');
+            showToast(positionId === 'neu' ? `${daten.artikel} hinzugefügt` : 'Gespeichert');
             ungesichert = false; positionId = id;
             await laden();
           } catch (err) { alertDialog('Nicht gespeichert', err.message); return false; }
-        }) }, positionId === 'neu' ? 'Hinzufügen' : 'Sichern');
+        }) }, positionId === 'neu' ? 'Hinzufügen' : 'Speichern');
         insp.append(mac.zuKnopf(schliessen), el('div.vo-form',
           el('h2', positionId === 'neu' ? 'Neue Position' : p.artikel),
           el('div.m', b.name),
@@ -130,7 +131,7 @@
         if (farbe == null) return;
         try {
           const id = await api.bereichSpeichern(b ? b.id : null, vorlage.id, name.trim().slice(0, 80), farbe);
-          showToast(b ? 'Bereich gesichert' : `Bereich „${name.trim()}“ angelegt`);
+          showToast(b ? 'Bereich gespeichert' : `Bereich „${name.trim()}“ angelegt`);
           bereichId = id; positionId = null;
           await laden();
         } catch (e) { alertDialog('Nicht gespeichert', e.message); }
@@ -143,7 +144,7 @@
           const zu = wert => { overlay.remove(); fertig(wert); };
           const overlay = el('div.code-overlay', el('div.code-box', { role: 'dialog', 'aria-modal': 'true' },
             el('h2', 'Farbe des Bereichs'), el('p', 'Die Farbe erscheint als Streifen, wie auf der Papierliste.'), sel,
-            el('div.code-acts', el('button.pbtn', { type: 'button', onclick: () => zu(null) }, 'Abbrechen'), el('button.pbtn.def', { type: 'button', onclick: () => zu(sel.value) }, 'Sichern'))));
+            el('div.code-acts', el('button.pbtn', { type: 'button', onclick: () => zu(null) }, 'Abbrechen'), el('button.pbtn.def', { type: 'button', onclick: () => zu(sel.value) }, 'Speichern'))));
           overlay.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.querySelector('.auswahl-liste')) zu(null); });
           document.body.append(overlay);
         });
