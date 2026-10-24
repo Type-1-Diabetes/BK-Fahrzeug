@@ -43,7 +43,7 @@ BK.modul('tablets', {
       if (t.gesperrt) return ['offen', 'Gesperrt'];
       if (t.gekoppelt_am) return ['erledigt', 'Aktiv'];
       if (t.code_gueltig_bis && new Date(t.code_gueltig_bis) > new Date()) return ['in_bearbeitung', 'Wartet auf Kopplung'];
-      return ['warte', 'Code abgelaufen'];
+      return ['warte', t.code_gueltig_bis ? 'Code abgelaufen' : 'Nicht gekoppelt'];
     }
 
     async function laden() {
@@ -62,7 +62,7 @@ BK.modul('tablets', {
             el('td',
               el('button.pbtn', { type: 'button', onclick: () => blattOeffnen(t) }, 'Bearbeiten'),
               t.gekoppelt_am && !t.gesperrt ? el('button.pbtn', { type: 'button', onclick: async () => {
-                const pin = await promptDialog(`${t.name} entkoppeln?`, 'Das Tablet wird entfernt, sein KTW verschwindet aus der Übersicht. Meldungen bleiben gespeichert. Bitte Entkoppel-PIN eingeben.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Entkoppeln' });
+                const pin = await promptDialog(`${t.name} entkoppeln?`, 'Das Gerät zeigt danach wieder die Anmeldung. Der KTW bleibt, mit „Neuer Code“ koppelst du ein Gerät neu. Bitte Entkoppel-PIN eingeben.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Entkoppeln' });
                 if (pin == null) return;
                 try {
                   const fehler = await api.tabletEntkoppelnAdmin(t.id, pin.trim());
@@ -71,7 +71,7 @@ BK.modul('tablets', {
                 } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
               } }, 'Entkoppeln') : null,
               el('button.pbtn', { type: 'button', onclick: async () => {
-                if (!await confirmDialog('Neuen Code erzeugen?', `„${t.name}“ wird vom aktuellen Gerät getrennt und muss neu gekoppelt werden.`)) return;
+                if (t.gekoppelt_am && !await confirmDialog('Neuen Code erzeugen?', `„${t.name}“ wird vom aktuellen Gerät getrennt und muss neu gekoppelt werden.`)) return;
                 try { codeZeigen('Neuer Code für ' + t.name, await api.tabletNeuerCode(t.id), t.id); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
               } }, 'Neuer Code'),
               el('button.pbtn.rot', { type: 'button', onclick: async () => {
@@ -107,9 +107,21 @@ BK.modul('tablets', {
     const neuName = root.querySelector('[data-neu-name]');
     const neuKz = root.querySelector('[data-neu-kz]');
     const neuWeiter = root.querySelector('[data-neu-weiter]');
-    let nameGeaendert = false, bearbeiten = null;  // bearbeiten = Tablet beim Ändern
+    const neuDa = root.querySelector('[data-neu-da]');
+    const ausblenden = root.querySelector('[data-neu-ausblenden]');
+    let nameGeaendert = false, bearbeiten = null, modus = 'neu';  // bearbeiten = Tablet beim Ändern; modus: neu | da (vorhandener KTW)
     const neuZu = () => { neuBlatt.hidden = true; };
-    const pruefen = () => { neuWeiter.disabled = !neuWache.value || !neuKtw.value.trim() || !neuName.value.trim(); };
+    const pruefen = () => { neuWeiter.disabled = !neuName.value.trim() || (modus === 'da' ? !neuDa.value : !neuWache.value || !neuKtw.value.trim()); };
+    const modusSetzen = m => {
+      modus = m;
+      for (const b of root.querySelectorAll('[data-neu-modus] button')) { b.classList.toggle('on', b.dataset.v === m); b.setAttribute('aria-checked', String(b.dataset.v === m)); }
+      root.querySelector('[data-neu-felder]').hidden = m === 'da';
+      root.querySelector('[data-da-felder]').hidden = m !== 'da';
+      if (!nameGeaendert) neuName.value = m === 'da' ? (neuDa.selectedOptions[0] ? 'iPad ' + neuDa.selectedOptions[0].textContent : '') : (neuKtw.value.trim() ? 'iPad ' + neuKtw.value.trim() : '');
+      pruefen();
+    };
+    for (const b of root.querySelectorAll('[data-neu-modus] button')) b.onclick = () => modusSetzen(b.dataset.v);
+    neuDa.onchange = () => modusSetzen('da');
     root.querySelector('[data-neu-abbrechen]').onclick = neuZu;
     neuBlatt.addEventListener('keydown', e => { if (e.key === 'Escape') neuZu(); if (e.key === 'Enter' && !neuWeiter.disabled) neuWeiter.click(); });
     neuBlatt.addEventListener('mousedown', e => { if (e.target === neuBlatt) neuZu(); });
@@ -123,6 +135,14 @@ BK.modul('tablets', {
       if (!wachen.length) return alertDialog('Keine Wachen', 'Lege zuerst unter Einstellungen eine Wache an.');
       bearbeiten = t || null;
       const fz = t ? fahrzeuge.find(f => f.id === t.fahrzeug_id) : null;
+      // KTW ohne Tablet für „Vorhandener KTW“
+      let tablets = [];
+      if (!t) { try { tablets = await api.tablets(); } catch { /* Liste bleibt leer */ } }
+      const ohne = t ? [] : fahrzeuge.filter(f => !tablets.some(x => x.fahrzeug_id === f.id));
+      leeren(neuDa);
+      for (const f of ohne) neuDa.append(el('option', { value: f.id }, f.name));
+      root.querySelector('[data-neu-modus]').hidden = !!t || !ohne.length;
+      ausblenden.hidden = !t;
       leeren(neuWache);
       for (const w of wachen) neuWache.append(el('option', { value: w.id }, w.name));
       if (fz && fz.wache) neuWache.value = fz.wache.id;
@@ -133,7 +153,7 @@ BK.modul('tablets', {
       neuKtw.value = fz ? fz.name : '';
       neuKz.value = fz ? fz.kennzeichen || '' : '';
       neuName.value = t ? t.name : '';
-      pruefen();
+      modusSetzen('neu');
       neuBlatt.hidden = false;
       neuKtw.focus();
     }
@@ -141,7 +161,7 @@ BK.modul('tablets', {
 
     neuWeiter.onclick = async () => {
       const ktw = neuKtw.value.trim(), name = neuName.value.trim();
-      if (!neuWache.value || !ktw || !name) return;
+      if (neuWeiter.disabled) return;
       neuWeiter.disabled = true;
       try {
         if (bearbeiten) {
@@ -149,11 +169,26 @@ BK.modul('tablets', {
           neuZu(); showToast(name + ' gesichert'); laden();
           return;
         }
+        if (modus === 'da') {
+          const f = fahrzeuge.find(x => x.id === neuDa.value);
+          const code = await api.tabletAnlegen(f.id, name);
+          const neu = (await api.tablets()).find(x => x.fahrzeug_id === f.id && !x.gekoppelt_am);
+          neuZu();
+          return codeZeigen('Neues Tablet für ' + f.name, code, neu && neu.id);
+        }
         const code = await api.tabletMitFahrzeugAnlegen(neuWache.value, ktw, name, neuKz.value.trim());
         const neu = (await api.tablets()).find(t => t.name === name && !t.gekoppelt_am);
         neuZu();
         codeZeigen('Neues Tablet für ' + ktw, code, neu && neu.id);
       } catch (e) { pruefen(); alertDialog('Hat nicht geklappt', e.message); }
+    };
+
+    // KTW bewusst ausblenden: Tablet wird entfernt, Meldungen und Checklisten bleiben
+    ausblenden.onclick = async () => {
+      const fz = bearbeiten && fahrzeuge.find(f => f.id === bearbeiten.fahrzeug_id);
+      if (!fz || !await confirmDialog(`${fz.name} ausblenden?`, 'Der KTW verschwindet aus der Übersicht, sein Tablet wird entfernt. Meldungen und Checklisten bleiben gespeichert. Mit gleichem Namen lässt er sich wieder anlegen.')) return;
+      try { await api.fahrzeugAusblenden(fz.id); neuZu(); showToast(fz.name + ' ausgeblendet'); laden(); }
+      catch (e) { alertDialog('Hat nicht geklappt', e.message); }
     };
 
     BK.beiNeu(() => { if (overlay.hidden) laden(); });

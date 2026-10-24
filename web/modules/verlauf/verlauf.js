@@ -21,6 +21,7 @@
     tablet_bearbeitet: () => ['Tablet bearbeitet', 'tablet'],
     tablet_gesperrt: () => ['Tablet gesperrt', 'tablet'],
     tablet_entsperrt: () => ['Tablet entsperrt', 'tablet'],
+    fahrzeug_ausgeblendet: () => ['KTW ausgeblendet', 'alert'],
     meldung_geloescht: d => [d.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', 'alert'],
     checkliste_geloescht: () => ['Checkliste gelöscht', 'list'],
   };

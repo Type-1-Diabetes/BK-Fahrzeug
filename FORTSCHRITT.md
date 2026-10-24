@@ -177,3 +177,15 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Migration 018: Fahrzeug-Handy und Ladekabel Handy inaktiv.
 - Migration 018 eingespielt (geprüft).
 - Offen: im Browser prüfen.
+
+## Touch-Ebene MPGler-Portal (2026-10-24)
+- `komponenten.css`: Block `@media (pointer: coarse)` am Ende. Nur bei Fingerbedienung: Knöpfe, Seitenleiste, Reiter, Tabellenzeilen, Auswahllisten ≥ 44 px; Felder 44 px hoch mit 16 px Schrift (kein Safari-Zoom); größere Kästchen; `touch-action: manipulation`. Mac mit Maus unverändert.
+- Tastenkürzel (⌘S, ⌘P) haben schon sichtbare Knöpfe, Rechtsklick/Doppelklick wird nicht genutzt.
+- Offen: auf dem iPad prüfen (quer/hoch). Schritt 2 (Hochformat: Seitenleiste einklappen, Liste/Akte zweistufig) noch nicht gemacht.
+
+## KTW ohne Tablet (2026-10-24)
+- Migration 019: Entkoppeln (Tablet und Mac) löst nur die Kopplung, Tablet-Zeile und KTW bleiben (ersetzt 016). Neue Funktion `fahrzeug_ausblenden` (Admin): KTW `aktiv = false`, Tablets dazu entfernt.
+- Tablets: Status „Nicht gekoppelt“, „Neuer Code“ ohne Rückfrage, wenn nicht gekoppelt. Bearbeiten-Blatt mit „KTW ausblenden“. „Neues Tablet“ mit Umschalter „Neuer KTW“ / „Vorhandener KTW“ (KTW ohne Tablet, nur sichtbar wenn es welche gibt).
+- Ausgeblendete KTW (u. a. N-KTW 9/3) bleiben ausgeblendet, über „Neues Tablet“ mit gleichem Namen wieder aufnehmbar.
+- Migration 019 eingespielt (geprüft).
+- Offen: im Browser prüfen.

@@ -17,3 +17,6 @@
 /* Neues Tablet: Wache, KTW, Name */
 .neu-label { display: block; margin: 14px 0 6px; font-size: 12px; color: var(--label2); }
 .neu-box .neu-name { height: 28px; }
+.neu-modus { display: flex; margin-top: 4px; } .neu-modus button { flex: 1; }
+.neu-ausblenden { margin-right: auto; }
+@media (pointer: coarse) { .neu-box .neu-name { height: 44px; font-size: 16px; } }

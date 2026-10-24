@@ -533,3 +533,35 @@ button.veh:active { background: var(--fill); }
 .blatt-klein .btn { width: 100%; }
 .blatt-klein #pwaGuide { align-self: stretch; text-align: left; }
 .es-app-text { margin: 0 0 12px; color: var(--label2); }
+
+/* Touch-Ebene für das MPGler-Portal auf iPad/Android-Tablets.
+   Greift nur bei Fingerbedienung (pointer: coarse), am Mac mit Maus bleibt alles wie oben. */
+@media (pointer: coarse) {
+  /* Ziele mindestens 44 px hoch */
+  .huelle-mac .pbtn, .huelle-mac .tb { height: auto; min-height: 44px; padding: 0 16px; font-size: 15px; border-radius: 9px; }
+  .huelle-mac .si, .huelle-mac .sl-nav-item { min-height: 44px; font-size: 16px; }
+  .huelle-mac .si svg { font-size: 20px; }
+  .huelle-mac .mseg button { min-height: 40px; padding: 0 14px; font-size: 15px; }
+  .huelle-mac .tabs button { min-height: 44px; padding: 0 16px; font-size: 15px; }
+  .huelle-mac .vr { min-height: 56px; }
+  .huelle-mac table.tab th { height: 40px; }
+  .huelle-mac table.tab td { height: 52px; }
+  .huelle-mac .tool { height: auto; min-height: 60px; padding-top: 8px; padding-bottom: 8px; }
+  .huelle-mac .acts, .huelle-mac .tool, .huelle-mac table.tab td:last-child { gap: 10px; }
+  .huelle-mac table.tab td .pbtn + .pbtn { margin-left: 8px; }
+  /* Eingabefelder: ab 16 px zoomt Safari nicht hinein */
+  .huelle-mac .tf, .huelle-mac select.tf, .huelle-mac .search, .huelle-mac .auswahl-knopf.tf { height: 44px; min-height: 44px; font-size: 16px; padding: 0 12px; border-radius: 9px; }
+  .huelle-mac textarea.tf { height: auto; min-height: 88px; padding: 10px 12px; }
+  .huelle-mac .search { width: 240px; }
+  .tf, select.tf, .search, .field, textarea { font-size: max(16px, 1em); }
+  /* Kästchen und Optionsfelder größer, ganze Zeile bleibt antippbar */
+  .huelle-mac .cb input, .huelle-mac input.cbx, .huelle-mac .rb input { width: 22px; height: 22px; }
+  .huelle-mac .cb, .huelle-mac .rb { min-height: 44px; }
+  /* Auswahllisten, Dialoge, Blätter */
+  .auswahl-liste .auswahl-option, .auswahl-liste.klein .auswahl-option { min-height: 44px; font-size: 16px; padding: 0 12px; }
+  .blatt-zu { width: 44px; height: 44px; top: 8px; right: 8px; }
+  .code-acts .pbtn { min-height: 44px; padding: 0 18px; font-size: 15px; }
+  .code-overlay .tf { height: 44px; font-size: 16px; }
+  /* Kein grauer Tipp-Blitz, kein Doppeltipp-Zoom auf Knöpfen */
+  button, a, [role="button"], table.tab tbody tr { touch-action: manipulation; }
+}
