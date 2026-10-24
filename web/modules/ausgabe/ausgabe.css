@@ -1,3 +1,10 @@
 /* Modul Material ausgeben (Mac): nutzt die Mac-Bausteine aus komponenten.css */
 
 .aus-hinweis { padding: 10px 0 0; text-align: right; }
+.aus-tab { margin-top: 14px; }
+.aus-tab .kreuz { width: 56px; text-align: center; font-weight: 600; }
+/* Unten wie auf dem Blatt: Ausgegeben durch / am */
+.aus-sig { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px; }
+.aus-sig div { border-bottom: 1px solid var(--label3); padding-bottom: 6px; }
+.aus-sig span { display: block; font-size: 12px; color: var(--label2); }
+.aus-sig b { display: block; margin-top: 2px; font-weight: 500; }

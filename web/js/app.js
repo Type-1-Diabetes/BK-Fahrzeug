@@ -15,11 +15,12 @@
   let neuHoerer = null;
   BK.beiNeu = fn => { neuHoerer = fn; };
   document.addEventListener('bk:neu', () => { if (ctx && !ctx.ich.tablet_id) zaehlen(); });
+  document.addEventListener('bk:geschrieben', () => { if (ctx && ctx.ich && !ctx.ich.tablet_id) setTimeout(zaehlen, 300); });
   document.addEventListener('bk:neu', () => { if (neuHoerer && !document.querySelector('._ad-open, .blatt-overlay')) neuHoerer(); });
 
   // HTML der Module einmal holen und merken
   const htmlVorrat = {};
-  const htmlVon = name => htmlVorrat[name] || (htmlVorrat[name] = fetch(`modules/${name}/${name}.html`).then(r => r.ok ? r.text() : '').catch(e => { delete htmlVorrat[name]; throw e; }));
+  const htmlVon = name => htmlVorrat[name] || (htmlVorrat[name] = fetch(`modules/${name}/${name}.html`, { cache: 'no-cache' }).then(r => r.ok ? r.text() : '').catch(e => { delete htmlVorrat[name]; throw e; }));
   // Nach dem Start die übrigen Module still laden, damit der Wechsel sofort geht
   const vorladen = liste => setTimeout(() => liste.forEach(m => { laden(m.name).catch(() => {}); htmlVon(m.name).catch(() => {}); }), 800);
 

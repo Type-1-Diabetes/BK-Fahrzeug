@@ -81,3 +81,23 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Tablet-Checkliste wie Papierliste: farbiger Bereichskopf, Spalten Vorh. · Nr. · Artikel · Soll/Ist, Lfd. Nr. aus der Vorlage („Nr. 1.2“). bk-v19.
 - Benachrichtigungen: gehen (waren beim Nutzer nur aus).
 - Löschen: Mängelmeldungen, Materialanforderungen und Checklisten am Mac (MPGler der Wache, Admin), mit Rückfrage. Verlauf behält einen Eintrag (Migration 012). bk-v20.
+
+## Stand 24.10.2026 (bk-v23, nicht deployt): näher an den Papierformularen
+
+- Bereichsfarben wie Legende MPG.doc (Sauerstoff hellblau, Hygiene orange, Wundversorgung rot, Diagnostik grün, Immobilisation gelb), im Dunkelmodus gedämpft.
+- Mängelmeldung (Tablet): Reihenfolge wie das Blatt. Art (KTW / MPG), Kopfzeile Amtl. Kennzeichen · Funkruf · Datum · Zeit, Gegenstand, Beschreibung, Fotos, Gemeldet durch, Unterschriftslinie (Name · Zeit · Tablet), Senden unten.
+- Mängel (Mac): Inspektor in Gruppen-Boxen wie die Blatt-Rückseite: TL und GF je eigener Weg, Gesichtet, Reparatur als Auswahl (intern, extern, instandgesetzt, unreparabel) mit passenden Feldern, Termin mit Uhrzeit, „Mängelbericht für richtig befunden“ (Name, Datum). Alte Einträge werden beim Öffnen umgesetzt. Knopf „Drucken“.
+- Material: Tablet „Verbr./Abgel.“, „Angefordert durch“. Mac Spalten Angeforderte / Erhaltene Menge, Verbr./Abgel. angekreuzt, unten Ausgegeben durch / am. Knopf „Drucken“.
+- Checkliste (Tablet): Spalten wie MPG.doc (Lfd. Nr., Artikel mit SN/Hersteller, Anzahl soll, Anzahl ist, Verfallsdatum/STK/MTK, Wo), Kopf bleibt stehen, Farbbalken je Zeile, Gruppen in der Seitenliste, „Bereich x von y“. Hochformat ohne „Wo“. Abschluss wie Seite 1 und 13 (Datum der Überprüfung, Liste Feuerwehr, Unterschriften, Gegenzeichnung, Legende). Touchflächen 44 pt.
+- Druck (Mac, ⌘P): Mängelmeldung, Material-Anforderung und Checkliste im Papierlayout mit Kopf, Dok.-Nr., Version und Fußzeile.
+- Migration 013 (gruppe, wo, liste_feuerwehr): ausgeführt und geprüft (A 2, 25 Gruppen, 10 × Wo).
+- Getestet im Browser (Mac, Demo-Admin, 1180×820): Mängelmeldung anlegen, Inspektor (TL/GF, Reparatur extern mit Termin, befunden) sichern und neu laden, Material anlegen und ausgeben, Gegenzeichnen „Ganze Liste“, alle drei Druckblätter (Druckregeln am Bildschirm eingeschaltet). Checkliste am Tablet nur als Ansicht mit einer Test-Checkliste im Browser (Spalten, fester Kopf, Gruppen, Abschluss, schmales Hochformat); Abhaken und Senden nicht auf echtem Tablet.
+- Beim Test behoben: Prüffrist landete im Artikeltext (Steuerzeichen in dom.js), Spalten der Checkliste richten sich jetzt nach der Listenbreite, Spalte „Betrifft“ heißt „Art“, „1 Abweichung“.
+- Testdaten vom Test (Mängelmeldung, Materialanforderung) wieder gelöscht.
+- Offen: Gruppe und Wo im Vorlage-Editor bearbeiten können.
+
+## Stand 24.10.2026 (bk-v24)
+
+- Mängel und Material (Mac): Auswahl „+ Neu“ in der Werkzeugleiste. KTW wählen, dann öffnet sich das Formular als Blatt (wie in der Fahrzeug-Akte). Getestet im Browser (Material für KTW 3/4 geöffnet, nicht gesendet).
+- Zahlen in der Seitenleiste werden nach jedem Speichern oder Löschen sofort neu geholt (Ereignis `bk:geschrieben`).
+- Service Worker und Modul-HTML fragen jetzt immer beim Server nach (`cache: 'no-cache'`). Vorher kamen alte Dateien aus dem Browser-Cache (z. B. noch „Betrifft“ und eine alte Zahl).

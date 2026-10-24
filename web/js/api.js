@@ -96,7 +96,9 @@
     return JSON.parse(alt);
   }
 
-  const rpc = (name, args = {}) => { geschrieben = Date.now(); return mitLogin(`/rest/v1/rpc/${name}`, { method: 'POST', body: JSON.stringify(args) }); };
+  // Nach jedem Aufruf „bk:geschrieben“ melden, damit z. B. die Zahlen in der Seitenleiste sofort stimmen
+  const rpc = (name, args = {}) => { geschrieben = Date.now(); return mitLogin(`/rest/v1/rpc/${name}`, { method: 'POST', body: JSON.stringify(args) })
+    .then(r => { document.dispatchEvent(new Event('bk:geschrieben')); return r; }); };
 
   function cacheLeeren() {
     try { Object.keys(localStorage).filter(k => k.startsWith(CACHE) || k === 'bk_ich').forEach(k => localStorage.removeItem(k)); } catch { /* privat */ }
@@ -148,7 +150,7 @@
 
     // Meldungen ---------------------------------------------------------
     meldungen({ fahrzeugId, status, art, seitTagen } = {}) {
-      const f = ['select=id,client_id,fahrzeug_id,art,betrifft,gegenstand,geraet_frei,beschreibung,gemeldet_von,status,bearbeitung,erstellt_am,erledigt_am,geraet:geraete(name,seriennummer),fahrzeug:fahrzeuge(name),positionen:material_positionen(id,artikel,groesse,menge,grund,erhalten),fotos(id,pfad)', 'order=erstellt_am.desc'];
+      const f = ['select=id,client_id,fahrzeug_id,art,betrifft,gegenstand,geraet_frei,beschreibung,gemeldet_von,status,bearbeitung,erstellt_am,erledigt_am,geraet:geraete(name,seriennummer),fahrzeug:fahrzeuge(name,kennzeichen),positionen:material_positionen(id,artikel,groesse,menge,grund,erhalten),fotos(id,pfad)', 'order=erstellt_am.desc'];
       if (fahrzeugId) f.push('fahrzeug_id=eq.' + fahrzeugId);
       if (status) f.push('status=in.(' + [].concat(status).join(',') + ')');
       if (art) f.push('art=eq.' + art);
@@ -171,9 +173,9 @@
 
     // Checklisten -------------------------------------------------------
     // alle = auch ausgeblendete Positionen (für alte Checklisten)
-    vorlage: (vorlageId, { alle } = {}) => lesen('vorlage_bereiche', `vorlage_id=eq.${vorlageId}&select=id,name,farbe,reihenfolge,aktiv,positionen:vorlage_positionen(id,nr,artikel,hinweis,soll,pruefart,optional,aktiv)&order=reihenfolge&positionen.order=nr`
+    vorlage: (vorlageId, { alle } = {}) => lesen('vorlage_bereiche', `vorlage_id=eq.${vorlageId}&select=id,name,farbe,gruppe,reihenfolge,aktiv,positionen:vorlage_positionen(id,nr,artikel,hinweis,soll,pruefart,optional,wo,aktiv)&order=reihenfolge&positionen.order=nr`
       + (alle ? '' : '&aktiv=eq.true&positionen.aktiv=eq.true')),
-    vorlagen: () => lesen('checklisten_vorlagen', 'select=id,name&order=name'),
+    vorlagen: () => lesen('checklisten_vorlagen', 'select=id,name,liste_feuerwehr&order=name'),
     fristen: () => lesen('fristen', 'select=id,wache_id,fahrzeug_id,intervall,vorlauf_tage'),
     wachen: () => lesen('wachen', 'select=id,name&order=name'),
     fristSetzen: (wache, intervall, vorlauf) => rpc('frist_setzen', { p_wache: wache, p_intervall: intervall, p_vorlauf: vorlauf }),
@@ -184,7 +186,7 @@
     positionLoeschen: id => rpc('vorlage_position_loeschen', { p_id: id }),
     verschieben: (art, id, richtung) => rpc('vorlage_verschieben', { p_art: art, p_id: id, p_richtung: richtung }),
     checklisten: ({ fahrzeugId, offen } = {}) => lesen('checklisten',
-      ['select=id,client_id,fahrzeug_id,vorlage_id,zeitraum,begonnen_am,abgeschlossen_am,mitarbeiter1,mitarbeiter2,gegengezeichnet_am,zurueck_grund,fahrzeug:fahrzeuge(name),eintraege:checklisten_eintraege(position_id,ist,verfall,bemerkung)', 'order=begonnen_am.desc']
+      ['select=id,client_id,fahrzeug_id,vorlage_id,zeitraum,begonnen_am,abgeschlossen_am,mitarbeiter1,mitarbeiter2,gegengezeichnet_am,zurueck_grund,fahrzeug:fahrzeuge(name,kennzeichen),eintraege:checklisten_eintraege(position_id,ist,verfall,bemerkung)', 'order=begonnen_am.desc']
         .concat(fahrzeugId ? ['fahrzeug_id=eq.' + fahrzeugId] : [], offen ? ['gegengezeichnet_am=is.null'] : []).join('&')),
     checklisteStarten: zeitraum => rpc('checkliste_starten', { p_client_id: crypto.randomUUID(), p_zeitraum: zeitraum }),
     checklisteEintrag: (checkliste, position, e) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_eintrag', daten: { p_checkliste: checkliste, p_position: position, p_ist: e.ist ?? null, p_verfall: e.verfall || null, p_bemerkung: e.bemerkung || null, p_entfernen: !!e.entfernen } }),

@@ -7,6 +7,8 @@ BK.modul('gegenzeichnen', {
     root.querySelector('[data-csv]').append(icon('export'), 'Tabelle');
     root.querySelector('[data-pdf]').append(icon('export'), 'PDF');
     const vorlagen = {};  // vorlage_id → Bereiche
+    let listen = [];  // Vorlagen mit „Liste Feuerwehr“
+    api.vorlagen().then(v => { listen = v; }).catch(() => {});
     let alle = [], gewaehlt = null, ganz = false;
     const quartal = BK.fristen.zeitraumText;
 
@@ -47,6 +49,7 @@ BK.modul('gegenzeichnen', {
 
     async function datei() {
       leeren(akte);
+      akte.classList.add('hat-druck');
       const c = alle.find(x => x.id === gewaehlt);
       if (!c) return akte.append(el('div.mleer', 'Checkliste links auswählen.'));
       let bereiche = [];
@@ -72,6 +75,23 @@ BK.modul('gegenzeichnen', {
         el('div.gz-kurz' + (ganz ? '.gz-aus' : ''), uebersicht(c, pos, gesamt, befund)),
         // Ganze Liste wie die Papierliste: am Bildschirm über den Reiter, im Druck immer
         el('div.gz-voll' + (ganz ? '.zeigen' : ''), BK.papierliste(bereiche, c.eintraege)),
+        BK.druckblatt({ bereich: 'MPG', titel: 'Liste Überprüfung KTW, medizinisches Material', dok: 'MPG.doc', version: '14.04.2025' },
+          el('p', 'Überprüfung der Fahrzeuge Blauer Kreis GmbH angelehnt an die Liste der Feuerwehr Hamburg auf Vollzähligkeit Med. Produkte und zusätzlichen Material. Grundlage der Liste ist § 20 Abs. 2 HmbRDG Überprüfung von Krankenkraftwagen.'),
+          el('div.dr-felder',
+            BK.linie('Datum der Überprüfung:', BK.datum(c.begonnen_am, false)),
+            BK.linie('Datum Abgabe:', c.abgeschlossen_am ? BK.datum(c.abgeschlossen_am, false) : ''),
+            el('div.dr-reihe', BK.linie('Zuständige Mitarbeiter:', c.mitarbeiter1), BK.linie('', c.mitarbeiter2)),
+            el('div.dr-reihe', BK.linie('Liste Feuerwehr:', (listen.find(v => v.id === c.vorlage_id) || {}).liste_feuerwehr),
+              BK.linie('KTW:', c.fahrzeug.name), BK.linie('Amtliches Kennzeichen:', c.fahrzeug.kennzeichen))),
+          BK.papierliste(bereiche, c.eintraege),
+          el('div.dr-unter',
+            BK.linie('Unterschrift Mitarbeiter 1:', c.mitarbeiter1 ? c.mitarbeiter1 + ' (digital)' : ''),
+            BK.linie('Unterschrift Mitarbeiter 2:', c.mitarbeiter2 ? c.mitarbeiter2 + ' (digital)' : ''),
+            BK.linie('Gegengezeichnet MPG-Beauftragter:', c.gegengezeichnet_am ? 'digital' : ''),
+            BK.linie('Datum:', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '')),
+          el('div.dr-legende', el('span', 'Legende:'), el('span'),
+            ...[['blau', 'Sauerstoff'], ['orange', 'Hygiene'], ['rot', 'Wundversorgung'], ['gruen', 'Diagnostik'], ['gelb', 'Immobilisation']]
+              .flatMap(([f, t]) => [el('i', { class: f }), el('span', t)]))),
         el('div.acts', mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); }),
         ...(warten ? [
           el('button.pbtn', { type: 'button', onclick: async () => {

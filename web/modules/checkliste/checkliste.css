@@ -55,18 +55,72 @@
   .ckl-side { width: auto; max-height: 34vh; border-right: 0; border-bottom: .5px solid var(--sep); }
 }
 .ck .box { position: relative; } .ck .box::after { content: ""; position: absolute; inset: -8px; }
-/* Wie die Papierliste: farbiger Bereichskopf, Spalten Vorh. · Nr. · Artikel · Soll / Ist */
+/* Wie die Papierliste MPG.doc: farbiger Bereichskopf, Spalten Lfd. Nr. · Artikel · Soll · Ist · Verfall · Wo */
 .ckl-kopf { padding: 10px 14px; border-radius: 10px; background: var(--fill); }
-.ckl-kopf.blau { background: color-mix(in srgb, var(--b-blau) 13%, var(--bg2)); }
-.ckl-kopf.orange { background: color-mix(in srgb, var(--b-orange) 14%, var(--bg2)); }
-.ckl-kopf.rot { background: color-mix(in srgb, var(--b-rot) 11%, var(--bg2)); }
-.ckl-kopf.gruen { background: color-mix(in srgb, var(--b-gruen) 13%, var(--bg2)); }
-.ckl-kopf.gelb { background: color-mix(in srgb, var(--b-gelb) 22%, var(--bg2)); }
-.ck-spalten { display: grid; grid-template-columns: 46px 52px 1fr auto; gap: 0; padding: 8px 16px 6px 0; font-size: 12px; font-weight: 600; color: var(--label2); border-bottom: .5px solid var(--sep); }
-.ck-spalten span:first-child { text-align: center; }
-.ck-nr { width: 52px; flex: none; color: var(--label2); font-variant-numeric: tabular-nums; font-size: 15px; }
-.ck-text { gap: 0; padding-left: 4px; }
-.ck-text .t { margin-right: 12px; }
+.ckl-kopf.blau { background: color-mix(in srgb, var(--b-blau) 22%, var(--bg2)); }
+.ckl-kopf.orange { background: color-mix(in srgb, var(--b-orange) 20%, var(--bg2)); }
+.ckl-kopf.rot { background: color-mix(in srgb, var(--b-rot) 12%, var(--bg2)); }
+.ckl-kopf.gruen { background: color-mix(in srgb, var(--b-gruen) 20%, var(--bg2)); }
+.ckl-kopf.gelb { background: color-mix(in srgb, var(--b-gelb) 24%, var(--bg2)); }
+.ckl-titel { flex: 1; min-width: 0; }
+.ckl-titel h2 { font-size: 26px; }
+.ckl-titel span { display: block; font-size: 14px; color: var(--label2); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.ckl-zeitraum { padding: 0; }
+.ckl-zurueck { margin: 8px 0 0; font-size: 14px; }
+/* Unterüberschrift der Gruppe in der Seitenliste */
+.ckl-gruppe { margin: 14px 0 4px; padding: 0 12px; font-size: 12px; font-weight: 600; color: var(--label2); text-transform: uppercase; letter-spacing: .03em; }
+/* Raster: Haken | Nr. | Artikel | Soll | Ist | Verfall | Wo */
+.ck-liste { overflow: visible; }
+.ckl-main { container-type: inline-size; }
+.ck-liste { --ck-spalten: 52px minmax(0, 1fr) 54px 54px 118px 72px; }
+.ck-text, .ck-spalten { display: grid; grid-template-columns: var(--ck-spalten); column-gap: 10px; align-items: center; }
+.ck-spalten { grid-template-columns: 38px var(--ck-spalten); }
+.ck-text { flex: 1; gap: 0 10px; padding: 10px 16px 10px 4px; text-align: left; align-self: stretch; }
+.ck-spalten { position: sticky; top: -12px; z-index: 2; padding: 10px 16px 8px 0; font-size: 12px; font-weight: 600; line-height: 1.25; color: var(--label2);
+  background: var(--bg2); border-bottom: .5px solid var(--sep); border-radius: 12px 12px 0 0; }
+.ck-nr { color: var(--label2); font-variant-numeric: tabular-nums; font-size: 15px; }
+.ck .t b { display: block; font-weight: 400; }
+.ck .t span { display: block; font-size: 14px; color: var(--label2); margin-top: 2px; overflow-wrap: anywhere; }
+.ck .zahl, .ck-spalten .zahl { text-align: center; font-variant-numeric: tabular-nums; }
+.ck .ist.warnt { font-weight: 700; }
+.ck-frist { font-size: 14px; color: var(--label2); font-variant-numeric: tabular-nums; }
+.ck-frist.warnt { color: var(--warn-ink); font-weight: 600; }
+.ck-wo { font-size: 14px; color: var(--label2); }
 .ck-liste .ck-wrap:nth-child(odd) { background: color-mix(in srgb, var(--fill) 45%, var(--bg2)); }
 .ck-liste .ck-wrap.dev { background: color-mix(in srgb, var(--warn) 9%, var(--bg2)); }
 .ck-wrap + .ck-wrap::before { left: 0; }
+/* Bereichsfarbe als Balken links in jeder Zeile, wie die farbige Spalte im Papier */
+.ck-liste .ck-wrap { box-shadow: inset 4px 0 var(--label3); }
+.ck-liste .ck-wrap.blau { box-shadow: inset 4px 0 var(--b-blau); } .ck-liste .ck-wrap.orange { box-shadow: inset 4px 0 var(--b-orange); }
+.ck-liste .ck-wrap.rot { box-shadow: inset 4px 0 var(--b-rot); } .ck-liste .ck-wrap.gruen { box-shadow: inset 4px 0 var(--b-gruen); }
+.ck-liste .ck-wrap.gelb { box-shadow: inset 4px 0 var(--b-gelb); }
+/* Haken: Trefferfläche mindestens 44 pt */
+.ck .box { margin: 0 4px 0 10px; }
+.ck .box::after { inset: -9px; }
+/* Schmale Liste (Hochformat): Wo ausblenden, Verfall schmaler; sehr schmal nur Nr., Artikel, Soll, Ist */
+@container (max-width: 760px) {
+  .ck-liste { --ck-spalten: 44px minmax(0, 1fr) 48px 48px 96px; }
+  .ck-wo { display: none; }
+}
+@container (max-width: 560px) {
+  .ck-liste { --ck-spalten: 40px minmax(0, 1fr) 44px 44px; }
+  .ck-frist { display: none; }
+}
+/* Abschluss wie Seite 1 und 13 der Papierliste */
+.ckl-blatt { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--bg2); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+.ckl-blatt > div { padding: 10px 16px; min-width: 0; }
+.ckl-blatt > div + div { border-left: .5px solid var(--sep); }
+.ckl-blatt span, .ckl-sig > span, .ckl-sig > label { font-size: 13px; color: var(--label2); }
+.ckl-blatt b { display: block; margin-top: 2px; font-weight: 500; overflow-wrap: anywhere; }
+@media (max-width: 760px) { .ckl-blatt { grid-template-columns: 1fr 1fr; } .ckl-blatt > div:nth-child(3) { border-left: 0; } .ckl-blatt > div:nth-child(n+3) { border-top: .5px solid var(--sep); } }
+.ckl-sig { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 18px 16px; align-items: end; margin: 24px 0 8px; padding: 0 16px; }
+.ckl-sig .field, .ckl-sig > b { border-bottom: 1px solid var(--label3); padding: 6px 2px; min-height: 44px; display: flex; align-items: flex-end; font-weight: 500; }
+.ckl-sig .field { width: 100%; background: transparent; font-size: 17px; }
+.ckl-sig > b.leer { font-weight: 400; color: var(--label3); }
+.ckl-legende { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 20px 16px 0; font-size: 14px; color: var(--label2); }
+.ckl-legende span { display: inline-flex; align-items: center; gap: 6px; }
+.ckl-legende i { width: 22px; height: 12px; border-radius: 3px; background: var(--label3); }
+.ckl-legende i.blau { background: var(--b-blau); } .ckl-legende i.orange { background: var(--b-orange); } .ckl-legende i.rot { background: var(--b-rot); }
+.ckl-legende i.gruen { background: var(--b-gruen); } .ckl-legende i.gelb { background: var(--b-gelb); }
+.acts.links { justify-content: flex-start; margin-top: 20px; }
+.ck-spalten > span:first-child { text-align: center; }

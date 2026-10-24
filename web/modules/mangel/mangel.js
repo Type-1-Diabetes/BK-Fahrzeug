@@ -4,33 +4,49 @@ BK.modul('mangel', {
     const { api } = BK;
     const fz = ctx.fahrzeug;
 
-    root.querySelector('[data-fz-name]').textContent = fz.name;
-    root.querySelector('[data-fz-info]').textContent = [fz.kennzeichen, fz.kennnummer && 'Kennnummer ' + fz.kennnummer].filter(Boolean).join(' · ');
-    root.querySelector('[data-jetzt]').textContent = 'heute, ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const jetzt = new Date();
+    const uhr = jetzt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    root.querySelector('[data-kennzeichen]').textContent = fz.kennzeichen || '–';
+    root.querySelector('[data-funkruf]').textContent = fz.name;
+    root.querySelector('[data-datum]').textContent = jetzt.toLocaleDateString('de-DE');
+    root.querySelector('[data-zeit]').textContent = uhr;
 
     let geraete = [];
     try { geraete = await api.geraete(fz.id); } catch { /* ohne Netz und ohne Vorrat: nur „Anderes Gerät“ */ }
     const geraetText = g => [g.name, g.seriennummer && 'SN ' + g.seriennummer].filter(Boolean).join(' · ');
 
     const FELDER = [
-      { name: 'betrifft', typ: 'segment', label: 'Betrifft', pflicht: true, standard: 'fahrzeug',
-        optionen: [['fahrzeug', 'Fahrzeug'], ['mpg', 'Medizinprodukt (MPG)']] },
-      { name: 'gegenstand', typ: 'text', label: 'Was ist defekt?', pflicht: true, max: 200,
+      { name: 'betrifft', typ: 'segment', label: 'Art', pflicht: true, standard: 'fahrzeug',
+        optionen: [['fahrzeug', 'KTW'], ['mpg', 'MPG']] },
+      { name: 'gegenstand', typ: 'text', label: 'Gegenstand', pflicht: true, max: 200,
         platzhalter: 'z. B. Trage, Schiebetür, Blaulicht', wenn: w => w.betrifft === 'fahrzeug' },
-      { name: 'geraet_id', typ: 'auswahl', label: 'Gerät', pflicht: true, platzhalter: 'Gerät wählen',
+      { name: 'geraet_id', typ: 'auswahl', label: 'MPG: SN', pflicht: true, platzhalter: 'Gerät wählen',
         optionen: [...geraete.map(g => [g.id, geraetText(g)]), ['anders', 'Anderes Gerät']],
         hinweis: 'Seriennummer und Hersteller kommen aus der Geräteliste dieses KTW.', wenn: w => w.betrifft === 'mpg' },
       { name: 'geraet_frei', typ: 'text', label: 'Welches Gerät?', pflicht: true, max: 120,
         platzhalter: 'Name und Seriennummer', wenn: w => w.betrifft === 'mpg' && w.geraet_id === 'anders' },
-      { name: 'beschreibung', typ: 'textarea', label: 'Was ist das Problem?', pflicht: true, max: 2000,
+      { name: 'beschreibung', typ: 'textarea', label: 'Beschreibung', pflicht: true, max: 2000,
         platzhalter: 'Kurz beschreiben, was nicht funktioniert.' },
       { name: 'fotos', typ: 'fotos', label: 'Fotos', max: 5, hinweis: 'Höchstens 5 Fotos.' },
-      { name: 'gemeldet_von', typ: 'text', label: 'Gemeldet von', pflicht: true, max: 100,
+      { name: 'gemeldet_von', typ: 'text', label: 'Gemeldet durch', pflicht: true, max: 100,
         platzhalter: 'Vor- und Nachname', autocomplete: 'name', standard: ctx.ich.rolle ? ctx.ich.name : undefined },
     ];
 
-    const form = BK.formular.bauen(root.querySelector('[data-formular]'), FELDER);
+    const formBox = root.querySelector('[data-formular]');
+    const form = BK.formular.bauen(formBox, FELDER);
+    // Kopfzeile wie auf dem Blatt direkt unter „Art“
+    formBox.firstElementChild.after(root.querySelector('[data-kopf]'));
     const knopf = root.querySelector('[data-senden]');
+
+    // Unterschriftslinie: Name · Datum Uhrzeit · Tablet
+    const sig = root.querySelector('[data-sig]');
+    const sigZeichnen = () => {
+      const n = (form.werte().gemeldet_von || '').trim();
+      sig.textContent = n ? [n, jetzt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ' ' + uhr, ctx.ich.rolle ? 'am Mac' : 'Tablet ' + fz.name].join(' · ') : 'Name unter „Gemeldet durch“ eintragen';
+      sig.classList.toggle('leer', !n);
+    };
+    formBox.addEventListener('input', sigZeichnen);
+    sigZeichnen();
 
     knopf.onclick = async () => {
       if (!form.pruefen()) return;

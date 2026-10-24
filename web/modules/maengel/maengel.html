@@ -6,6 +6,7 @@
     <button type="button" data-v="in_bearbeitung">In Bearbeitung</button>
     <button type="button" data-v="erledigt">Erledigt</button>
   </div>
+  <span data-neu></span>
   <select class="tf auto" aria-label="KTW" data-ktw><option value="">Alle KTW</option></select>
   <button type="button" class="tb" data-export title="Als Tabelle (CSV) herunterladen"></button>
   <input class="search" type="search" placeholder="Suchen" aria-label="Suchen" data-suche>
@@ -13,7 +14,7 @@
 <div class="mbody">
   <div class="tablewrap">
     <table class="tab">
-      <thead><tr><th>Status</th><th>Mangel</th><th>KTW</th><th>Betrifft</th><th>Gemeldet</th><th>Von</th></tr></thead>
+      <thead><tr><th>Status</th><th>Mangel</th><th>KTW</th><th>Art</th><th>Gemeldet</th><th>Von</th></tr></thead>
       <tbody data-liste></tbody>
     </table>
   </div>

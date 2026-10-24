@@ -1,5 +1,16 @@
-/* Modul Mangel melden (Tablet) */
-.mangel { max-width: 760px; margin: 0 auto; }
-.mangel-kopf { display: flex; align-items: center; gap: 16px; }
-.mangel-kopf .large { flex: 1; }
+/* Modul Mangel melden (Tablet): von oben nach unten wie das Papierformular */
+.mangel { max-width: 760px; margin: 0 auto; padding-bottom: 24px; }
 .mangel .fblock[hidden] { display: none; }
+/* Kopfzeile wie auf dem Blatt: Kennzeichen, Funkruf, Datum, Zeit */
+.mkopf { display: grid; grid-template-columns: 1.4fr 1fr 1fr .8fr; background: var(--bg2); border-radius: 12px; overflow: hidden; margin-top: 24px; }
+.mkopf > div { padding: 10px 16px; min-width: 0; }
+.mkopf > div + div { border-left: .5px solid var(--sep); }
+.mkopf span { display: block; font-size: 13px; color: var(--label2); }
+.mkopf b { display: block; margin-top: 2px; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .mkopf { grid-template-columns: 1fr 1fr; } .mkopf > div:nth-child(3) { border-left: 0; } .mkopf > div:nth-child(n+3) { border-top: .5px solid var(--sep); } }
+/* Unterschriftslinie: Name, Zeit und Tablet statt Unterschrift */
+.msig { display: flex; align-items: baseline; gap: 14px; margin: 28px 16px 0; padding-bottom: 8px; border-bottom: 1px solid var(--label3); }
+.msig span { font-size: 13px; color: var(--label2); flex: none; }
+.msig b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.msig b.leer { font-weight: 400; color: var(--label3); }
+.msenden { width: 100%; margin-top: 24px; }

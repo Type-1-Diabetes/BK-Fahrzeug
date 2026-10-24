@@ -21,7 +21,7 @@ BK.modul('material', {
       zeilen.forEach((z, i) => {
         const menge = el('span.q', String(z.menge));
         const grund = el('div.segc.grund', { role: 'radiogroup', 'aria-label': 'Grund' },
-          [['verbraucht', 'verbraucht'], ['abgelaufen', 'abgelaufen']].map(([w, t]) =>
+          [['verbraucht', 'Verbr.'], ['abgelaufen', 'Abgel.']].map(([w, t]) =>
             el('button', { type: 'button', role: 'radio', 'aria-checked': String(z.grund === w), class: z.grund === w ? 'on' : null,
               onclick: () => { z.grund = w; zeichnen(); } }, t)));
         zeilenBox.append(el('div.row.mz',

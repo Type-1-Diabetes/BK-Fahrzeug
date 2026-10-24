@@ -1,7 +1,7 @@
 /* Service Worker: App-Dateien offline verfügbar, Web-Push.
    Aufbau angelehnt an die Website Schrietz (admin/sw.js), erweitert um den Offline-Modus.
    Bei Änderungen an App-Dateien VERSION erhöhen, dann holt sich jedes Gerät die neuen Dateien. */
-const VERSION = 'bk-v20';
+const VERSION = 'bk-v24';
 const DATEIEN = [
   './', 'index.html', 'manifest.webmanifest', 'icons/icon.svg',
   'css/basis.css', 'css/komponenten.css',
@@ -21,12 +21,12 @@ self.addEventListener('activate', e => {
     .then(() => self.clients.claim()));
 });
 
-// Eigene Dateien: erst Netz, ohne Netz aus dem Speicher. Daten (Supabase) laufen nie über den Speicher hier.
+// Eigene Dateien: erst Netz (immer beim Server nachfragen, sonst kommen alte Dateien aus dem Browser-Cache), ohne Netz aus dem Speicher. Daten (Supabase) laufen nie über den Speicher hier.
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-cache' })
       .then(res => {
         if (res.ok) { const kopie = res.clone(); caches.open(VERSION).then(c => c.put(e.request, kopie)); }
         return res;

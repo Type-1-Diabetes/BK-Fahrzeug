@@ -41,6 +41,16 @@
       catch (e) { alertDialog('Nicht gelöscht', e.message); }
     } }, 'Löschen'),
 
+    // Werkzeugleiste: neue Mängelmeldung / Materialanforderung für ein gewähltes KTW (Formular als Blatt)
+    neuFuer(modul, text, fahrzeuge, fertig) {
+      const s = BK.el('select.tf.auto.neu-fuer', { 'aria-label': text + ' für KTW', title: text + ' für ein KTW anlegen', onchange: async () => {
+        const id = s.value; s.value = '';
+        if (!id) return;
+        try { BK.blatt(modul, await BK.api.fahrzeug(id), fertig); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+      } }, BK.el('option', { value: '' }, '+ Neu'), ...fahrzeuge.map(f => BK.el('option', { value: f.id }, f.name)));
+      return s;
+    },
+
     // Rechte Seitenansicht schließen: Knopf oben rechts und Esc
     zuKnopf: fn => BK.el('button.tb.insp-zu', { type: 'button', title: 'Schließen (Esc)', 'aria-label': 'Schließen', onclick: fn }, BK.icon('x')),
     escZu(root, insp, fn) {
@@ -63,26 +73,45 @@
     },
   };
 
-  // Ganze Checkliste wie die Papierliste: Bereich als farbige Zeile, dann Nr., Artikel, Soll, Ist, Frist, Bemerkung
+  // Ganze Checkliste wie MPG.doc: Gruppe als Überschrift, Material-Spalte farbig, dann Artikel, Soll, Ist, Verfall, Wo, Bemerkung
   BK.papierliste = (bereiche, eintraege) => {
     const { el } = BK;
     const abw = new Map((eintraege || []).map(e => [e.position_id, e]));
     const frist = { verfall: 'Verfall', stk: 'STK', mtk: 'MTK' };
     return el('table.tab.pliste',
-      el('thead', el('tr', el('th', 'Nr.'), el('th', 'Artikel'), el('th.num', 'Soll'), el('th.num', 'Ist'), el('th', 'Verfall / Prüfung'), el('th', 'Bemerkung'))),
-      ...bereiche.map(b => el('tbody',
-        el('tr.pl-bereich', el('td', { colspan: 6, class: b.farbe || null }, b.name)),
-        ...b.positionen.map(p => {
+      el('thead', el('tr', el('th', 'Lfd. Nr.'), el('th', 'Material/ Ausstattung'), el('th', 'Artikel, wenn vorhanden SN und Hersteller'),
+        el('th.num', 'Anzahl soll'), el('th.num', 'Anzahl ist'), el('th', 'Verfallsdatum, STK/ MTK'), el('th', 'Wo'), el('th', 'Bemerkung'))),
+      ...bereiche.map((b, i) => el('tbody',
+        b.gruppe && b.gruppe !== (bereiche[i - 1] || {}).gruppe ? el('tr.pl-gruppe', el('td'), el('td', { colspan: 7 }, b.gruppe)) : null,
+        ...b.positionen.map((p, j) => {
           const e = abw.get(p.id);
           const fehlt = e && e.ist != null && e.ist < p.soll;
           const l = BK.lfd(p);
           return el('tr', { class: e ? 'abw' : null },
             el('td.pl-nr', l.nr),
-            el('td.pl-art', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), l.rest ? el('span', l.rest) : null),
+            j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
+            el('td.pl-art', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), l.text ? el('span', l.text) : null),
             el('td.num', String(p.soll)),
-            el('td.num', { class: fehlt ? 'warnt' : null }, e && e.ist != null ? String(e.ist) : String(p.soll)),
-            el('td', { class: e && e.verfall ? 'warnt' : null }, e && e.verfall ? BK.datum(e.verfall, false) : frist[p.pruefart] || ''),
+            el('td', { class: 'num' + (fehlt ? ' warnt' : '') }, e && e.ist != null ? String(e.ist) : String(p.soll)),
+            el('td', { class: e && e.verfall ? 'warnt' : null }, e && e.verfall ? BK.datum(e.verfall, false) : l.frist || frist[p.pruefart] || ''),
+            el('td', p.wo || ''),
             el('td', e ? e.bemerkung || 'Abweichung' : ''));
         }))));
   };
+
+  // Druckblatt wie im Organisationshandbuch: Kopf mit Logo, Titel, Dok. und Version, Fußzeile. Nur im Druck sichtbar.
+  BK.druckblatt = ({ bereich, titel, dok, version }, ...inhalt) => {
+    const { el } = BK;
+    return el('div.druck',
+      el('table.dr-kopf', el('tbody', el('tr',
+        el('td.dr-logo', el('img', { src: 'icons/icon.svg', alt: 'Blauer Kreis' })),
+        el('td.dr-titel', el('b', 'Organisationshandbuch'), el('span', bereich), el('u', titel)),
+        el('td.dr-dok', el('span', 'Dok.: ' + dok), el('span', 'Version: ' + version + ' Freigegeben von GL'))))),
+      ...inhalt,
+      el('div.dr-fuss', el('span', `Dok.: ${dok} v. ${version}`), el('b', 'Gemeinsam qualitätsorientiert in die Zukunft')));
+  };
+  // Ankreuzfeld wie auf dem Papier: ○ leer, ● gewählt
+  BK.kreuz = (an, text) => BK.el('span.dr-wahl', BK.el('i', { class: an ? 'an' : null }), text);
+  // Linie mit Beschriftung, darauf der Wert
+  BK.linie = (label, wert) => BK.el('span.dr-linie', BK.el('span', label), BK.el('b', wert || ''));
 })();

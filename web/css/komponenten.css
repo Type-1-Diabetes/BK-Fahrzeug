@@ -24,7 +24,7 @@ button.row:active { background: var(--fill); }
 textarea.field { min-height: 100px; resize: vertical; line-height: 1.4; }
 select.field { appearance: none; min-height: 36px; }
 .segc { display: flex; background: var(--fill); border-radius: 9px; padding: 2px; }
-.segc button { flex: 1; min-height: 40px; border-radius: 7px; font-size: 15px; }
+.segc button { flex: 1; min-height: 44px; border-radius: 7px; font-size: 15px; }
 .segc button.on { background: var(--bg2); box-shadow: 0 1px 3px rgba(0,0,0,.14); font-weight: 600; }
 .photo { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
 .ph { position: relative; width: 96px; height: 96px; border-radius: 10px; background: var(--fill); display: grid; place-items: center; color: var(--tint); font-size: 28px; overflow: hidden; }
@@ -226,6 +226,26 @@ textarea.tf { height: auto; min-height: 48px; padding: 5px 7px; resize: vertical
 .cb input:checked, input.cbx:checked { background: var(--navy2); box-shadow: none; }
 .cb input:checked::after, input.cbx:checked::after { opacity: 1; transform: rotate(-45deg) scale(1); }
 .cb input:focus-visible, input.cbx:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 1px; }
+/* Radio wie macOS: Kreis, gewählt dunkelblau mit weißem Punkt */
+.rbs { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.rbs.senk { flex-direction: column; gap: 6px; }
+.rb { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; }
+.rb input {
+  appearance: none; -webkit-appearance: none; flex: none; width: 16px; height: 16px; margin: 0; border-radius: 50%;
+  background: var(--bg2); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--label) 28%, transparent);
+  display: inline-grid; place-items: center; transition: background-color .12s ease-out, box-shadow .12s ease-out;
+}
+.rb input::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; transform: scale(.3); opacity: 0; transition: transform .14s cubic-bezier(.2,.8,.2,1), opacity .1s; }
+.rb:hover input:not(:checked) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy2) 70%, transparent); background: color-mix(in srgb, var(--navy2) 6%, var(--bg2)); }
+.rb input:checked { background: var(--navy2); box-shadow: none; }
+.rb input:checked::after { opacity: 1; transform: scale(1); }
+.rb input:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 1px; }
+/* Mängel-Inspektor: Abschnitte des Papiers als Gruppen-Boxen */
+.mgrp { margin: 14px 0 0; }
+.mgrp .kv { grid-template-columns: 96px 1fr; }
+.mgrp .kv > [hidden] { display: none; }
+.grp-hinweis { margin: -6px 0 10px; font-size: 12px; color: var(--label2); }
+.mgrp .tf { background: var(--bg2); }
 .reihe { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; }
 .tl { border-left: 2px solid var(--fill2); margin-left: 5px; padding-left: 12px; }
 .tl div { position: relative; padding: 4px 0; color: var(--label2); }
@@ -256,6 +276,51 @@ textarea.tf { height: auto; min-height: 48px; padding: 5px 7px; resize: vertical
   .huelle-mac, .mmain, .mbody, .vfile { display: block; height: auto; overflow: visible; }
   body { background: #fff; }
 }
+/* Druckblatt wie im Organisationshandbuch: am Bildschirm aus, im Druck allein sichtbar */
+.druck { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm 14mm 12mm; }
+  :root { color-scheme: light; }
+  .mbody:has(.druck) > :not(:has(.druck)), .hat-druck > :not(.druck) { display: none !important; }
+  .mbody:has(.druck) .insp { width: auto; border: 0; padding: 0; overflow: visible; }
+  .druck { display: block; color: #000; font-size: 10pt; line-height: 1.35; }
+  .dr-kopf { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+  .dr-kopf td { border: 1px solid #000; padding: 2mm 3mm; vertical-align: middle; }
+  .dr-logo { width: 26mm; text-align: center; } .dr-logo img { width: 16mm; height: 16mm; }
+  .dr-titel { text-align: center; } .dr-titel b { display: block; font-size: 13pt; } .dr-titel span, .dr-titel u { display: block; }
+  .dr-titel span { font-weight: 600; }
+  .dr-dok { width: 52mm; text-align: right; font-size: 9pt; } .dr-dok span { display: block; }
+  .dr-fuss { display: flex; justify-content: space-between; border-top: 1px solid #000; margin-top: 8mm; padding-top: 1.5mm; font-size: 8.5pt; }
+  .dr-box { border: 1px solid #000; }
+  .dr-box > div { padding: 2mm 3mm; } .dr-box > div + div { border-top: 1px solid #000; }
+  .dr-box h4 { margin: 0 0 1.5mm; text-align: center; font: 400 13pt/1.2 "Times New Roman", serif; }
+  .dr-reihe { display: flex; flex-wrap: wrap; gap: 1.5mm 8mm; align-items: baseline; }
+  .dr-zeile { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; } .dr-zeile > div { padding: 1.5mm 3mm; } .dr-zeile > div + div { border-left: 1px solid #000; }
+  .dr-zeile span, .dr-linie > span { color: #000; font-size: 9pt; }
+  .dr-zeile b { display: block; font-weight: 600; }
+  .dr-text { min-height: 60mm; white-space: pre-wrap; background: repeating-linear-gradient(#fff 0 6.5mm, #bbb 6.5mm calc(6.5mm + 1px)); }
+  .dr-text.klein { min-height: 13mm; }
+  .dr-h { margin: 0 0 3mm; text-align: center; font-size: 13pt; }
+  .dr-wahl { display: inline-flex; align-items: center; gap: 1.5mm; }
+  .dr-wahl i { width: 3mm; height: 3mm; border: 1px solid #000; border-radius: 50%; }
+  .dr-wahl i.an { background: #000; box-shadow: inset 0 0 0 .6mm #fff; }
+  .dr-linie { display: inline-flex; gap: 2mm; align-items: baseline; flex: 1; min-width: 50mm; }
+  .dr-linie b { flex: 1; border-bottom: 1px solid #000; min-height: 5mm; font-weight: 600; padding: 0 1mm; }
+  .dr-unter { display: grid; gap: 5mm; margin-top: 8mm; } .dr-unter .dr-linie { max-width: 150mm; }
+  .dr-tab { width: 100%; border-collapse: collapse; margin: 3mm 0; }
+  .dr-tab th, .dr-tab td { border: 1px solid #000; padding: 1.5mm 2mm; text-align: left; vertical-align: top; font-size: 9.5pt; }
+  .dr-tab th { font-weight: 700; } .dr-tab .num, .dr-tab .kreuz { text-align: center; }
+  .dr-tab tbody tr { break-inside: avoid; }
+  .dr-felder { display: grid; gap: 2mm; margin-bottom: 4mm; }
+  .dr-legende { display: grid; grid-template-columns: 30mm 50mm; margin-top: 8mm; } .dr-legende i, .dr-legende span { border: 1px solid #000; padding: 1mm 2mm; }
+  .dr-legende i { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .druck .pliste { font-size: 9pt; width: 100%; }
+  .druck .pliste th, .druck .pliste td { border: 1px solid #000; color: #000; background: none !important; height: auto; padding: 1mm 1.5mm; }
+  .druck .pliste thead { display: table-header-group; }
+  .druck .pliste tr { break-inside: avoid; }
+  .druck .pl-mat { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
 
 /* Auswahllisten: eigener Pfeil statt Browser-Optik */
 select.tf, select.search {
@@ -437,6 +502,14 @@ button.veh:active { background: var(--fill); }
 .pliste .pl-art b { font-weight: 500; }
 .pliste .pl-art span { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; }
 .pliste tr.abw td { background: color-mix(in srgb, var(--warn) 9%, var(--bg2)) !important; }
+/* Material-Spalte farbig wie in MPG.doc, Gruppe als unterstrichene Überschrift */
+.pl-gruppe td { font-weight: 700; text-decoration: underline; padding: 10px 10px 6px; background: var(--bg2) !important; }
+.pliste td.pl-mat { width: 150px; font-weight: 600; text-decoration: underline; background: var(--fill2); }
+.pliste td.pl-mat.blau { background: var(--b-blau) !important; } .pliste td.pl-mat.orange { background: var(--b-orange) !important; }
+.pliste td.pl-mat.rot { background: var(--b-rot) !important; color: #fff; } .pliste td.pl-mat.gruen { background: var(--b-gruen) !important; }
+.pliste td.pl-mat.gelb { background: var(--b-gelb) !important; }
+.dr-legende i.blau { background: var(--b-blau); } .dr-legende i.orange { background: var(--b-orange); } .dr-legende i.rot { background: var(--b-rot); }
+.dr-legende i.gruen { background: var(--b-gruen); } .dr-legende i.gelb { background: var(--b-gelb); }
 .pl-bereich td { font-weight: 600; padding: 8px 10px; border-left: 4px solid var(--label3); background: var(--fill2); }
 .pl-bereich td.blau { border-color: var(--b-blau); background: color-mix(in srgb, var(--b-blau) 14%, var(--bg2)); }
 .pl-bereich td.orange { border-color: var(--b-orange); background: color-mix(in srgb, var(--b-orange) 14%, var(--bg2)); }

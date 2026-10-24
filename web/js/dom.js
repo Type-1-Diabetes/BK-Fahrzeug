@@ -27,6 +27,11 @@
   // Lfd. Nr. wie auf der Papierliste („Nr. 1.2 · …“ im Hinweis), sonst die laufende Nummer
   window.BK.lfd = p => {
     const m = /^Nr\.\s*([\d.]+)\s*(?:·\s*)?(.*)$/.exec(p.hinweis || '');
-    return m ? { nr: m[1].replace(/\.$/, ''), rest: m[2] } : { nr: String(p.nr), rest: p.hinweis || '' };
+    const l = m ? { nr: m[1].replace(/\.$/, ''), rest: m[2] } : { nr: String(p.nr), rest: p.hinweis || '' };
+    // Wie Spalte „Verfallsdatum, Zeitraum STK/MTK“: Prüfangaben getrennt vom Artikeltext
+    const teile = l.rest.split(' · ').filter(Boolean);
+    l.frist = teile.filter(t => /^(STK|MTK|Prüfung)/.test(t)).join(', ');
+    l.text = teile.filter(t => !/^(STK|MTK|Prüfung)/.test(t)).join(' · ');
+    return l;
   };
 })();
