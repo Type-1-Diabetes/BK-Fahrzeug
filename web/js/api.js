@@ -122,6 +122,11 @@
     },
     tabletKoppeln: code => rpc('tablet_koppeln', { p_code: code }),
     tabletPing: () => rpc('tablet_ping'),
+    // Entkoppeln mit PIN: null = erledigt, sonst Grund als Text
+    tabletEntkoppeln: pin => rpc('tablet_entkoppeln', { p_pin: pin }),
+    tabletEntkoppelnAdmin: (id, pin) => rpc('tablet_entkoppeln_admin', { p_tablet: id, p_pin: pin }),
+    entkoppelPinSetzen: pin => rpc('entkoppel_pin_setzen', { p_pin: pin }),
+    entkoppelPinGesetzt: () => rpc('entkoppel_pin_gesetzt'),
     ich: () => rpc('ich'),
 
     // Fahrzeuge ---------------------------------------------------------
@@ -129,6 +134,9 @@
       const d = await lesen('fahrzeuge', `id=eq.${id}&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,module,vorlage_id,wache:wachen(name)`);
       return d[0] || null;
     },
+    // Nur Fahrzeugstatus, immer frisch vom Server (für die Live-Anzeige)
+    ampeln: () => mitLogin('/rest/v1/fahrzeuge?aktiv=eq.true&select=id,name,ampel,ampel_grund'),
+    zuletztGeschrieben: () => geschrieben,
     fahrzeuge: () => lesen('fahrzeuge', 'aktiv=eq.true&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,wache:wachen(id,name)&order=name'),
     geraete: fahrzeugId => lesen('geraete', `fahrzeug_id=eq.${fahrzeugId}&select=id,name,seriennummer,hersteller,pruefart,pruefung_bis&order=name`),
     ampelSetzen: (fahrzeugId, ampel, grund) => rpc('ampel_setzen', { p_fahrzeug: fahrzeugId, p_ampel: ampel, p_grund: grund || null }),

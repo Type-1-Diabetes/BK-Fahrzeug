@@ -41,8 +41,8 @@ BK.modul('uebersicht', {
       }
       if (ziel && !(fz.module || []).includes(ziel)) ziel = null;
       leeren(tun).className = 'tun' + (warn ? ' warn' : ' ok');
-      tun.append(el('div.tun-ic', icon(warn ? 'alert' : ziel ? 'list' : 'check')), el('div.t', el('b', titel), el('span', text)),
-        ziel ? el('button.btn', { type: 'button', onclick: () => ctx.oeffnen(ziel) }, 'Öffnen', icon('chevR')) : null);
+      tun.append(...[el('div.tun-ic', icon(warn ? 'alert' : ziel ? 'list' : 'check')), el('div.t', el('b', titel), el('span', text)),
+        ziel && el('button.btn', { type: 'button', onclick: () => ctx.oeffnen(ziel) }, 'Öffnen', icon('chevR'))].filter(Boolean));
     }
 
     const kachel = (modul, farbe, ic, titel, text) => (fz.module || []).includes(modul)

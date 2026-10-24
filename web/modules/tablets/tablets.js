@@ -60,6 +60,15 @@ BK.modul('tablets', {
             el('td', el('span', { class: 'pill mp ' + klasse }, text)),
             el('td', t.zuletzt_online ? timeAgo(t.zuletzt_online) : '–'),
             el('td',
+              t.gekoppelt_am && !t.gesperrt ? el('button.pbtn', { type: 'button', onclick: async () => {
+                const pin = await promptDialog(`${t.name} entkoppeln?`, 'Das Tablet zeigt danach wieder die Anmeldung und braucht einen neuen Code. Bitte Entkoppel-PIN eingeben.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Entkoppeln' });
+                if (pin == null) return;
+                try {
+                  const fehler = await api.tabletEntkoppelnAdmin(t.id, pin.trim());
+                  if (fehler) return alertDialog('Nicht entkoppelt', fehler);
+                  showToast(`${t.name} entkoppelt`); laden();
+                } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+              } }, 'Entkoppeln') : null,
               el('button.pbtn', { type: 'button', onclick: async () => {
                 if (!await confirmDialog('Neuen Code erzeugen?', `„${t.name}“ wird vom aktuellen Gerät getrennt und muss neu gekoppelt werden.`)) return;
                 try { codeZeigen('Neuer Code für ' + t.name, await api.tabletNeuerCode(t.id), t.id); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
@@ -74,6 +83,21 @@ BK.modul('tablets', {
         leeren(tbody).append(el('tr', el('td', { colspan: 5 }, 'Liste lässt sich nicht laden: ' + e.message)));
       }
     }
+
+    // Entkoppel-PIN festlegen (gilt für alle Tablets)
+    const pinKnopf = root.querySelector('[data-pin]');
+    const pinZeigen = async () => { try { pinKnopf.textContent = await api.entkoppelPinGesetzt() ? 'PIN ändern' : 'PIN festlegen'; } catch { /* Standardtext */ } };
+    pinKnopf.onclick = async () => {
+      const pin = await promptDialog('Entkoppel-PIN', 'Mit dieser PIN lässt sich ein Tablet entkoppeln, am Tablet und hier. 4 bis 8 Ziffern.', { typ: 'password', inputmode: 'numeric', placeholder: 'Neue PIN', confirmLabel: 'Weiter' });
+      if (pin == null) return;
+      if (!/^[0-9]{4,8}$/.test(pin.trim())) return alertDialog('PIN ungültig', 'Bitte 4 bis 8 Ziffern eingeben.');
+      const nochmal = await promptDialog('PIN wiederholen', 'Zur Sicherheit noch einmal eingeben.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Speichern' });
+      if (nochmal == null) return;
+      if (nochmal.trim() !== pin.trim()) return alertDialog('PINs sind verschieden', 'Bitte noch einmal festlegen.');
+      try { await api.entkoppelPinSetzen(pin.trim()); showToast('Entkoppel-PIN gespeichert'); pinZeigen(); }
+      catch (e) { alertDialog('Nicht gespeichert', e.message); }
+    };
+    pinZeigen();
 
     root.querySelector('[data-neu]').onclick = async () => {
       if (!fahrzeuge.length) return alertDialog('Keine Fahrzeuge', 'Es gibt noch keinen KTW, dem ein Tablet zugeordnet werden kann.');

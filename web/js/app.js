@@ -97,6 +97,60 @@
     return aus;
   }
 
+  // Fahrzeugstatus live: alle 10 s und beim Zurückkommen in die App. Bei Änderung lädt die offene Ansicht neu.
+  let ampelStand = null, ampelTimer = null;
+  function statusBeobachten() {
+    const pruefen = async () => {
+      if (!ctx || document.visibilityState !== 'visible' || !navigator.onLine) return;
+      let l;
+      try { l = await api.ampeln(); } catch { return; }
+      if (!ctx) return;
+      if (ctx.ich.tablet_id && !l.length) {  // Tablet sieht sein Fahrzeug nicht mehr: entkoppelt oder gesperrt
+        const ich = await api.ich().catch(() => null);
+        if (ich && !ich.tablet_id) return abmeldenUndStart('Dieses Tablet wurde entkoppelt.');
+      }
+      const neu = Object.fromEntries(l.map(f => [f.id, f.ampel + '|' + (f.ampel_grund || '')]));
+      if (ampelStand) {
+        const geaendert = l.filter(f => ampelStand[f.id] && ampelStand[f.id] !== neu[f.id]);
+        const selbst = Date.now() - api.zuletztGeschrieben() < 15000;
+        for (const f of geaendert) {
+          if (ctx.fahrzeug && ctx.fahrzeug.id === f.id) Object.assign(ctx.fahrzeug, { ampel: f.ampel, ampel_grund: f.ampel_grund });
+          if (!selbst) showToast(f.ampel === 'einsatzbereit' ? `${f.name} ist wieder einsatzbereit` : `${f.name} ist nicht einsatzbereit`, f.ampel === 'einsatzbereit' ? null : 'fehler');
+        }
+        if (geaendert.length) {
+          if (neuHoerer && !document.querySelector('._ad-open, .blatt-overlay')) neuHoerer();
+          if (!ctx.ich.tablet_id) zaehlen();
+        }
+      }
+      ampelStand = neu;
+    };
+    clearInterval(ampelTimer);
+    ampelTimer = setInterval(pruefen, 10000);
+    document.onvisibilitychange = pruefen;
+    pruefen();
+  }
+
+  // Tablet-Menü: Infos zum Gerät und Entkoppeln (nur mit PIN)
+  async function tabletMenue() {
+    const fz = ctx.fahrzeug;
+    if (!await confirmDialog(`Tablet ${fz.name}`, 'Entkoppeln trennt dieses Tablet vom KTW. Danach zeigt es wieder die Anmeldung und braucht einen neuen Code. Dafür ist die Entkoppel-PIN nötig.')) return;
+    const pin = await promptDialog('Entkoppel-PIN', 'Die PIN hat der Admin.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Entkoppeln' });
+    if (pin == null) return;
+    try {
+      const fehler = await api.tabletEntkoppeln(pin.trim());
+      if (fehler) return alertDialog('Nicht entkoppelt', fehler);
+    } catch (e) { return alertDialog('Nicht entkoppelt', e.offline ? 'Zum Entkoppeln braucht das Tablet Internet.' : e.message); }
+    await abmeldenUndStart('Tablet ist entkoppelt.');
+  }
+
+  async function abmeldenUndStart(hinweis) {
+    clearInterval(ampelTimer); ampelStand = null; document.onvisibilitychange = null;
+    await api.abmelden();
+    try { localStorage.removeItem('bk_ich'); localStorage.setItem('bk_startmodus', 'koppeln'); } catch { /* privat */ }
+    ctx = null;
+    startSeite(hinweis, 'koppeln');
+  }
+
   // Hülle iPad (Fahrzeug-Tablet) ------------------------------------------
   function tabletHuelle() {
     const liste = erlaubteModule();
@@ -109,7 +163,8 @@
         el('div.brandmini', el('span.logo-platzhalter', 'BK'), 'Blauer Kreis'),
         el('nav.ftabs', { 'aria-label': 'Bereiche' }, reiter(liste).map(r =>
           el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
-        el('div.veh', el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue)),
+        el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
+          el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue)),
       inhalt);
     BK.warteschlange.beiAenderung(l => {
       queue.hidden = !l.length;
@@ -118,6 +173,7 @@
     navigieren = (name, extra) => oeffnen(name, inhalt, extra);
     navigieren(liste[0].name);
     vorladen(liste);
+    statusBeobachten();
     api.tabletPing().catch(() => {});
   }
 
@@ -142,6 +198,7 @@
     const letztes = localStorage.getItem('bk_modul');
     navigieren(liste.some(m => m.name === letztes) ? letztes : liste[0].name);
     vorladen(liste);
+    statusBeobachten();
   }
 
   // Zahlen in der Mac-Seitenleiste wie im Mockup (rot = wartet auf dich)

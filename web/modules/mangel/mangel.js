@@ -36,7 +36,7 @@ BK.modul('mangel', {
       if (!form.pruefen()) return;
       const w = form.werte();
       if (w.gemeldet_von.length < 2) return alertDialog('Name zu kurz', 'Bitte Vor- und Nachnamen eintragen.');
-      knopf.disabled = true;
+      knopf.disabled = true; knopf.classList.add('laedt');
       try {
         const vomMac = !!ctx.ich.rolle;
         await (vomMac ? api.meldungAnlegen : api.meldungMelden)({
@@ -55,7 +55,7 @@ BK.modul('mangel', {
           : 'Kein Netz. Sie ist auf dem Tablet gespeichert und geht raus, sobald wieder Netz da ist.', navigator.onLine ? 2000 : 4000);
         ctx.oeffnen('uebersicht');
       } catch (e) {
-        knopf.disabled = false;
+        knopf.disabled = false; knopf.classList.remove('laedt');
         alertDialog('Nicht gespeichert', e.message);
       }
     };

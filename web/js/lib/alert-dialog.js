@@ -53,6 +53,9 @@
             inputEl.style.display = opts.input ? '' : 'none';
             inputEl.value = opts.input ? (opts.value || '') : '';
             inputEl.placeholder = opts.placeholder || '';
+            inputEl.type = opts.typ || 'text';  // z. B. password für die PIN
+            inputEl.inputMode = opts.inputmode || '';
+            inputEl.autocomplete = opts.typ === 'password' ? 'off' : '';
             cancelBtn.style.display = opts.cancel === false ? 'none' : '';
             confirmBtn.textContent = opts.confirmLabel || (opts.cancel === false ? 'OK' : 'Bestätigen');
 
@@ -87,7 +90,7 @@
     };
     window.promptDialog = function (title, description, opts) {
         opts = opts || {};
-        return open({ title: title, desc: description, input: true, value: opts.value, placeholder: opts.placeholder, confirmLabel: opts.confirmLabel });
+        return open({ title: title, desc: description, input: true, value: opts.value, placeholder: opts.placeholder, confirmLabel: opts.confirmLabel, typ: opts.typ, inputmode: opts.inputmode });
     };
     window.alertDialog = function (title, description) {
         return open({ title: title, desc: description, cancel: false });

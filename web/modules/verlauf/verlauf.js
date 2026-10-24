@@ -15,6 +15,7 @@
     gegengezeichnet: () => ['Checkliste gegengezeichnet', 'check'],
     checkliste_zurueck: () => ['Checkliste zurück ans Team', 'list'],
     tablet_gekoppelt: () => ['Tablet gekoppelt', 'tablet'],
+    tablet_entkoppelt: () => ['Tablet entkoppelt', 'tablet'],
   };
   const FARBE = { wrench: 'f-rot', box: 'f-blau', list: 'f-navy', check: 'f-gruen', alert: 'f-rot', pen: 'f-orange', tablet: 'f-navy' };
 

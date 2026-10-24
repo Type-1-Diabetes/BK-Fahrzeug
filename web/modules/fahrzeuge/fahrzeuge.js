@@ -136,7 +136,7 @@ BK.modul('fahrzeuge', {
               ampel: e.details.ampel === 'einsatzbereit' ? 'Einsatzbereit gesetzt' : 'Nicht einsatzbereit: ' + (e.details.grund || ''),
               ausgegeben: 'Material ausgegeben', teilweise_ausgegeben: 'Material zum Teil ausgegeben', checkliste_begonnen: 'Checkliste begonnen',
               checkliste_abgeschlossen: 'Checkliste abgeschlossen', gegengezeichnet: 'Checkliste gegengezeichnet', checkliste_zurueck: 'Checkliste zurück ans Team',
-              tablet_gekoppelt: 'Tablet gekoppelt' })[e.aktion] || e.aktion),
+              tablet_gekoppelt: 'Tablet gekoppelt', tablet_entkoppelt: 'Tablet entkoppelt' })[e.aktion] || e.aktion),
             el('td', e.wer_name || '–'))), 'Noch nichts passiert.'));
         } catch (e) { inhalt.append(el('div.mleer', e.message)); }
       }

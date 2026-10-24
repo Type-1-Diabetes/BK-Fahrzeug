@@ -25,9 +25,9 @@ BK.modul('checkliste', {
 
     if (!offen) {
       const knopf = el('button.btn', { type: 'button', onclick: async () => {
-        knopf.disabled = true;
+        knopf.disabled = true; knopf.classList.add('laedt');
         try { await api.checklisteStarten(zeitraum); ctx.oeffnen('checkliste'); }
-        catch (e) { knopf.disabled = false; alertDialog('Hat nicht geklappt', e.offline ? 'Zum Beginnen braucht das Tablet einmal Netz. Danach geht alles auch offline.' : e.message); }
+        catch (e) { knopf.disabled = false; knopf.classList.remove('laedt'); alertDialog('Hat nicht geklappt', e.offline ? 'Zum Beginnen braucht das Tablet einmal Netz. Danach geht alles auch offline.' : e.message); }
       } }, 'Checkliste beginnen');
       const anzahl = bereiche.reduce((n, b) => n + b.positionen.length, 0);
       return meldung('Überprüfung Vollzähligkeit',
@@ -122,7 +122,8 @@ BK.modul('checkliste', {
         lokalSetzen(p.id, neu);
         offenePosition = null;
         seite();
-        try { await api.checklisteEintrag(offen.id, p.id, neu || { entfernen: true }); } catch (err) { alertDialog('Nicht gespeichert', err.message); }
+        try { await api.checklisteEintrag(offen.id, p.id, neu || { entfernen: true }); showToast(neu ? `${p.artikel}: Abweichung gemerkt` : `${p.artikel}: vollständig`); }
+        catch (err) { alertDialog('Nicht gespeichert', err.message); }
       };
       return el('div.ck-edit',
         el('span', 'Anzahl ist'),
@@ -146,13 +147,13 @@ BK.modul('checkliste', {
       const knopf = el('button.btn', { type: 'button', onclick: async () => {
         if (m1.value.trim().length < 2 || m2.value.trim().length < 2) { fehler.textContent = 'Bitte beide Namen eintragen.'; return; }
         if (nichtGeprueft.length && !await confirmDialog('Noch nicht alles geprüft', `${nichtGeprueft.length} Bereiche sind noch nicht durchgesehen. Trotzdem abschließen?`)) return;
-        knopf.disabled = true;
+        knopf.disabled = true; knopf.classList.add('laedt');
         try {
           await api.checklisteAbschliessen(offen.id, m1.value.trim(), m2.value.trim());
           try { localStorage.removeItem(SPEICHER); } catch { /* egal */ }
           await erfolg('Checkliste abgeschlossen', 'Der MPGler zeichnet sie jetzt gegen.');
           ctx.oeffnen('uebersicht');
-        } catch (e) { knopf.disabled = false; alertDialog('Nicht gespeichert', e.message); }
+        } catch (e) { knopf.disabled = false; knopf.classList.remove('laedt'); alertDialog('Nicht gespeichert', e.message); }
       } }, 'Abschließen');
       leeren(main).append(el('div.content',
         el('div.ckl-kopf', el('h2', 'Abschließen')),

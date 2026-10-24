@@ -272,7 +272,7 @@ input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   transition: background-color .12s ease-out, box-shadow .12s ease-out, color .12s ease-out, filter .12s ease-out;
 }
 @media (hover: hover) {
-  .pbtn:hover { background: color-mix(in srgb, var(--label) 5%, var(--bg2)); }
+  .pbtn:hover { background: color-mix(in srgb, var(--label) 8%, var(--bg2)); box-shadow: 0 0 0 .5px color-mix(in srgb, var(--label) 30%, transparent), 0 1px 2px rgba(0,0,0,.12); }
   .pbtn.def:hover { background: color-mix(in srgb, #fff 12%, var(--navy2)); }
   .pbtn.stopp:hover { background: color-mix(in srgb, #000 10%, var(--bad)); }
   .pbtn.los:hover { background: color-mix(in srgb, #000 10%, var(--ok)); }
@@ -361,3 +361,67 @@ input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 }
 @keyframes platzhalter { to { background-position: 140% 0, 14px 14px; } }
 @media (prefers-reduced-motion: reduce) { .erfolg-kreis svg { stroke-dashoffset: 0; } }
+
+/* Eigene Auswahlliste (auswahl.js): Knopf statt <select>, Liste als schwebendes Menü */
+.auswahl-nativ { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden; }
+.auswahl-knopf { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; color: var(--label); }
+.auswahl-knopf .auswahl-wert { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.auswahl-knopf svg { flex: none; color: var(--label2); transition: transform .18s cubic-bezier(.2,.8,.2,1); }
+.auswahl-knopf.offen svg { transform: rotate(180deg); }
+.auswahl-knopf.ohne-wert .auswahl-wert { color: var(--label3); }
+.auswahl-knopf:disabled { opacity: .5; }
+/* Mac */
+.auswahl-knopf.tf { height: 26px; padding: 0 7px 0 9px; border-radius: 6px; background: var(--bg2); box-shadow: 0 0 0 .5px var(--sep), 0 .5px 1px rgba(0,0,0,.1); font-size: 13px; }
+.auswahl-knopf.tf.auto { width: auto; min-width: 120px; }
+.auswahl-knopf.tf svg { font-size: 14px; }
+.auswahl-knopf.tf.offen, .auswahl-knopf.tf:focus-visible { outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 45%, transparent); }
+/* Tablet (in Listenzeilen) */
+.auswahl-knopf.field { width: 100%; min-height: 44px; font-size: 17px; }
+.auswahl-knopf.field svg { font-size: 22px; }
+
+.auswahl-liste {
+  position: fixed; z-index: 300; overflow: auto; padding: 6px; border-radius: 14px; outline: none;
+  background: var(--bg2); box-shadow: 0 0 0 .5px var(--sep), 0 12px 32px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.08);
+  animation: auswahl-ein .16s cubic-bezier(.2,.8,.2,1); transform-origin: top center;
+}
+.auswahl-liste.nach-oben { transform-origin: bottom center; }
+.auswahl-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px 0 10px; border-radius: 9px; font-size: 17px; color: var(--label); }
+.auswahl-option svg { font-size: 18px; color: var(--tint); stroke-width: 2.2; visibility: hidden; }
+.auswahl-option[aria-selected="true"] svg { visibility: visible; }
+.auswahl-option[aria-selected="true"] span { font-weight: 600; }
+.auswahl-option.aktiv { background: var(--fill); }
+.auswahl-option:active { background: var(--fill2); }
+.auswahl-option.platzhalter span { color: var(--label2); }
+.auswahl-option[aria-disabled="true"] { opacity: .4; }
+.auswahl-liste.klein { padding: 4px; border-radius: 9px; }
+.auswahl-liste.klein .auswahl-option { min-height: 26px; padding: 0 10px 0 6px; border-radius: 5px; font-size: 13px; gap: 6px; }
+.auswahl-liste.klein .auswahl-option svg { font-size: 13px; }
+.auswahl-liste.klein .auswahl-option.aktiv { background: var(--navy2); color: #fff; }
+.auswahl-liste.klein .auswahl-option.aktiv svg, .auswahl-liste.klein .auswahl-option.aktiv span { color: #fff; }
+@keyframes auswahl-ein { from { opacity: 0; transform: scale(.97) translateY(-4px); } }
+@media (hover: hover) { .auswahl-knopf.tf:hover { box-shadow: 0 0 0 .5px color-mix(in srgb, var(--label) 35%, transparent), 0 .5px 1px rgba(0,0,0,.12); } }
+
+/* Tablet-Kopf: Fahrzeug antippen öffnet das Tablet-Menü */
+button.veh { min-height: 44px; padding: 4px 10px; margin-right: -10px; border-radius: 12px; text-align: right; transition: background-color .12s ease-out; }
+button.veh:active { background: var(--fill); }
+@media (hover: hover) { button.veh:hover { background: var(--fill); } }
+
+/* Rückmeldung für alle übrigen klickbaren Elemente (Tablet und Mac). Maus: Hover, Touch: beim Drücken. */
+.tile, .ck, .area, .ftabs button, button.row, .ph, .ph-x, .stepper button, .mz-weg, .auswahl-knopf.field, .code-acts .pbtn {
+  transition: background-color .12s ease-out, box-shadow .15s ease-out, transform .15s cubic-bezier(.2,.8,.2,1), color .12s ease-out;
+}
+.tile:active { transform: scale(.985); }
+.ck:active, button.row:active, .area:active { background: var(--fill); }
+.ftabs button:not(.on):active, .stepper button:active, .ph:active, .mz-weg:active { background: var(--fill2); }
+.ph-x:active { background: rgba(0,0,0,.75); }
+@media (hover: hover) {
+  .tile:hover { box-shadow: 0 6px 18px rgba(0,0,0,.08); transform: translateY(-1px); }
+  .ck:hover, button.row:hover { background: color-mix(in srgb, var(--fill) 55%, transparent); }
+  .area:not(.on):hover { background: var(--fill); }
+  .ftabs button:not(.on):hover { background: var(--fill); color: var(--label); }
+  .stepper button:hover, .ph:hover, .mz-weg:hover { background: var(--fill2); }
+  .ph-x:hover { background: rgba(0,0,0,.75); }
+  .auswahl-knopf.field:hover svg { color: var(--label); }
+  /* Tabellen ohne Klick (z. B. Tablets): Zeile leicht hervorheben, damit man sie beim Lesen verfolgen kann */
+  table.tab tbody tr:not([data-id]):not([data-klick]):hover td { background: color-mix(in srgb, var(--fill) 50%, transparent); }
+}

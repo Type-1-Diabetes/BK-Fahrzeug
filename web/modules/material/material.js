@@ -60,7 +60,7 @@ BK.modul('material', {
       fehlerZ.textContent = positionen.length ? '' : 'Bitte mindestens einen Artikel eintragen.';
       fehlerN.textContent = name.value.trim().length >= 2 ? '' : 'Bitte Vor- und Nachnamen eintragen.';
       if (fehlerZ.textContent || fehlerN.textContent) return;
-      knopf.disabled = true;
+      knopf.disabled = true; knopf.classList.add('laedt');
       try {
         const vomMac = !!ctx.ich.rolle;
         await (vomMac ? api.meldungAnlegen : api.meldungMelden)({ art: 'material', fahrzeug_id: fz.id, gemeldet_von: name.value.trim(), positionen });
@@ -70,7 +70,7 @@ BK.modul('material', {
           : 'Kein Netz. Die Anforderung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
         ctx.oeffnen('uebersicht');
       } catch (e) {
-        knopf.disabled = false;
+        knopf.disabled = false; knopf.classList.remove('laedt');
         alertDialog('Nicht gespeichert', e.message);
       }
     };
