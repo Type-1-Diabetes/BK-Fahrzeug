@@ -1,7 +1,7 @@
 // Kleiner DOM-Baukasten. Text immer über textContent, nie über innerHTML.
 (function () {
   window.BK = window.BK || {};
-  // Hell ist Standard. Dunkel nur, wenn in den Einstellungen gewählt.
+  // Hell ist Standard. Dunkel nur auf Wunsch (Einstellungen, Login, Tablet), gilt pro Gerät.
   try { if (localStorage.getItem('bk_theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch { /* privat */ }
   // el('div.row', {onclick}, 'Text', kindElement)
   window.BK.el = function (tag, attrs, ...kinder) {

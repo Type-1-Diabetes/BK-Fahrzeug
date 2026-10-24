@@ -118,3 +118,28 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 
 - Anmelden: oben wieder das runde Logo statt Banner (`BK.banner()` bleibt für später).
 - Tablets › Neues Tablet: ein Blatt statt zwei Eingabefenstern. KTW nach Wache antippen, Hinweis „hat schon …“, Name wird vorbelegt („iPad KTW …“), dann „Code erzeugen“ und wie bisher Link und Code. Erledigt Offen-Punkt 5. Getestet bis zur Auswahl, kein Tablet angelegt.
+
+## Tablet = Fahrzeug (2026-10-24)
+- „Neues Tablet“ fragt Wache, KTW-Name und Tabletname. Der KTW wird dabei angelegt (RPC `tablet_mit_fahrzeug_anlegen`, Migration 014), Vorlage = meistgenutzte.
+- Migration 014 blendet alle KTW ohne gekoppeltes Tablet aus (`aktiv = false`, Daten bleiben).
+- Migration 014 eingespielt: nur N-KTW 9/3 aktiv, Funktion nur für `authenticated` (Admin-Prüfung in der Funktion).
+- Offen: Blatt „Neues Tablet“ mit Admin-Login im Browser testen.
+
+## Tablet bearbeiten (2026-10-24)
+- Knopf „Bearbeiten“ je Tablet öffnet das gleiche Blatt wie „Neues Tablet“, vorbelegt: Wache, KTW-Name, Tabletname. „Sichern“ ruft `tablet_bearbeiten` (Migration 015), ändert Tablet und KTW.
+- Migration 015 eingespielt (nur `authenticated`).
+- Offen: mit Admin-Login im Browser testen.
+
+## Entkoppeln blendet KTW aus (2026-10-24)
+- Live-DB löschte beim Entkoppeln das Tablet (abweichend von 009), KTW blieb sichtbar. Migration 016 übernimmt das Löschen ins Repo und setzt den KTW auf `aktiv = false`.
+- Leere Tablet-Liste: Hinweistext stand rechts, jetzt links.
+- Migration 016 eingespielt (geprüft: 0 aktive KTW, Entkoppeln blendet KTW aus).
+
+## Dunkler Modus grau statt schwarz (2026-10-24)
+- `basis.css` Dunkel: `--bg` #000 → #1c1c1e, `--bg2` #1c1c1e → #26262a (Karten, Hauptfläche Mac), `--mac-side` #212124, `--bar` dunkelgrau. Gilt für Mac (MPGler/Admin) und Tablet.
+- Tablet hat keinen eigenen Schalter für Dunkel (nur Mac › Einstellungen).
+- Offen: im Browser prüfen (Vorschau ließ sich nicht öffnen).
+
+## Hell/Dunkel auf Login und Tablet (2026-10-24)
+- Knopf „Dunkel“/„Hell“ (Mond/Sonne) oben rechts auf der Anmeldeseite und in der Tablet-Kopfzeile (`themeKnopf` in `app.js`). Speichert wie Mac-Einstellungen in `bk_theme`, nur dieses Gerät.
+- Offen: im Browser prüfen (iPad quer, Login).

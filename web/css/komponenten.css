@@ -120,6 +120,7 @@ table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 /* Start und Koppeln ------------------------------------------------------ */
 .huelle-start { min-height: 100dvh; display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top)) 16px 24px; }
 .login { width: min(420px, 100%); display: flex; flex-direction: column; gap: 24px; }
+.login-theme { position: fixed; top: max(12px, env(safe-area-inset-top)); right: 16px; min-height: 44px; padding: 0 12px; }
 .login-kopf { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .login-kopf .logo-platzhalter, .login-kopf .logo-bild { margin-bottom: 8px; }
 .login-kopf h1 { font-size: 28px; }
@@ -390,7 +391,7 @@ input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .toast.fehler { background: var(--bad); color: #fff; padding-left: 16px; }
 .toast.weg { opacity: 0; transform: translateY(6px); transition: opacity .2s ease-in, transform .2s ease-in; }
 @keyframes toast-ein { from { opacity: 0; transform: translateY(12px) scale(.96); } }
-:root[data-theme="dark"] .toast:not(.fehler) { background: #3a3a3c; color: #fff; }
+:root[data-theme="dark"] .toast:not(.fehler) { background: #3a3a3e; color: #fff; }
 
 .laedt { position: relative; color: transparent !important; pointer-events: none; }
 .laedt > * { visibility: hidden; }

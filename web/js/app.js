@@ -133,6 +133,24 @@
     pruefen();
   }
 
+  // Knopf Hell/Dunkel (Login und Tablet), gilt nur auf diesem Gerät
+  function themeKnopf(klasse) {
+    const b = el('button.tb.' + klasse, { type: 'button' });
+    const zeigen = () => {
+      const dunkel = document.documentElement.dataset.theme === 'dark';
+      leeren(b).append(icon(dunkel ? 'sun' : 'moon'), dunkel ? 'Hell' : 'Dunkel');
+      b.title = dunkel ? 'Helle Darstellung' : 'Dunkle Darstellung';
+    };
+    b.onclick = () => {
+      const dunkel = document.documentElement.dataset.theme !== 'dark';
+      if (dunkel) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme;
+      try { dunkel ? localStorage.setItem('bk_theme', 'dark') : localStorage.removeItem('bk_theme'); } catch { /* privat */ }
+      zeigen();
+    };
+    zeigen();
+    return b;
+  }
+
   // Tablet-Menü: Infos zum Gerät und Entkoppeln (nur mit PIN)
   async function tabletMenue() {
     const fz = ctx.fahrzeug;
@@ -190,6 +208,7 @@
         el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
           el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue),
         window.pwaIsStandalone() ? null : el('button.tb.tablet-ab', { type: 'button', title: 'Als App auf dem Home-Bildschirm installieren', onclick: installBlatt }, icon('download'), 'App installieren'),
+        themeKnopf('tablet-ab'),
         el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden')),
       inhalt);
     BK.warteschlange.beiAenderung(l => {
@@ -264,7 +283,7 @@
         el('button', { type: 'button', role: 'tab', 'aria-selected': String(m === modus), class: m === modus ? 'on' : null,
           onclick: () => m !== modus && startSeite('', m) }, t)));
     const inhalt = modus === 'koppeln' ? koppelFormular(fehler) : anmeldeFormular(fehler);
-    leeren(app).append(el('div.login',
+    leeren(app).append(el('div.login', themeKnopf('login-theme'),
       el('div.login-kopf', BK.logo('gross'), el('h1', 'BK Fahrzeug'), el('p', 'Blauer Kreis · Krankenbeförderung')),
       el('div.login-karte', nurKoppeln ? null : wahl, inhalt.form, fehler)));
     inhalt.fokus.focus();

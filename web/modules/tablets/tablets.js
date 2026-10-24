@@ -60,8 +60,9 @@ BK.modul('tablets', {
             el('td', el('span', { class: 'pill mp ' + klasse }, text)),
             el('td', t.zuletzt_online ? timeAgo(t.zuletzt_online) : '–'),
             el('td',
+              el('button.pbtn', { type: 'button', onclick: () => blattOeffnen(t) }, 'Bearbeiten'),
               t.gekoppelt_am && !t.gesperrt ? el('button.pbtn', { type: 'button', onclick: async () => {
-                const pin = await promptDialog(`${t.name} entkoppeln?`, 'Das Tablet zeigt danach wieder die Anmeldung und braucht einen neuen Code. Bitte Entkoppel-PIN eingeben.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Entkoppeln' });
+                const pin = await promptDialog(`${t.name} entkoppeln?`, 'Das Tablet wird entfernt, sein KTW verschwindet aus der Übersicht. Meldungen bleiben gespeichert. Bitte Entkoppel-PIN eingeben.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Entkoppeln' });
                 if (pin == null) return;
                 try {
                   const fehler = await api.tabletEntkoppelnAdmin(t.id, pin.trim());
@@ -99,52 +100,58 @@ BK.modul('tablets', {
     };
     pinZeigen();
 
-    // Neues Tablet: KTW antippen (nach Wache), Name ist vorbelegt, dann Code
+    // Neues oder vorhandenes Tablet: Wache, KTW-Name und Tabletname
     const neuBlatt = root.querySelector('[data-neu-blatt]');
+    const neuWache = root.querySelector('[data-neu-wache]');
     const neuKtw = root.querySelector('[data-neu-ktw]');
     const neuName = root.querySelector('[data-neu-name]');
     const neuWeiter = root.querySelector('[data-neu-weiter]');
-    let neuFz = null, nameGeaendert = false;
+    let nameGeaendert = false, bearbeiten = null;  // bearbeiten = Tablet beim Ändern
     const neuZu = () => { neuBlatt.hidden = true; };
+    const pruefen = () => { neuWeiter.disabled = !neuWache.value || !neuKtw.value.trim() || !neuName.value.trim(); };
     root.querySelector('[data-neu-abbrechen]').onclick = neuZu;
     neuBlatt.addEventListener('keydown', e => { if (e.key === 'Escape') neuZu(); if (e.key === 'Enter' && !neuWeiter.disabled) neuWeiter.click(); });
     neuBlatt.addEventListener('mousedown', e => { if (e.target === neuBlatt) neuZu(); });
-    neuName.oninput = () => { nameGeaendert = true; neuWeiter.disabled = !neuFz || !neuName.value.trim(); };
+    neuWache.onchange = pruefen;
+    neuKtw.oninput = () => { if (!nameGeaendert) neuName.value = neuKtw.value.trim() ? 'iPad ' + neuKtw.value.trim() : ''; pruefen(); };
+    neuName.oninput = () => { nameGeaendert = true; pruefen(); };
 
-    root.querySelector('[data-neu]').onclick = async () => {
-      if (!fahrzeuge.length) return alertDialog('Keine Fahrzeuge', 'Es gibt noch keinen KTW, dem ein Tablet zugeordnet werden kann.');
-      let tablets = [];
-      try { tablets = await api.tablets(); } catch { /* ohne Hinweis „hat schon ein Tablet“ */ }
-      neuFz = null; nameGeaendert = false; neuName.value = ''; neuWeiter.disabled = true;
-      leeren(neuKtw);
-      const wachen = [...new Set(fahrzeuge.map(f => f.wache ? f.wache.name : ''))];
-      for (const w of wachen) {
-        if (w) neuKtw.append(el('div.neu-wache', w));
-        for (const f of fahrzeuge.filter(x => (x.wache ? x.wache.name : '') === w)) {
-          const hat = tablets.find(t => t.fahrzeug_id === f.id && !t.gesperrt && t.gekoppelt_am);
-          neuKtw.append(el('label.rb.neu-zeile',
-            el('input', { type: 'radio', name: 'neu_ktw', value: f.id, onchange: () => {
-              neuFz = f;
-              if (!nameGeaendert) neuName.value = 'iPad ' + f.name;
-              neuWeiter.disabled = !neuName.value.trim();
-            } }),
-            el('span', f.name), hat ? el('span.neu-hat', 'hat schon ' + hat.name) : null));
-        }
-      }
+    async function blattOeffnen(t) {
+      let wachen = [];
+      try { wachen = await api.wachen(); } catch (e) { return alertDialog('Hat nicht geklappt', e.message); }
+      if (!wachen.length) return alertDialog('Keine Wachen', 'Lege zuerst unter Einstellungen eine Wache an.');
+      bearbeiten = t || null;
+      const fz = t ? fahrzeuge.find(f => f.id === t.fahrzeug_id) : null;
+      leeren(neuWache);
+      for (const w of wachen) neuWache.append(el('option', { value: w.id }, w.name));
+      if (fz && fz.wache) neuWache.value = fz.wache.id;
+      root.querySelector('[data-neu-titel]').textContent = t ? 'Tablet bearbeiten' : 'Neues Tablet';
+      root.querySelector('[data-neu-text]').textContent = t ? 'Änderungen gelten auch für den KTW.' : 'Jedes Tablet gehört fest zu einem KTW.';
+      neuWeiter.textContent = t ? 'Sichern' : 'Code erzeugen';
+      nameGeaendert = !!t;
+      neuKtw.value = fz ? fz.name : '';
+      neuName.value = t ? t.name : '';
+      pruefen();
       neuBlatt.hidden = false;
-      neuKtw.querySelector('input')?.focus();
-    };
+      neuKtw.focus();
+    }
+    root.querySelector('[data-neu]').onclick = () => blattOeffnen(null);
 
     neuWeiter.onclick = async () => {
-      const fz = neuFz, name = neuName.value.trim();
-      if (!fz || !name) return;
+      const ktw = neuKtw.value.trim(), name = neuName.value.trim();
+      if (!neuWache.value || !ktw || !name) return;
       neuWeiter.disabled = true;
       try {
-        const code = await api.tabletAnlegen(fz.id, name);
-        const neu = (await api.tablets()).find(t => t.fahrzeug_id === fz.id && t.name === name && !t.gekoppelt_am);
+        if (bearbeiten) {
+          await api.tabletBearbeiten(bearbeiten.id, name, ktw, neuWache.value);
+          neuZu(); showToast(name + ' gesichert'); laden();
+          return;
+        }
+        const code = await api.tabletMitFahrzeugAnlegen(neuWache.value, ktw, name);
+        const neu = (await api.tablets()).find(t => t.name === name && !t.gekoppelt_am);
         neuZu();
-        codeZeigen('Neues Tablet für ' + fz.name, code, neu && neu.id);
-      } catch (e) { neuWeiter.disabled = false; alertDialog('Hat nicht geklappt', e.message); }
+        codeZeigen('Neues Tablet für ' + ktw, code, neu && neu.id);
+      } catch (e) { pruefen(); alertDialog('Hat nicht geklappt', e.message); }
     };
 
     BK.beiNeu(() => { if (overlay.hidden) laden(); });
