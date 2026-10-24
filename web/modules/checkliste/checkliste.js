@@ -91,7 +91,7 @@ BK.modul('checkliste', {
       const fehlend = b.positionen.filter(p => eintraege[p.id] && eintraege[p.id].ist != null && eintraege[p.id].ist < p.soll);
       const alleDa = b.positionen.every(istGeprueft);
       // Spalten wie MPG.doc, Kopf bleibt beim Scrollen stehen
-      const zeilen = el('div.list.ck-liste', el('div.ck-spalten', el('span', 'Vorh.'), el('span', 'Lfd. Nr.'), el('span', 'Artikel, SN und Hersteller'),
+      const zeilen = el('div.list.ck-liste', el('div.ck-spalten', el('span', 'Vorh.'), el('span', 'Artikel, SN und Hersteller'),
         el('span.zahl', 'Anzahl soll'), el('span.zahl', 'Anzahl ist'), el('span.ck-frist', 'Verfallsdatum, STK/MTK'), el('span.ck-wo', 'Wo')));
       for (const p of b.positionen) zeilen.append(zeile(p, b));
       leeren(main).append(
@@ -121,17 +121,17 @@ BK.modul('checkliste', {
     function zeile(p, b) {
       const e = eintraege[p.id];
       const da = ok.has(p.id);
-      const haken = el('button', { type: 'button', class: 'box' + (e ? ' warn' : da ? ' an' : ' aus'), 'aria-pressed': String(!!(e || da)),
+      const durch = !!(e && e.durchgestrichen);
+      const haken = el('button', { type: 'button', class: 'box' + (durch ? ' durch' : e ? ' warn' : da ? ' an' : ' aus'), 'aria-pressed': String(!!(e || da)),
         'aria-label': p.artikel + (da ? ': Haken entfernen' : ': vorhanden'), onclick: ev => {
           ev.stopPropagation();
           if (e) { offenePosition = p.id; return seite(); }
           da ? ok.delete(p.id) : ok.add(p.id); sichern(); seite();
-        } }, e ? icon('alert') : da ? icon('check') : null);
+        } }, durch ? icon('minus') : e ? icon('alert') : da ? icon('check') : null);
       const l = BK.lfd(p);
-      const zweite = e && e.bemerkung ? e.bemerkung : l.text;
-      const wrap = el('div', { class: 'ck-wrap ' + (b.farbe || '') + (e ? ' dev' : '') },
+      const zweite = durch ? (e.bemerkung ? 'Nicht im KTW · ' + e.bemerkung : 'Nicht im KTW') : e && e.bemerkung ? e.bemerkung : l.text;
+      const wrap = el('div', { class: 'ck-wrap ' + (b.farbe || '') + (durch ? ' durch' : e ? ' dev' : '') },
         el('div.ck', haken, el('button.ck-text', { type: 'button', 'aria-expanded': String(offenePosition === p.id), onclick: () => { offenePosition = offenePosition === p.id ? null : p.id; seite(); } },
-          el('span.ck-nr', l.nr),
           el('div.t', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), zweite ? el('span', zweite) : null),
           el('span.zahl', String(p.soll)),
           el('span', { class: 'zahl ist' + (e && e.ist != null ? ' warnt' : '') }, e && e.ist != null ? String(e.ist) : ''),
@@ -146,14 +146,16 @@ BK.modul('checkliste', {
       const q = el('span.q', String(ist));
       const verfall = el('input.field', { type: 'month', value: e && e.verfall ? e.verfall.slice(0, 7) : '', 'aria-label': 'Verfallsdatum' });
       const bem = el('input.field', { maxlength: 300, placeholder: 'z. B. defekt, Fülldruck unter 100 bar', value: (e && e.bemerkung) || '', 'aria-label': 'Bemerkung' });
-      const speichern = async entfernen => {
-        const neu = entfernen ? null : { position_id: p.id, ist: ist === p.soll ? null : ist, verfall: verfall.value ? verfall.value + '-01' : null, bemerkung: bem.value.trim() || null };
-        if (neu && neu.ist == null && !neu.verfall && !neu.bemerkung) return speichern(true);
+      const speichern = async (entfernen, durchstreichen = false) => {
+        const neu = entfernen ? null : durchstreichen
+          ? { position_id: p.id, ist: null, verfall: null, bemerkung: bem.value.trim() || null, durchgestrichen: true }
+          : { position_id: p.id, ist: ist === p.soll ? null : ist, verfall: verfall.value ? verfall.value + '-01' : null, bemerkung: bem.value.trim() || null };
+        if (neu && !neu.durchgestrichen && neu.ist == null && !neu.verfall && !neu.bemerkung) return speichern(true);
         if (neu) eintraege[p.id] = neu; else { delete eintraege[p.id]; ok.add(p.id); sichern(); }
         lokalSetzen(p.id, neu);
         offenePosition = null;
         seite();
-        try { await api.checklisteEintrag(offen.id, p.id, neu || { entfernen: true }); showToast(neu ? `${p.artikel}: Abweichung gemerkt` : `${p.artikel}: vollständig`); }
+        try { await api.checklisteEintrag(offen.id, p.id, neu || { entfernen: true }); showToast(!neu ? `${p.artikel}: vollständig` : neu.durchgestrichen ? `${p.artikel}: nicht im KTW` : `${p.artikel}: Abweichung gemerkt`); }
         catch (err) { alertDialog('Nicht gespeichert', err.message); }
       };
       return el('div.ck-edit',
@@ -166,11 +168,12 @@ BK.modul('checkliste', {
         el('span', 'Bemerkung'), bem,
         el('div.acts',
           e ? el('button.btn.sec', { type: 'button', onclick: () => speichern(true) }, 'Doch vollständig') : null,
+          e && e.durchgestrichen ? null : el('button.btn.sec', { type: 'button', title: 'Wie auf Papier durchstreichen: bekannt, nicht im KTW', onclick: () => speichern(false, true) }, 'Nicht im KTW'),
           el('button.btn', { type: 'button', onclick: () => speichern(false) }, 'Übernehmen')));
     }
 
     function abschluss() {
-      const n = Object.keys(eintraege).length;
+      const n = Object.values(eintraege).filter(x => x && !x.durchgestrichen).length;
       const m1 = el('input.field', { id: 'ckl_m1', maxlength: 100, autocomplete: 'off', placeholder: 'Vor- und Nachname' });
       const m2 = el('input.field', { id: 'ckl_m2', maxlength: 100, autocomplete: 'off', placeholder: 'Vor- und Nachname' });
       const fehler = el('div.ffehler', { role: 'alert' });

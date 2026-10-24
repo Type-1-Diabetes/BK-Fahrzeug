@@ -72,7 +72,7 @@
 /* Raster: Haken | Nr. | Artikel | Soll | Ist | Verfall | Wo */
 .ck-liste { overflow: visible; }
 .ckl-main { container-type: inline-size; }
-.ck-liste { --ck-spalten: 52px minmax(0, 1fr) 54px 54px 118px 72px; }
+.ck-liste { --ck-spalten: minmax(0, 1fr) 54px 54px 118px 72px; }
 .ck-text, .ck-spalten { display: grid; grid-template-columns: var(--ck-spalten); column-gap: 10px; align-items: center; }
 .ck-spalten { grid-template-columns: 38px var(--ck-spalten); }
 .ck-text { flex: 1; gap: 0 10px; padding: 10px 16px 10px 4px; text-align: left; align-self: stretch; }
@@ -99,11 +99,11 @@
 .ck .box::after { inset: -9px; }
 /* Schmale Liste (Hochformat): Wo ausblenden, Verfall schmaler; sehr schmal nur Nr., Artikel, Soll, Ist */
 @container (max-width: 760px) {
-  .ck-liste { --ck-spalten: 44px minmax(0, 1fr) 48px 48px 96px; }
+  .ck-liste { --ck-spalten: minmax(0, 1fr) 48px 48px 96px; }
   .ck-wo { display: none; }
 }
 @container (max-width: 560px) {
-  .ck-liste { --ck-spalten: 40px minmax(0, 1fr) 44px 44px; }
+  .ck-liste { --ck-spalten: minmax(0, 1fr) 44px 44px; }
   .ck-frist { display: none; }
 }
 /* Abschluss wie Seite 1 und 13 der Papierliste */
@@ -124,3 +124,6 @@
 .ckl-legende i.gruen { background: var(--b-gruen); } .ckl-legende i.gelb { background: var(--b-gelb); }
 .acts.links { justify-content: flex-start; margin-top: 20px; }
 .ck-spalten > span:first-child { text-align: center; }
+/* Durchgestrichen wie auf Papier: bekannt, nicht im KTW */
+.ck-wrap.durch .ck-text b, .ck-wrap.durch .ck-text .zahl { text-decoration: line-through; text-decoration-thickness: 1.5px; color: var(--label2); }
+.box.durch { background: var(--fill2); color: var(--label2); }

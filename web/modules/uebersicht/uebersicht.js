@@ -1,4 +1,4 @@
-// Modul Übersicht (Tablet): Ampel, was jetzt zu tun ist, Kacheln, aktuelle Meldungen
+// Modul Übersicht (Tablet): Ampel, was jetzt zu tun ist, Kacheln, aktuelle Meldungen, Geräte mit Prüffrist
 BK.modul('uebersicht', {
   async start(root, ctx) {
     const { el, icon, api, leeren } = BK;
@@ -6,6 +6,7 @@ BK.modul('uebersicht', {
     const ampel = root.querySelector('[data-ampel]');
     const tun = root.querySelector('[data-tun]');
     const liste = root.querySelector('[data-liste]');
+    const geraeteBox = root.querySelector('[data-geraete]');
     const STATUS = { offen: 'Offen', in_bearbeitung: 'In Bearbeitung', erledigt: 'Erledigt' };
 
     // Ampel. Hat sie sich seit dem letzten Blick geändert, leuchtet sie kurz auf.
@@ -18,7 +19,7 @@ BK.modul('uebersicht', {
       leeren(ampel).append(
         el('div.dot', icon(bereit ? 'check' : 'alert')),
         el('div', el('h2', bereit ? 'Einsatzbereit' : 'Nicht einsatzbereit'),
-          el('p', bereit ? 'Der KTW darf fahren.' : [fz.ampel_grund, fz.ampel_am && 'seit ' + BK.datum(fz.ampel_am)].filter(Boolean).join(' · '))));
+          bereit ? null : el('p', [fz.ampel_grund, fz.ampel_am && 'seit ' + BK.datum(fz.ampel_am)].filter(Boolean).join(' · '))));
     }
 
     // Ein Satz: was das Team jetzt tun sollte
@@ -42,14 +43,14 @@ BK.modul('uebersicht', {
         ziel && el('button.btn', { type: 'button', onclick: () => ctx.oeffnen(ziel) }, 'Öffnen', icon('chevR'))].filter(Boolean));
     }
 
-    const kachel = (modul, farbe, ic, titel, text) => (fz.module || []).includes(modul)
+    const kachel = (modul, farbe, ic, titel) => (fz.module || []).includes(modul)
       ? el('button.tile', { type: 'button', onclick: () => ctx.oeffnen(modul) },
-          el('div.ic', { class: 'ic ' + farbe }, icon(ic)), el('h3', titel), el('p', text))
+          el('div.ic', { class: 'ic ' + farbe }, icon(ic)), el('h3', titel))
       : null;
     root.querySelector('[data-kacheln]').append(
-      kachel('mangel', 'f-rot', 'wrench', 'Mängelmeldung', 'Etwas am KTW oder an einem Gerät ist defekt.'),
-      kachel('material', 'f-blau', 'box', 'Materialanforderung', 'Etwas fehlt, ist verbraucht oder abgelaufen.'),
-      kachel('checkliste', 'f-navy', 'list', 'Checkliste', 'Vollzähligkeit prüfen.'));
+      kachel('mangel', 'f-rot', 'wrench', 'Mängelmeldung'),
+      kachel('material', 'f-blau', 'box', 'Materialanforderung'),
+      kachel('checkliste', 'f-navy', 'list', 'Checkliste'));
 
     async function laden() {
       try { fz = (await api.fahrzeug(fz.id)) || fz; } catch { /* alter Stand */ }
@@ -60,8 +61,7 @@ BK.modul('uebersicht', {
         const meldungen = alle.filter(m => m.status !== 'erledigt' || Date.now() - new Date(m.erledigt_am) < 7 * 864e5);
         tunZeigen(cl.find(c => c.zeitraum === frist.key), meldungen, frist);
         leeren(liste);
-        // Abschnitt nur zeigen, wenn es Meldungen gibt
-        for (const x of root.querySelectorAll('[data-aktuell]')) x.hidden = !meldungen.length;
+        if (!meldungen.length) liste.append(el('div.row', el('div', { class: 'ico f-gruen' }, icon('check')), el('div.t', el('b', 'Keine offenen Meldungen'))));
         for (const m of meldungen) {
           const titel = m.art === 'material'
             ? `Materialanforderung: ${m.positionen.length} Artikel`
@@ -73,12 +73,32 @@ BK.modul('uebersicht', {
             el('span', { class: 'pill ' + m.status }, STATUS[m.status])));
         }
       } catch (e) {
-        liste.hidden = false;
         leeren(liste).append(el('div.row', el('div.t', el('b', 'Liste lässt sich nicht laden.'), el('span', e.message))));
       }
     }
 
-    BK.beiNeu(laden);
+    // Geräte nach Prüffrist: überfällig rot, in 30 Tagen fällig orange
+    async function geraeteZeigen() {
+      try {
+        const g = (await api.geraete(fz.id)).filter(x => x.pruefung_bis).sort((a, b) => a.pruefung_bis.localeCompare(b.pruefung_bis));
+        leeren(geraeteBox);
+        if (!g.length) return geraeteBox.append(el('div.row', el('div.t', el('b', 'Keine Geräte mit Prüffrist'))));
+        const heute = new Date(); heute.setHours(0, 0, 0, 0);
+        for (const x of g) {
+          const tage = Math.round((new Date(x.pruefung_bis) - heute) / 864e5);
+          const [klasse, text] = tage < 0 ? ['offen', 'Überfällig'] : tage <= 30 ? ['in_bearbeitung', tage === 0 ? 'Heute fällig' : `In ${tage} ${tage === 1 ? 'Tag' : 'Tagen'}`] : [null, null];
+          geraeteBox.append(el('div.row',
+            el('div', { class: 'ico ' + (klasse === 'offen' ? 'f-rot' : klasse ? 'f-orange' : 'f-navy') }, icon('clock')),
+            el('div.t', el('b', x.name), el('span', [x.pruefart, 'Prüfung bis ' + BK.datum(x.pruefung_bis, false)].filter(Boolean).join(' · '))),
+            text ? el('span', { class: 'pill ' + klasse }, text) : null));
+        }
+      } catch (e) {
+        leeren(geraeteBox).append(el('div.row', el('div.t', el('b', 'Geräte lassen sich nicht laden.'), el('span', e.message))));
+      }
+    }
+
+    BK.beiNeu(() => { laden(); geraeteZeigen(); });
+    geraeteZeigen();
     await laden();
   },
 });

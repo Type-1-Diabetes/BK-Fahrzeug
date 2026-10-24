@@ -512,6 +512,7 @@ button.veh:active { background: var(--fill); }
 .pliste .pl-art b { font-weight: 500; }
 .pliste .pl-art span { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; }
 .pliste tr.abw td { background: color-mix(in srgb, var(--warn) 9%, var(--bg2)) !important; }
+.pliste tr.durch td.pl-art, .pliste tr.durch td.num { text-decoration: line-through; color: var(--label2); }
 /* Material-Spalte farbig wie in MPG.doc, Gruppe als unterstrichene Überschrift */
 .pl-gruppe td { font-weight: 700; text-decoration: underline; padding: 10px 10px 6px; background: var(--bg2) !important; }
 .pliste td.pl-mat { width: 150px; font-weight: 600; text-decoration: underline; background: var(--fill2); }

@@ -18,7 +18,7 @@
   --b-blau: #7a9cc8; --b-orange: #d9a300; --b-rot: #d23a3a; --b-gruen: #7fb046; --b-gelb: #cfc000;
   --bg: #1c1c1e; --bg2: #26262a; --fill: rgba(118,118,128,.24); --fill2: rgba(118,118,128,.36);
   --label: #fff; --label2: rgba(235,235,245,.64); --label3: rgba(235,235,245,.32); --sep: rgba(84,84,88,.6);
-  --tint: #8f9bff; --ok: #30d158; --ok-ink: #30d158; --bad: #ff453a; --bad-ink: #ff6961; --warn: #ff9f0a; --warn-ink: #ffb340;
+  --tint: #8f9bff; --ok: #29b84c; --ok-ink: #34c659; --bad: #e5392f; --bad-ink: #f25c54; --warn: #ff9f0a; --warn-ink: #ffb340;
   --bar: rgba(30,30,33,.94); --mac-side: #212124; --navy2: #2a2d8f;
   --schatten-fenster: inset 0 0 0 .5px rgba(255,255,255,.1), 0 0 0 .5px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.3), 0 18px 40px -10px rgba(0,0,0,.45);
 }

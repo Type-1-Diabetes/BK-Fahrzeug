@@ -11,7 +11,9 @@ BK.modul('material', {
     const MAX = 30;
     const GRUND = [['verbraucht', 'Verbraucht'], ['abgelaufen', 'Abgelaufen']];
     const zeilen = [];  // { artikel, groesse, menge, grund }
-    let bereiche = [], namen = [], weg = 'suchen';
+    let bereiche = [], namen = [], weg = 'suchen', filter = '';
+    const suche = root.querySelector('[data-katalog-suche]');
+    suche.oninput = () => { filter = suche.value.trim().toLowerCase(); zeichnenListe(); };
 
     const grundWahl = z => el('div.segc.grund', { role: 'radiogroup', 'aria-label': 'Grund' },
       GRUND.map(([w, t]) => el('button', { type: 'button', role: 'radio', 'aria-checked': String(z.grund === w), class: z.grund === w ? 'on' : null,
@@ -60,9 +62,11 @@ BK.modul('material', {
     function zeichnenListe() {
       leeren(katBox);
       if (!bereiche.length) { katBox.append(el('div.foot', 'Für diesen KTW gibt es keine Checkliste.')); return; }
+      let treffer = 0;
       for (const b of bereiche) {
-        const pos = b.positionen.filter(p => p.aktiv !== false);
+        const pos = b.positionen.filter(p => p.aktiv !== false && (!filter || p.artikel.toLowerCase().includes(filter)));
         if (!pos.length) continue;
+        treffer += pos.length;
         katBox.append(el('div.sect.mat-bereich', el('span', { class: 'streifen ' + (b.farbe || '') }), b.name));
         katBox.append(el('div.list', pos.map(p => {
           const z = zeilen.find(x => x.artikel === p.artikel);
@@ -78,20 +82,22 @@ BK.modul('material', {
             zeichnen();
           };
           return el('div.row.mk' + (menge ? '.an' : ''),
-            el('div.t', el('b', p.artikel), p.hinweis ? el('span', p.hinweis) : null),
+            el('div.t', el('b', p.artikel), BK.lfd(p).text ? el('span', BK.lfd(p).text) : null),
             z ? grundWahl(z) : null,
             stepper(menge, setzen, 0));
         })));
       }
+      if (!treffer) katBox.append(el('div.foot', 'Kein Artikel gefunden.'));
     }
 
     function zeichnen() {
+      if (!zeilen.length) zeilen.push({ artikel: '', groesse: '', menge: 1, grund: 'verbraucht' });
       for (const b of root.querySelectorAll('[data-weg] button')) {
         const an = b.dataset.v === weg;
         b.classList.toggle('on', an); b.setAttribute('aria-selected', String(an));
       }
       zeilenBox.hidden = weg !== 'suchen';
-      katBox.hidden = weg !== 'liste';
+      katBox.hidden = suche.hidden = weg !== 'liste';
       weg === 'suchen' ? zeichnenSuchen() : zeichnenListe();
     }
     for (const b of root.querySelectorAll('[data-weg] button')) b.onclick = () => { weg = b.dataset.v; zeichnen(); };

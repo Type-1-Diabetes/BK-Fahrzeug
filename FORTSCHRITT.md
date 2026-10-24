@@ -158,3 +158,22 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Kennzeichen beim Neuen Tablet und Bearbeiten (Migration 017).
 - Migration 017 eingespielt (geprüft: nur `authenticated`).
 - Offen: im Browser prüfen (Vorschau lädt nicht).
+
+## Tablet-Übersicht: Aktuell immer, Geräte mit Prüffrist (2026-10-24)
+- „Aktuell“ ist wieder immer sichtbar, leer mit „Keine offenen Meldungen“.
+- Neu darunter „Geräte mit Prüffrist“ (`api.geraete`), sortiert nach Datum: überfällig rot, ≤ 30 Tage orange mit „In X Tagen“.
+- Offen: im Browser prüfen.
+
+## Farben, Online-Stand, Tablet-Texte (2026-10-24)
+- Dunkel: `--ok` #29b84c, `--bad` #e5392f (etwas dunkler), Mac und Tablet.
+- Tablet meldet sich jede Minute als online, solange die App sichtbar ist (vorher nur beim Start).
+- Tablet-Übersicht: „Der KTW darf fahren.“ und Kachel-Untertitel entfernt (Grund bei „Nicht einsatzbereit“ bleibt).
+- Offen: im Browser prüfen.
+
+## Material-Liste, Durchstreichen, Handy raus (2026-10-24)
+- Mängelmeldung: Unterschriftszeile entfernt.
+- Material: leere Suchzeile bleibt immer da (Bug nach +1/−1 in der Liste); Suche über „Liste durchgehen“; Nr.-Angaben aus Hinweisen entfernt.
+- Checkliste (Tablet): Spalte „Lfd. Nr.“ entfernt. Neuer Knopf „Nicht im KTW“ streicht die Position durch (Spalte `durchgestrichen`, Migration 018), zählt nicht als Abweichung. Mac-Liste zeigt sie durchgestrichen.
+- Migration 018: Fahrzeug-Handy und Ladekabel Handy inaktiv.
+- Migration 018 eingespielt (geprüft).
+- Offen: im Browser prüfen.

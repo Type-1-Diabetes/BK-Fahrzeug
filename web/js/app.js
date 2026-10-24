@@ -100,10 +100,12 @@
   }
 
   // Fahrzeugstatus live: alle 10 s und beim Zurückkommen in die App. Bei Änderung lädt die offene Ansicht neu.
-  let ampelStand = null, ampelTimer = null;
+  let ampelStand = null, ampelTimer = null, letzterPing = 0;
   function statusBeobachten() {
     const pruefen = async () => {
       if (!ctx || document.visibilityState !== 'visible' || !navigator.onLine) return;
+      // Tablet meldet sich höchstens jede Minute als online (auch nach dem Wiederöffnen)
+      if (ctx.ich.tablet_id && Date.now() - letzterPing > 60000) { letzterPing = Date.now(); api.tabletPing().catch(() => {}); }
       let l;
       try { l = await api.ampeln(); } catch { return; }
       if (!ctx) return;
@@ -218,8 +220,8 @@
     navigieren = (name, extra) => oeffnen(name, inhalt, extra);
     navigieren(liste[0].name);
     vorladen(liste);
+    letzterPing = 0;
     statusBeobachten();
-    api.tabletPing().catch(() => {});
   }
 
   // Hülle Mac (MPGler/Admin) ----------------------------------------------

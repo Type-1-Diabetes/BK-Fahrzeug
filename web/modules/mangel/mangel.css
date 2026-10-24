@@ -9,8 +9,4 @@
 .mkopf b { display: block; margin-top: 2px; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .mkopf { grid-template-columns: 1fr 1fr; } .mkopf > div:nth-child(3) { border-left: 0; } .mkopf > div:nth-child(n+3) { border-top: .5px solid var(--sep); } }
 /* Unterschriftslinie: Name, Zeit und Tablet statt Unterschrift */
-.msig { display: flex; align-items: baseline; gap: 14px; margin: 28px 16px 0; padding-bottom: 8px; border-bottom: 1px solid var(--label3); }
-.msig span { font-size: 13px; color: var(--label2); flex: none; }
-.msig b { font-weight: 500; font-variant-numeric: tabular-nums; }
-.msig b.leer { font-weight: 400; color: var(--label3); }
 .msenden { width: 100%; margin-top: 24px; }

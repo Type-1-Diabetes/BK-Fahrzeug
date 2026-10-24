@@ -87,6 +87,11 @@
           const e = abw.get(p.id);
           const fehlt = e && e.ist != null && e.ist < p.soll;
           const l = BK.lfd(p);
+          if (e && e.durchgestrichen) return el('tr.durch',
+            el('td.pl-nr', l.nr),
+            j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
+            el('td.pl-art', el('b', p.artikel)), el('td.num', String(p.soll)), el('td.num', '–'), el('td'), el('td', p.wo || ''),
+            el('td', e.bemerkung ? 'Nicht im KTW · ' + e.bemerkung : 'Nicht im KTW'));
           return el('tr', { class: e ? 'abw' : null },
             el('td.pl-nr', l.nr),
             j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
