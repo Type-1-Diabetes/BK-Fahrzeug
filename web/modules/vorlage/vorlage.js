@@ -69,13 +69,21 @@
         inspektor();
       }
       mac.tastatur(tbody, id => waehlen(id));
+      async function schliessen() {
+        if (!await weiter()) return;
+        positionId = null; ungesichert = false;
+        tbody.querySelectorAll('tr.sel').forEach(tr => tr.classList.remove('sel'));
+        inspektor();
+      }
+      mac.escZu(root, insp, schliessen);
 
       // Formular rechts: Position bearbeiten oder neu anlegen (positionId = 'neu')
       function inspektor() {
         leeren(insp);
         const b = bereich();
         const p = positionId === 'neu' ? { artikel: '', hinweis: '', soll: 1, pruefart: 'keine', optional: false } : b && b.positionen.find(x => x.id === positionId);
-        if (!p) return insp.append(el('div.mleer', 'Position in der Tabelle wählen oder neu anlegen.'));
+        insp.classList.toggle('zu', !p);
+        if (!p) return;
         ungesichert = false;
         const merk = () => { ungesichert = true; hinweis.hidden = false; };
         const artikel = el('input.tf', { maxlength: 120, value: p.artikel, oninput: merk, 'aria-label': 'Artikel' });
@@ -95,7 +103,7 @@
             await laden();
           } catch (err) { alertDialog('Nicht gespeichert', err.message); return false; }
         }) }, positionId === 'neu' ? 'Hinzufügen' : 'Sichern');
-        insp.append(el('div.vo-form',
+        insp.append(mac.zuKnopf(schliessen), el('div.vo-form',
           el('h2', positionId === 'neu' ? 'Neue Position' : p.artikel),
           el('div.m', b.name),
           el('div.kv',

@@ -70,3 +70,13 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Vorlage bearbeiten: Admin › Checklisten. Bereiche (Name, Farbe, Reihenfolge) und Positionen (Artikel, Hinweis, Soll, Prüfung, optional) anlegen, ändern, verschieben, löschen. Benutzte Einträge werden nur ausgeblendet.
 - Getestet: Syntax. Nicht getestet: im Browser mit Login (braucht 010).
 - Demo-Login: Statt E-Mail und Passwort zwei Knöpfe „Als MPGler“ / „Als Admin“ (anonyme Sitzung + `demo_anmelden`, Migration 011). Jeder kann so Admin werden: nur für die Demo, vor dem eigenen Webserver entfernen. bk-v16.
+- Rechte Seitenansicht (Mängel, Vorlage): Schließen-Knopf oben rechts und Esc. Ohne Auswahl ist sie ausgeblendet. bk-v17.
+- Checkliste: Nichts ist mehr vorab abgehakt. Jede Position wird einzeln abgehakt (Kreis links), Zähler „x von 186 geprüft“ läuft mit, Knopf „Alle im Bereich vorhanden“. Haken liegen lokal auf dem Tablet, an den Server gehen weiter nur Abweichungen.
+- Checkliste springt beim Öffnen und Übernehmen nicht mehr nach oben.
+- Tabellen: höhere Zeilen, deutlichere Streifen und Trennlinien. Fahrzeug-Kacheln Radius 9 px, langer Checklisten-Text bricht um.
+- Tablet: Knopf „Abmelden“ oben rechts, mit PIN (trennt vom KTW, zurück zu Anmelden/Koppeln). bk-v18.
+- Offen: Benachrichtigung im normalen Browser-Tab. Es ist noch kein einziges Gerät angemeldet (Tabelle push_abos leer).
+- Seitenleiste Mac: Zahlen (Übersicht, Mängel, Material, Gegenzeichnen) aktualisieren sich alle 10 s von selbst.
+- Gegenzeichnen: Reiter „Übersicht“ (Zahlen + nur Abweichungen nach Bereich) und „Ganze Liste“ im Stil der Papierliste (farbige Bereichszeile, Nr., Artikel, Soll, Ist, Verfall/Prüfung, Bemerkung). Im Druck beides.
+- Tablet-Checkliste wie Papierliste: farbiger Bereichskopf, Spalten Vorh. · Nr. · Artikel · Soll/Ist, Lfd. Nr. aus der Vorlage („Nr. 1.2“). bk-v19.
+- Benachrichtigungen: gehen (waren beim Nutzer nur aus).

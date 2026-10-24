@@ -1,13 +1,22 @@
 /* Modul Gegenzeichnen (Mac) */
-.gz-wahl { margin: 18px 0 10px; }
-.gz-fuss { padding: 8px 0 0; }
 .gz-voll { display: none; }
-.gz-voll.zeigen { display: table; }
+.gz-voll.zeigen { display: block; }
 .gz-aus { display: none; }
-.gz-voll tr.abw td { color: var(--warn-ink); font-weight: 600; }
+.gz-befunde { margin-top: 16px; border: .5px solid var(--sep); border-radius: 10px; overflow: hidden; }
+.gz-bereich { padding: 7px 12px; font-weight: 600; font-size: 13px; border-left: 4px solid var(--label3); background: var(--fill); }
+.gz-bereich.blau { border-color: var(--b-blau); background: color-mix(in srgb, var(--b-blau) 14%, var(--bg2)); }
+.gz-bereich.orange { border-color: var(--b-orange); background: color-mix(in srgb, var(--b-orange) 14%, var(--bg2)); }
+.gz-bereich.rot { border-color: var(--b-rot); background: color-mix(in srgb, var(--b-rot) 12%, var(--bg2)); }
+.gz-bereich.gruen { border-color: var(--b-gruen); background: color-mix(in srgb, var(--b-gruen) 14%, var(--bg2)); }
+.gz-bereich.gelb { border-color: var(--b-gelb); background: color-mix(in srgb, var(--b-gelb) 22%, var(--bg2)); }
+.gz-befund { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: baseline; padding: 9px 12px; border-top: .5px solid var(--sep); }
+.gz-befund b { font-weight: 500; }
+.gz-befund div span { display: block; color: var(--label2); font-size: 13px; margin-top: 2px; }
+.gz-nr { color: var(--label2); font-variant-numeric: tabular-nums; }
+.gz-alles { display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 14px; border-radius: 10px; background: color-mix(in srgb, var(--ok) 10%, var(--bg2)); color: var(--ok-ink); font-weight: 500; }
 @media print {
-  .gz-voll { display: table; margin-top: 16px; }
-  .gz-aus { display: table; }
-  .gz-wahl { display: none; }
+  .gz-voll { display: block; margin-top: 16px; }
+  .gz-aus { display: block; }
+  .tabs { display: none; }
   .vfile .foot { color: #444; }
 }

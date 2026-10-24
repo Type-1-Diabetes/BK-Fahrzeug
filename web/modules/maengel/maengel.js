@@ -91,6 +91,14 @@
         inspektor();
       }
 
+      async function schliessen() {
+        if (!await weiter()) return;
+        gewaehlt = null;
+        tbody.querySelectorAll('tr.sel').forEach(tr => tr.classList.remove('sel'));
+        inspektor();
+      }
+      mac.escZu(root, insp, schliessen);
+
       function feld(f, werte) {
         const w = werte[f.key];
         const setz = v => { werte[f.key] = v; ungesichert = true; insp.querySelector('[data-ungesichert]').hidden = false; };
@@ -108,12 +116,13 @@
         const m = alle.find(x => x.id === gewaehlt);
         ungesichert = false;
         leeren(insp);
-        if (!m) return insp.append(el('div.mleer', 'Mängelmeldung links auswählen.'));
+        insp.classList.toggle('zu', !m);
+        if (!m) return;
         const fz = fzVon(m);
         const werte = { ...(m.bearbeitung || {}) };
         const fotos = el('div.fotos-m');
         const verlauf = el('div.tl');
-        insp.append(
+        insp.append(mac.zuKnopf(schliessen),
           el('h2', mac.titel(m)),
           el('div.m', [m.fahrzeug.name, BK.datum(m.erstellt_am), m.gemeldet_von].join(' · ')),
           m.geraet ? el('div.m', 'Gerät: ' + [m.geraet.name, m.geraet.seriennummer && 'SN ' + m.geraet.seriennummer].filter(Boolean).join(' · ')) : '',

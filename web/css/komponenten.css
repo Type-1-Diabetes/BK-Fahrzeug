@@ -107,8 +107,8 @@ select.field { appearance: none; min-height: 36px; }
 .tool .sp { flex: 1; }
 table.tab { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 table.tab th { position: sticky; top: 0; background: var(--bg2); text-align: left; font-weight: 500; color: var(--label2); height: 28px; padding: 0 10px; border-bottom: .5px solid var(--sep); white-space: nowrap; }
-table.tab td { height: 30px; padding: 0 10px; white-space: nowrap; }
-table.tab tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--fill) 45%, transparent); }
+table.tab td { height: 34px; padding: 0 10px; white-space: nowrap; border-bottom: .5px solid color-mix(in srgb, var(--sep) 55%, transparent); }
+table.tab tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--fill) 90%, transparent); }
 table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 @media (max-width: 760px) { .mside { width: 64px; } .mside h6, .mlogo, .who div, .si { font-size: 0; } .si svg { font-size: 20px; } }
 
@@ -196,7 +196,10 @@ table.tab tbody tr.sel .pill { background: rgba(255,255,255,.22); color: #fff; }
 .tabs button { padding: 8px 12px; color: var(--label2); border-bottom: 2px solid transparent; }
 .tabs button.on { color: var(--label); border-color: var(--navy2); font-weight: 600; }
 .insp { width: 360px; flex: none; border-left: .5px solid var(--sep); overflow: auto; padding: 16px; }
-.insp h2 { font-size: 17px; }
+.insp h2 { font-size: 17px; padding-right: 32px; }
+.insp { position: relative; }
+.insp.zu { display: none; }
+.insp-zu { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; padding: 0; justify-content: center; }
 .insp .m { color: var(--label2); margin-top: 3px; }
 .note { background: var(--fill); border-radius: 8px; padding: 10px 12px; margin-top: 10px; line-height: 1.45; white-space: pre-wrap; -webkit-user-select: text; user-select: text; }
 .ih { margin: 18px 0 6px; font-size: 11px; font-weight: 600; color: var(--label2); text-transform: uppercase; }
@@ -425,3 +428,18 @@ button.veh:active { background: var(--fill); }
   /* Tabellen ohne Klick (z. B. Tablets): Zeile leicht hervorheben, damit man sie beim Lesen verfolgen kann */
   table.tab tbody tr:not([data-id]):not([data-klick]):hover td { background: color-mix(in srgb, var(--fill) 50%, transparent); }
 }
+.tablet-ab { margin-left: 12px; min-height: 44px; padding: 0 12px; gap: 6px; color: var(--label2); }
+/* Papierliste (Checkliste wie auf Papier) */
+.pliste td { white-space: normal; vertical-align: top; padding-top: 7px; padding-bottom: 7px; height: auto; }
+.pliste tbody tr:nth-child(even) td { background: none; }
+.pliste tbody tr:nth-child(odd):not(.pl-bereich) td { background: color-mix(in srgb, var(--fill) 70%, transparent); }
+.pliste .pl-nr { color: var(--label2); width: 56px; }
+.pliste .pl-art b { font-weight: 500; }
+.pliste .pl-art span { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; }
+.pliste tr.abw td { background: color-mix(in srgb, var(--warn) 9%, var(--bg2)) !important; }
+.pl-bereich td { font-weight: 600; padding: 8px 10px; border-left: 4px solid var(--label3); background: var(--fill2); }
+.pl-bereich td.blau { border-color: var(--b-blau); background: color-mix(in srgb, var(--b-blau) 14%, var(--bg2)); }
+.pl-bereich td.orange { border-color: var(--b-orange); background: color-mix(in srgb, var(--b-orange) 14%, var(--bg2)); }
+.pl-bereich td.rot { border-color: var(--b-rot); background: color-mix(in srgb, var(--b-rot) 12%, var(--bg2)); }
+.pl-bereich td.gruen { border-color: var(--b-gruen); background: color-mix(in srgb, var(--b-gruen) 14%, var(--bg2)); }
+.pl-bereich td.gelb { border-color: var(--b-gelb); background: color-mix(in srgb, var(--b-gelb) 22%, var(--bg2)); }

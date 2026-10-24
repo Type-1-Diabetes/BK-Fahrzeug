@@ -67,25 +67,11 @@ BK.modul('gegenzeichnen', {
           el('div', el('span', 'Mitarbeiter 2'), el('b', c.mitarbeiter2 || '–'))),
         c.gegengezeichnet_am ? el('div.sub2', 'Gegengezeichnet am ' + BK.datum(c.gegengezeichnet_am)) : '',
         c.zurueck_grund && !c.abgeschlossen_am ? el('div.sub2.red', 'Zurück ans Team: ' + c.zurueck_grund) : '',
-        el('div.gz-wahl', el('div.mseg', { role: 'tablist', 'aria-label': 'Ansicht' },
-          el('button', { type: 'button', role: 'tab', class: ganz ? null : 'on', 'aria-selected': String(!ganz), onclick: () => { ganz = false; datei(); } }, `Abweichungen (${c.eintraege.length})`),
-          el('button', { type: 'button', role: 'tab', class: ganz ? 'on' : null, 'aria-selected': String(ganz), onclick: () => { ganz = true; datei(); } }, `Ganze Liste (${gesamt || '?'})`))),
-        el('table.tab' + (ganz ? '.gz-aus' : ''),
-          el('thead', el('tr', el('th', 'Bereich'), el('th', 'Artikel'), el('th', 'Befund'), el('th', 'Bemerkung'))),
-          el('tbody', c.eintraege.length ? c.eintraege.map(e => {
-            const p = pos.get(e.position_id);
-            return el('tr', el('td', el('span', { class: 'stripe ' + ((p && p.bereich.farbe) || '') }), p ? p.bereich.name : '–'),
-              el('td', p ? p.artikel : 'Position'), el('td.warnt', befund(p, e)), el('td', e.bemerkung || '–'));
-          }) : el('tr', el('td.mleer', { colspan: 4 }, 'Keine Abweichung.')))),
-        ganz ? '' : el('div.foot.gz-fuss', `${gesamt - c.eintraege.length} Positionen vollständig.`),
-        // Ganze Liste: am Bildschirm über den Umschalter, im Druck immer
-        el('table.tab.gz-voll' + (ganz ? '.zeigen' : ''),
-          el('thead', el('tr', el('th', 'Nr.'), el('th', 'Bereich'), el('th', 'Artikel'), el('th.num', 'Soll'), el('th.num', 'Ist'), el('th', 'Bemerkung'))),
-          el('tbody', [...pos.values()].map(p => {
-            const e = c.eintraege.find(x => x.position_id === p.id);
-            return el('tr', { class: e ? 'abw' : null }, el('td', String(p.nr)), el('td', el('span', { class: 'stripe ' + (p.bereich.farbe || '') }), p.bereich.name), el('td', p.artikel), el('td.num', String(p.soll)),
-              el('td.num', e && e.ist != null ? String(e.ist) : String(p.soll)), el('td', e ? [e.verfall && 'Verfall ' + BK.datum(e.verfall, false), e.bemerkung].filter(Boolean).join(' · ') : 'vollständig'));
-          }))),
+        el('div.tabs', { role: 'tablist', 'aria-label': 'Ansicht' }, [['kurz', 'Übersicht'], ['ganz', `Ganze Liste (${gesamt || '?'})`]].map(([k, t]) =>
+          el('button', { type: 'button', role: 'tab', class: (k === 'ganz') === ganz ? 'on' : null, 'aria-selected': String((k === 'ganz') === ganz), onclick: () => { ganz = k === 'ganz'; datei(); } }, t))),
+        el('div.gz-kurz' + (ganz ? '.gz-aus' : ''), uebersicht(c, pos, gesamt, befund)),
+        // Ganze Liste wie die Papierliste: am Bildschirm über den Reiter, im Druck immer
+        el('div.gz-voll' + (ganz ? '.zeigen' : ''), BK.papierliste(bereiche, c.eintraege)),
         warten ? el('div.acts',
           el('button.pbtn', { type: 'button', onclick: async () => {
             const grund = await promptDialog('Zurück ans Team?', 'Das Team sieht den Grund auf dem Tablet und kann die Checkliste ändern.', { placeholder: 'z. B. Bereich Sauerstoff bitte nochmal prüfen', confirmLabel: 'Zurückgeben' });
@@ -96,6 +82,36 @@ BK.modul('gegenzeichnen', {
             if (!await confirmDialog('Gegenzeichnen?', `${c.fahrzeug.name}, ${quartal(c.zeitraum)}. Dein Name und die Uhrzeit werden gespeichert.`)) return;
             try { await api.checklisteGegenzeichnen(c.id); showToast(`${c.fahrzeug.name} gegengezeichnet`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
           } }, 'Gegenzeichnen')) : '');
+    }
+
+    // Kurz: Zahlen oben, darunter nur, was nicht stimmt, nach Bereich
+    function uebersicht(c, pos, gesamt, befund) {
+      const e = c.eintraege;
+      const fehlt = e.filter(x => { const p = pos.get(x.position_id); return x.ist != null && p && x.ist < p.soll; }).length;
+      const verfall = e.filter(x => x.verfall).length;
+      const kasten = el('div.gz-befunde');
+      const nachBereich = new Map();
+      for (const x of e) {
+        const p = pos.get(x.position_id);
+        const k = p ? p.bereich.id : '?';
+        if (!nachBereich.has(k)) nachBereich.set(k, { b: p && p.bereich, l: [] });
+        nachBereich.get(k).l.push([p, x]);
+      }
+      for (const { b, l } of nachBereich.values()) {
+        kasten.append(el('div', { class: 'gz-bereich ' + ((b && b.farbe) || '') }, b ? b.name : 'Unbekannter Bereich'),
+          ...l.map(([p, x]) => el('div.gz-befund',
+            el('span.gz-nr', p ? BK.lfd(p).nr : ''),
+            el('div', el('b', p ? p.artikel : 'Position'), x.bemerkung ? el('span', x.bemerkung) : null),
+            el('span.warnt', befund(p, x)))));
+      }
+      return [
+        el('div.kpis',
+          el('div.kpi', el('span', 'Geprüft'), el('b', `${gesamt} Positionen`)),
+          el('div.kpi', el('span', 'Vollständig'), el('b.gruen-t', String(gesamt - e.length))),
+          el('div.kpi', el('span', 'Fehlt'), el('b', { class: fehlt ? 'warnt' : null }, String(fehlt))),
+          el('div.kpi', el('span', 'Verfall / Prüffrist'), el('b', { class: verfall ? 'warnt' : null }, String(verfall)))),
+        e.length ? kasten : el('div.gz-alles', icon('check'), 'Alles vollständig. Nichts fehlt, nichts läuft ab.'),
+      ];
     }
 
     root.querySelector('[data-pdf]').onclick = () => { if (gewaehlt) window.print(); };

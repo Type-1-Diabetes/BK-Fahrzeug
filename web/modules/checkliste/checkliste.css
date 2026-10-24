@@ -23,10 +23,15 @@
 .ckl-kopf .streifen.blau { background: var(--b-blau); } .ckl-kopf .streifen.orange { background: var(--b-orange); } .ckl-kopf .streifen.rot { background: var(--b-rot); }
 .ckl-kopf .streifen.gruen { background: var(--b-gruen); } .ckl-kopf .streifen.gelb { background: var(--b-gelb); }
 .ckl-kopf .btn { min-height: 44px; font-size: 15px; }
-.ck { display: flex; align-items: center; gap: 14px; min-height: 62px; padding: 10px 16px; position: relative; width: 100%; text-align: left; }
+.ck { display: flex; align-items: center; min-height: 62px; position: relative; width: 100%; }
+.ck-text { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; align-self: stretch; padding: 10px 16px 10px 4px; text-align: left; }
+.ck .box { margin: 0 4px 0 6px; box-shadow: 0 0 0 8px transparent; }
+.ck .box.aus { background: transparent; border: 2px solid var(--label3, #c7c7cc); }
+.ck .box.an { background: var(--ok); }
+.ckl-alle { display: flex; justify-content: flex-end; margin-top: 12px; }
 .ck-wrap + .ck-wrap::before { content: ""; position: absolute; left: 58px; right: 0; border-top: .5px solid var(--sep); }
 .ck-wrap { position: relative; }
-.ck .box { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 17px; color: #fff; background: var(--ok); }
+.ck .box { width: 30px; height: 30px; outline-offset: 2px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 17px; color: #fff; background: var(--ok); }
 .ck .box.warn { background: var(--warn); }
 .ck .t { flex: 1; min-width: 0; }
 .ck .t b { display: block; font-weight: 400; }
@@ -49,3 +54,19 @@
   .ckl { flex-direction: column; }
   .ckl-side { width: auto; max-height: 34vh; border-right: 0; border-bottom: .5px solid var(--sep); }
 }
+.ck .box { position: relative; } .ck .box::after { content: ""; position: absolute; inset: -8px; }
+/* Wie die Papierliste: farbiger Bereichskopf, Spalten Vorh. · Nr. · Artikel · Soll / Ist */
+.ckl-kopf { padding: 10px 14px; border-radius: 10px; background: var(--fill); }
+.ckl-kopf.blau { background: color-mix(in srgb, var(--b-blau) 13%, var(--bg2)); }
+.ckl-kopf.orange { background: color-mix(in srgb, var(--b-orange) 14%, var(--bg2)); }
+.ckl-kopf.rot { background: color-mix(in srgb, var(--b-rot) 11%, var(--bg2)); }
+.ckl-kopf.gruen { background: color-mix(in srgb, var(--b-gruen) 13%, var(--bg2)); }
+.ckl-kopf.gelb { background: color-mix(in srgb, var(--b-gelb) 22%, var(--bg2)); }
+.ck-spalten { display: grid; grid-template-columns: 46px 52px 1fr auto; gap: 0; padding: 8px 16px 6px 0; font-size: 12px; font-weight: 600; color: var(--label2); border-bottom: .5px solid var(--sep); }
+.ck-spalten span:first-child { text-align: center; }
+.ck-nr { width: 52px; flex: none; color: var(--label2); font-variant-numeric: tabular-nums; font-size: 15px; }
+.ck-text { gap: 0; padding-left: 4px; }
+.ck-text .t { margin-right: 12px; }
+.ck-liste .ck-wrap:nth-child(odd) { background: color-mix(in srgb, var(--fill) 45%, var(--bg2)); }
+.ck-liste .ck-wrap.dev { background: color-mix(in srgb, var(--warn) 9%, var(--bg2)); }
+.ck-wrap + .ck-wrap::before { left: 0; }

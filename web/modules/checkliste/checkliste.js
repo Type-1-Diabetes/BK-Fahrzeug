@@ -42,9 +42,12 @@ BK.modul('checkliste', {
     try { lokal = JSON.parse(localStorage.getItem(SPEICHER)) || {}; } catch { /* leer */ }
     const eintraege = Object.fromEntries((offen.eintraege || []).map(e => [e.position_id, e]));
     Object.assign(eintraege, lokal.eintraege || {});
-    const geprueft = new Set(lokal.geprueft || []);
+    // Je Position abgehakt (vorhanden). Abweichungen zählen auch als geprüft.
+    const ok = new Set(lokal.ok || []);
+    const istGeprueft = p => ok.has(p.id) || !!eintraege[p.id];
+    const bereichFertig = b => b.positionen.every(istGeprueft);
     for (const k of Object.keys(eintraege)) if (eintraege[k] === null) delete eintraege[k];
-    const sichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify({ eintraege: lokal.eintraege || {}, geprueft: [...geprueft] })); } catch { /* voll */ } };
+    const sichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify({ eintraege: lokal.eintraege || {}, ok: [...ok] })); } catch { /* voll */ } };
     const lokalSetzen = (pid, wert) => { lokal.eintraege = lokal.eintraege || {}; lokal.eintraege[pid] = wert; sichern(); };
 
     let aktiv = 0;
@@ -56,9 +59,17 @@ BK.modul('checkliste', {
     const main = el('section.ckl-main');
     leeren(box).append(side, main);
 
+    // Neu zeichnen, ohne dass die Listen nach oben springen
     function seite() {
+      const pos = [side.scrollTop, main.querySelector('.content')?.scrollTop || 0];
+      zeichnen();
+      side.scrollTop = pos[0];
+      const c = main.querySelector('.content'); if (c) c.scrollTop = pos[1];
+    }
+
+    function zeichnen() {
       // Linke Spalte
-      const n = bereiche.filter(b => geprueft.has(b.id)).reduce((s, b) => s + b.positionen.length, 0);
+      const n = bereiche.reduce((s, b) => s + b.positionen.filter(istGeprueft).length, 0);
       leeren(side).append(
         el('h2', 'Checkliste'),
         el('div.foot', { style: 'padding:0' }, zeitraumText(offen.zeitraum)),
@@ -68,26 +79,30 @@ BK.modul('checkliste', {
         ...bereiche.map((b, i) => {
           const abw = abweichungen(b);
           return el('button', { type: 'button', class: `area ${b.farbe || ''} ${i === aktiv ? 'on' : ''}`, onclick: () => { aktiv = i; offenePosition = null; seite(); } },
-            b.name, el('span', abw ? el('b.abw', abw + ' offen') : null, geprueft.has(b.id) ? icon('check') : `${b.positionen.length}`));
+            b.name, el('span', abw ? el('b.abw', abw + ' offen') : null, bereichFertig(b) ? icon('check') : `${b.positionen.filter(istGeprueft).length}/${b.positionen.length}`));
         }),
         el('button', { type: 'button', class: 'area' + (aktiv === bereiche.length ? ' on' : ''), onclick: () => { aktiv = bereiche.length; seite(); } }, 'Abschließen', el('span', icon('chevR'))));
 
       if (aktiv === bereiche.length) return abschluss();
       const b = bereiche[aktiv];
       const fehlend = b.positionen.filter(p => eintraege[p.id] && eintraege[p.id].ist != null && eintraege[p.id].ist < p.soll);
-      const zeilen = el('div.list');
+      const alleDa = b.positionen.every(istGeprueft);
+      const zeilen = el('div.list.ck-liste', el('div.ck-spalten', el('span', 'Vorh.'), el('span', 'Nr.'), el('span', 'Artikel'), el('span', 'Soll / Ist')));
       for (const p of b.positionen) zeilen.append(zeile(p));
       leeren(main).append(
         el('div.content',
-          el('div.ckl-kopf', el('span', { class: 'streifen ' + (b.farbe || '') }), el('h2', b.name),
+          el('div', { class: 'ckl-kopf ' + (b.farbe || '') }, el('span', { class: 'streifen ' + (b.farbe || '') }), el('h2', b.name),
             fehlend.length ? el('button.btn.sec', { type: 'button', onclick: () => ctx.oeffnen('material', {
               positionen: fehlend.map(p => ({ artikel: p.artikel, menge: p.soll - eintraege[p.id].ist })) }) }, icon('box'), 'Fehlendes anfordern') : null),
           zeilen,
-          el('div.foot', 'Alles ist als vollständig vorbelegt. Tippe nur an, was fehlt, defekt ist oder bald abläuft.')),
+          el('div.ckl-alle', el('button.btn.sec', { type: 'button', onclick: () => {
+            b.positionen.forEach(p => alleDa ? ok.delete(p.id) : ok.add(p.id)); sichern(); seite();
+          } }, icon('check'), alleDa ? 'Haken im Bereich entfernen' : 'Alle im Bereich vorhanden')),
+          el('div.foot', 'Hake ab, was vorhanden ist. Tippe auf den Namen, wenn etwas fehlt, defekt ist oder bald abläuft.')),
         el('div.bottombar',
           aktiv > 0 ? el('button.btn.sec', { type: 'button', onclick: () => gehe(aktiv - 1) }, icon('chevL'), bereiche[aktiv - 1].name) : null,
           el('span.sp'),
-          el('button.btn', { type: 'button', onclick: () => { geprueft.add(b.id); sichern(); gehe(aktiv + 1); } },
+          el('button.btn', { type: 'button', onclick: () => gehe(aktiv + 1) },
             aktiv + 1 < bereiche.length ? 'Weiter zu ' + bereiche[aktiv + 1].name : 'Weiter zum Abschluss', icon('chevR'))));
     }
 
@@ -96,16 +111,23 @@ BK.modul('checkliste', {
     function untertitel(p, e) {
       if (e && e.bemerkung) return e.bemerkung;
       if (e && e.verfall) return 'Verfall ' + new Date(e.verfall).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' });
-      return p.hinweis || { verfall: 'Verfallsdatum prüfen', stk: 'STK prüfen', mtk: 'MTK prüfen' }[p.pruefart] || '';
+      return BK.lfd(p).rest || { verfall: 'Verfallsdatum prüfen', stk: 'STK prüfen', mtk: 'MTK prüfen' }[p.pruefart] || '';
     }
 
     function zeile(p) {
       const e = eintraege[p.id];
+      const da = ok.has(p.id);
+      const haken = el('button', { type: 'button', class: 'box' + (e ? ' warn' : da ? ' an' : ' aus'), 'aria-pressed': String(!!(e || da)),
+        'aria-label': p.artikel + (da ? ': Haken entfernen' : ': vorhanden'), onclick: ev => {
+          ev.stopPropagation();
+          if (e) { offenePosition = p.id; return seite(); }
+          da ? ok.delete(p.id) : ok.add(p.id); sichern(); seite();
+        } }, e ? icon('alert') : da ? icon('check') : null);
       const wrap = el('div', { class: 'ck-wrap' + (e ? ' dev' : '') },
-        el('button.ck', { type: 'button', 'aria-expanded': String(offenePosition === p.id), onclick: () => { offenePosition = offenePosition === p.id ? null : p.id; seite(); } },
-          el('div', { class: 'box' + (e ? ' warn' : '') }, icon(e ? 'alert' : 'check')),
+        el('div.ck', haken, el('button.ck-text', { type: 'button', 'aria-expanded': String(offenePosition === p.id), onclick: () => { offenePosition = offenePosition === p.id ? null : p.id; seite(); } },
+          el('span.ck-nr', BK.lfd(p).nr),
           el('div.t', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), el('span', untertitel(p, e))),
-          el('div.soll', e && e.ist != null ? ['Ist ', el('strong', String(e.ist)), ' / Soll ' + p.soll] : `${p.soll} / ${p.soll}`)));
+          el('div.soll', e && e.ist != null ? [String(p.soll) + ' / ', el('strong', String(e.ist))] : String(p.soll)))));
       if (offenePosition === p.id) wrap.append(editor(p, e));
       return wrap;
     }
@@ -118,7 +140,7 @@ BK.modul('checkliste', {
       const speichern = async entfernen => {
         const neu = entfernen ? null : { position_id: p.id, ist: ist === p.soll ? null : ist, verfall: verfall.value ? verfall.value + '-01' : null, bemerkung: bem.value.trim() || null };
         if (neu && neu.ist == null && !neu.verfall && !neu.bemerkung) return speichern(true);
-        if (neu) eintraege[p.id] = neu; else delete eintraege[p.id];
+        if (neu) eintraege[p.id] = neu; else { delete eintraege[p.id]; ok.add(p.id); sichern(); }
         lokalSetzen(p.id, neu);
         offenePosition = null;
         seite();
@@ -143,10 +165,10 @@ BK.modul('checkliste', {
       const m1 = el('input.field', { id: 'ckl_m1', maxlength: 100, autocomplete: 'off', placeholder: 'Vor- und Nachname' });
       const m2 = el('input.field', { id: 'ckl_m2', maxlength: 100, autocomplete: 'off', placeholder: 'Vor- und Nachname' });
       const fehler = el('div.ffehler', { role: 'alert' });
-      const nichtGeprueft = bereiche.filter(b => !geprueft.has(b.id));
+      const nichtGeprueft = bereiche.flatMap(b => b.positionen).filter(p => !istGeprueft(p));
       const knopf = el('button.btn', { type: 'button', onclick: async () => {
         if (m1.value.trim().length < 2 || m2.value.trim().length < 2) { fehler.textContent = 'Bitte beide Namen eintragen.'; return; }
-        if (nichtGeprueft.length && !await confirmDialog('Noch nicht alles geprüft', `${nichtGeprueft.length} Bereiche sind noch nicht durchgesehen. Trotzdem abschließen?`)) return;
+        if (nichtGeprueft.length && !await confirmDialog('Noch nicht alles geprüft', `${nichtGeprueft.length} Positionen sind noch nicht abgehakt. Trotzdem abschließen?`)) return;
         knopf.disabled = true; knopf.classList.add('laedt');
         try {
           await api.checklisteAbschliessen(offen.id, m1.value.trim(), m2.value.trim());

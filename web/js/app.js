@@ -14,6 +14,7 @@
   // Neue Daten vom Server (api.js): nur die offene Ansicht lädt neu
   let neuHoerer = null;
   BK.beiNeu = fn => { neuHoerer = fn; };
+  document.addEventListener('bk:neu', () => { if (ctx && !ctx.ich.tablet_id) zaehlen(); });
   document.addEventListener('bk:neu', () => { if (neuHoerer && !document.querySelector('._ad-open, .blatt-overlay')) neuHoerer(); });
 
   // HTML der Module einmal holen und merken
@@ -109,6 +110,7 @@
         const ich = await api.ich().catch(() => null);
         if (ich && !ich.tablet_id) return abmeldenUndStart('Dieses Tablet wurde entkoppelt.');
       }
+      if (!ctx.ich.tablet_id) zaehlen();  // Zahlen in der Seitenleiste live halten
       const neu = Object.fromEntries(l.map(f => [f.id, f.ampel + '|' + (f.ampel_grund || '')]));
       if (ampelStand) {
         const geaendert = l.filter(f => ampelStand[f.id] && ampelStand[f.id] !== neu[f.id]);
@@ -133,14 +135,14 @@
   // Tablet-Menü: Infos zum Gerät und Entkoppeln (nur mit PIN)
   async function tabletMenue() {
     const fz = ctx.fahrzeug;
-    if (!await confirmDialog(`Tablet ${fz.name}`, 'Entkoppeln trennt dieses Tablet vom KTW. Danach zeigt es wieder die Anmeldung und braucht einen neuen Code. Dafür ist die Entkoppel-PIN nötig.')) return;
-    const pin = await promptDialog('Entkoppel-PIN', 'Die PIN hat der Admin.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Entkoppeln' });
+    if (!await confirmDialog(`Tablet ${fz.name} abmelden?`, 'Das Tablet wird vom KTW getrennt und zeigt wieder Anmelden und Koppeln. Danach braucht es einen neuen Code. Dafür ist die PIN nötig.')) return;
+    const pin = await promptDialog('PIN eingeben', 'Die PIN hat der Admin.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Abmelden' });
     if (pin == null) return;
     try {
       const fehler = await api.tabletEntkoppeln(pin.trim());
       if (fehler) return alertDialog('Nicht entkoppelt', fehler);
     } catch (e) { return alertDialog('Nicht entkoppelt', e.offline ? 'Zum Entkoppeln braucht das Tablet Internet.' : e.message); }
-    await abmeldenUndStart('Tablet ist entkoppelt.');
+    await abmeldenUndStart('Tablet ist abgemeldet.');
   }
 
   async function abmeldenUndStart(hinweis) {
@@ -164,7 +166,8 @@
         el('nav.ftabs', { 'aria-label': 'Bereiche' }, reiter(liste).map(r =>
           el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
         el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
-          el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue)),
+          el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue),
+        el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden')),
       inhalt);
     BK.warteschlange.beiAenderung(l => {
       queue.hidden = !l.length;

@@ -24,4 +24,9 @@
   window.BK.datum = (d, zeit = true) => d ? new Date(d).toLocaleString('de-DE', zeit
     ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
     : { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
+  // Lfd. Nr. wie auf der Papierliste („Nr. 1.2 · …“ im Hinweis), sonst die laufende Nummer
+  window.BK.lfd = p => {
+    const m = /^Nr\.\s*([\d.]+)\s*(?:·\s*)?(.*)$/.exec(p.hinweis || '');
+    return m ? { nr: m[1].replace(/\.$/, ''), rest: m[2] } : { nr: String(p.nr), rest: p.hinweis || '' };
+  };
 })();

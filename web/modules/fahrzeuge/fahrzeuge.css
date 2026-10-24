@@ -6,7 +6,7 @@
 .fz-wache { font-size: 13px; font-weight: 600; color: var(--label2); margin: 18px 2px 10px; }
 .fz-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .fz-kachel {
-  display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 12px; border-radius: 12px; text-align: left;
+  display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 12px; border-radius: 9px; text-align: left;
   background: var(--bg2); box-shadow: 0 0 0 .5px var(--sep), 0 1px 2px rgba(0,0,0,.05);
   transition: box-shadow .18s cubic-bezier(.2,.8,.2,1), transform .18s cubic-bezier(.2,.8,.2,1);
 }
@@ -19,7 +19,7 @@
 .fz-kz, .fz-grund-k { font-size: 12px; min-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fz-kz { color: var(--label2); }
 .fz-grund-k { color: var(--bad-ink); }
-.fz-zahlen { display: grid; grid-template-columns: auto auto 1fr; gap: 18px; margin: 8px 0 0; padding-top: 10px; border-top: .5px solid var(--sep); }
+.fz-zahlen { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 18px; margin: 8px 0 0; padding-top: 10px; border-top: .5px solid var(--sep); }
 .fz-zahlen dt { color: var(--label2); font-size: 11px; }
 .fz-zahlen dd { margin: 2px 0 0; font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .gruen-t { color: var(--ok-ink); }
@@ -28,3 +28,4 @@
 .fz-zurueck svg { font-size: 16px; }
 .fz-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; }
 .fz-trenner { width: .5px; height: 20px; background: var(--sep); margin: 0 4px; }
+.fz-zahlen > div:last-child dd { white-space: normal; }

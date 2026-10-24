@@ -34,6 +34,14 @@
       return true;
     },
 
+    // Rechte Seitenansicht schließen: Knopf oben rechts und Esc
+    zuKnopf: fn => BK.el('button.tb.insp-zu', { type: 'button', title: 'Schließen (Esc)', 'aria-label': 'Schließen', onclick: fn }, BK.icon('x')),
+    escZu(root, insp, fn) {
+      root.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !insp.classList.contains('zu') && !document.querySelector('.auswahl-liste, .code-overlay, dialog[open]')) fn();
+      });
+    },
+
     // Klick auf Zeile wählt aus, Pfeiltasten wandern (wie Finder-Listen)
     tastatur(tbody, waehlen) {
       tbody.tabIndex = 0;
@@ -46,5 +54,28 @@
         e.preventDefault();
       });
     },
+  };
+
+  // Ganze Checkliste wie die Papierliste: Bereich als farbige Zeile, dann Nr., Artikel, Soll, Ist, Frist, Bemerkung
+  BK.papierliste = (bereiche, eintraege) => {
+    const { el } = BK;
+    const abw = new Map((eintraege || []).map(e => [e.position_id, e]));
+    const frist = { verfall: 'Verfall', stk: 'STK', mtk: 'MTK' };
+    return el('table.tab.pliste',
+      el('thead', el('tr', el('th', 'Nr.'), el('th', 'Artikel'), el('th.num', 'Soll'), el('th.num', 'Ist'), el('th', 'Verfall / Prüfung'), el('th', 'Bemerkung'))),
+      ...bereiche.map(b => el('tbody',
+        el('tr.pl-bereich', el('td', { colspan: 6, class: b.farbe || null }, b.name)),
+        ...b.positionen.map(p => {
+          const e = abw.get(p.id);
+          const fehlt = e && e.ist != null && e.ist < p.soll;
+          const l = BK.lfd(p);
+          return el('tr', { class: e ? 'abw' : null },
+            el('td.pl-nr', l.nr),
+            el('td.pl-art', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), l.rest ? el('span', l.rest) : null),
+            el('td.num', String(p.soll)),
+            el('td.num', { class: fehlt ? 'warnt' : null }, e && e.ist != null ? String(e.ist) : String(p.soll)),
+            el('td', { class: e && e.verfall ? 'warnt' : null }, e && e.verfall ? BK.datum(e.verfall, false) : frist[p.pruefart] || ''),
+            el('td', e ? e.bemerkung || 'Abweichung' : ''));
+        }))));
   };
 })();
