@@ -16,6 +16,11 @@
     checkliste_zurueck: () => ['Checkliste zurück ans Team', 'list'],
     tablet_gekoppelt: () => ['Tablet gekoppelt', 'tablet'],
     tablet_entkoppelt: () => ['Tablet entkoppelt', 'tablet'],
+    tablet_angelegt: () => ['Tablet angelegt', 'tablet'],
+    tablet_neuer_code: () => ['Neuer Kopplungscode', 'tablet'],
+    tablet_bearbeitet: () => ['Tablet bearbeitet', 'tablet'],
+    tablet_gesperrt: () => ['Tablet gesperrt', 'tablet'],
+    tablet_entsperrt: () => ['Tablet entsperrt', 'tablet'],
     meldung_geloescht: d => [d.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', 'alert'],
     checkliste_geloescht: () => ['Checkliste gelöscht', 'list'],
   };
@@ -64,7 +69,7 @@
           const g = d.toDateString() === heute ? 'Heute' : d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
           if (g !== gruppe) { gruppe = g; liste = el('div.list'); vBox.append(el('div.sect', g), liste); }
           const m = v.meldung_id && mNach[v.meldung_id];
-          const [was, ic] = (AKTION[v.aktion] || (() => [v.aktion, 'clock']))(v.details || {}, m);
+          const [was, ic] = (AKTION[v.aktion] || (() => [BK.aktionText(v.aktion), 'clock']))(v.details || {}, m);
           const datum = g === 'Heute' ? zeit(v.am) : d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ' · ' + zeit(v.am);
           liste.append(el('div.row',
             el('div', { class: 'ico ' + (FARBE[ic] || 'f-navy') }, icon(ic)),

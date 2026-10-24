@@ -16,12 +16,12 @@ BK.modul('fristen', {
     // Eine Zeile: Name, Intervall, Tage vorher, Knopf. eigen = false heißt „wie Standard“ (nur bei Wachen).
     function zeile(titel, frist, wache, standard) {
       const auswahl = el('select.tf.auto', { 'aria-label': 'Intervall ' + titel },
-        wache ? el('option', { value: '' }, 'Wie Standard') : null,
+        wache ? el('option', { value: '' }, 'Standard') : null,
         ...Object.entries(INTERVALLE).map(([k, t]) => el('option', { value: k, selected: frist && frist.intervall === k }, t)));
       if (wache && !frist) auswahl.value = '';
       const tage = el('input.tf', { type: 'number', min: 0, max: 90, value: frist ? frist.vorlauf_tage : standard.vorlauf_tage, 'aria-label': 'Tage vorher' });
       const info = el('span.fr-info');
-      const knopf = el('button.pbtn', { type: 'button' }, 'Sichern');
+      const knopf = el('button.pbtn', { type: 'button' }, 'Speichern');
       const zeigen = () => {
         const eigen = !wache || auswahl.value;
         tage.disabled = !eigen;

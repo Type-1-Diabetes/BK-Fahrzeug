@@ -24,7 +24,6 @@ BK.modul('uebersicht', {
     // Ein Satz: was das Team jetzt tun sollte
     function tunZeigen(checkliste, meldungen, frist) {
       const { tage, bis } = frist;
-      const offen = meldungen.filter(m => m.status !== 'erledigt').length;
       let titel, text, ziel = null, warn = false;
       if (checkliste && checkliste.zurueck_grund && !checkliste.abgeschlossen_am) {
         [titel, text, ziel, warn] = ['Checkliste korrigieren', 'Zurück vom MPGler: ' + checkliste.zurueck_grund, 'checkliste', true];
@@ -33,9 +32,10 @@ BK.modul('uebersicht', {
       } else if (!checkliste && frist.bald) {
         [titel, text, ziel, warn] = [tage < 0 ? 'Checkliste überfällig' : `Checkliste fällig bis ${bis}`, 'Vollzähligkeit prüfen und abschließen.', 'checkliste', true];
       } else {
-        titel = 'Alles erledigt';
-        text = offen ? (offen === 1 ? '1 Meldung wird gerade bearbeitet.' : `${offen} Meldungen werden gerade bearbeitet.`) : 'Defekt oder etwas fehlt? Unten melden.';
+        tun.hidden = true;  // nichts steht an
+        return;
       }
+      tun.hidden = false;
       if (ziel && !(fz.module || []).includes(ziel)) ziel = null;
       leeren(tun).className = 'tun' + (warn ? ' warn' : ' ok');
       tun.append(...[el('div.tun-ic', icon(warn ? 'alert' : ziel ? 'list' : 'check')), el('div.t', el('b', titel), el('span', text)),
@@ -60,7 +60,8 @@ BK.modul('uebersicht', {
         const meldungen = alle.filter(m => m.status !== 'erledigt' || Date.now() - new Date(m.erledigt_am) < 7 * 864e5);
         tunZeigen(cl.find(c => c.zeitraum === frist.key), meldungen, frist);
         leeren(liste);
-        if (!meldungen.length) liste.append(el('div.row', el('div.t', el('b', 'Keine offenen Meldungen.'), el('span', 'Neue Meldungen erscheinen hier, bis sie erledigt sind.'))));
+        // Abschnitt nur zeigen, wenn es Meldungen gibt
+        for (const x of root.querySelectorAll('[data-aktuell]')) x.hidden = !meldungen.length;
         for (const m of meldungen) {
           const titel = m.art === 'material'
             ? `Materialanforderung: ${m.positionen.length} Artikel`
@@ -72,6 +73,7 @@ BK.modul('uebersicht', {
             el('span', { class: 'pill ' + m.status }, STATUS[m.status])));
         }
       } catch (e) {
+        liste.hidden = false;
         leeren(liste).append(el('div.row', el('div.t', el('b', 'Liste lässt sich nicht laden.'), el('span', e.message))));
       }
     }

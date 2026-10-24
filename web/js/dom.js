@@ -3,6 +3,8 @@
   window.BK = window.BK || {};
   // Hell ist Standard. Dunkel nur auf Wunsch (Einstellungen, Login, Tablet), gilt pro Gerät.
   try { if (localStorage.getItem('bk_theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch { /* privat */ }
+  // Unbekannte Verlaufsaktion lesbar machen: tablet_angelegt → Tablet angelegt
+  window.BK.aktionText = a => { const t = String(a || '').replace(/_/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
   // el('div.row', {onclick}, 'Text', kindElement)
   window.BK.el = function (tag, attrs, ...kinder) {
     const [name, ...klassen] = tag.split('.');

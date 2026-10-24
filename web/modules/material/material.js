@@ -1,50 +1,113 @@
-// Modul Material anfordern (Tablet). Zeilen wie auf dem Papier: Artikel, Größe, Menge, verbraucht oder abgelaufen.
+// Modul Material anfordern (Tablet). Zwei Wege: Artikel suchen oder die Liste der Checkliste durchgehen und Mengen setzen.
 BK.modul('material', {
   async start(root, ctx) {
-    const { el, icon, api } = BK;
+    const { el, icon, api, leeren } = BK;
     const fz = ctx.fahrzeug;
     const zeilenBox = root.querySelector('[data-zeilen]');
+    const katBox = root.querySelector('[data-katalog]');
     const name = root.querySelector('#mat_name');
     if (ctx.ich.rolle) name.value = ctx.ich.name || '';
     const knopf = root.querySelector('[data-senden]');
     const MAX = 30;
+    const GRUND = [['verbraucht', 'Verbraucht'], ['abgelaufen', 'Abgelaufen']];
     const zeilen = [];  // { artikel, groesse, menge, grund }
+    let bereiche = [], namen = [], weg = 'suchen';
 
-    // Artikel aus der Checkliste als Vorschläge
-    if (fz.vorlage_id) api.vorlage(fz.vorlage_id).then(bereiche => {
-      const namen = [...new Set(bereiche.flatMap(b => b.positionen.map(p => p.artikel)))].sort((a, b) => a.localeCompare(b, 'de'));
-      root.querySelector('#mat_artikel').append(...namen.map(n => el('option', { value: n })));
-    }).catch(() => { /* ohne Vorschläge geht es auch */ });
+    const grundWahl = z => el('div.segc.grund', { role: 'radiogroup', 'aria-label': 'Grund' },
+      GRUND.map(([w, t]) => el('button', { type: 'button', role: 'radio', 'aria-checked': String(z.grund === w), class: z.grund === w ? 'on' : null,
+        onclick: () => { z.grund = w; zeichnen(); } }, t)));
 
-    function zeichnen() {
-      BK.leeren(zeilenBox);
+    const stepper = (wert, setzen, min) => el('div.stepper',
+      el('button', { type: 'button', 'aria-label': 'weniger', disabled: wert <= min, onclick: () => setzen(wert - 1) }, icon('minus')),
+      el('span.q', String(wert)),
+      el('button', { type: 'button', 'aria-label': 'mehr', disabled: wert >= 999, onclick: () => setzen(wert + 1) }, icon('plus')));
+
+    // Große Vorschlagsliste unter dem Artikelfeld (statt der kleinen Browser-Liste)
+    function vorschlaege(input, z) {
+      const box = el('div.mat-vorschlag', { role: 'listbox', hidden: true });
+      const fuellen = () => {
+        const q = input.value.trim().toLowerCase();
+        const treffer = q ? namen.filter(n => n.toLowerCase().includes(q) && n.toLowerCase() !== q).slice(0, 8) : [];
+        leeren(box).append(...treffer.map(n => el('button', { type: 'button', role: 'option',
+          onpointerdown: e => e.preventDefault(),
+          onclick: () => { z.artikel = n; input.value = n; box.hidden = true; } }, n)));
+        box.hidden = !treffer.length;
+      };
+      input.addEventListener('input', () => { z.artikel = input.value; fuellen(); });
+      input.addEventListener('focus', fuellen);
+      input.addEventListener('blur', () => { box.hidden = true; });
+      input.addEventListener('keydown', e => { if (e.key === 'Escape') box.hidden = true; });
+      return box;
+    }
+
+    function zeichnenSuchen() {
+      leeren(zeilenBox);
       zeilen.forEach((z, i) => {
-        const menge = el('span.q', String(z.menge));
-        const grund = el('div.segc.grund', { role: 'radiogroup', 'aria-label': 'Grund' },
-          [['verbraucht', 'Verbr.'], ['abgelaufen', 'Abgel.']].map(([w, t]) =>
-            el('button', { type: 'button', role: 'radio', 'aria-checked': String(z.grund === w), class: z.grund === w ? 'on' : null,
-              onclick: () => { z.grund = w; zeichnen(); } }, t)));
+        const feld = el('input.field', { maxlength: 120, placeholder: 'Artikel suchen oder eintippen', value: z.artikel, autocomplete: 'off', 'aria-label': 'Artikel ' + (i + 1) });
         zeilenBox.append(el('div.row.mz',
           el('div.t',
-            el('input.field', { list: 'mat_artikel', maxlength: 120, placeholder: 'Artikel', value: z.artikel, 'aria-label': 'Artikel ' + (i + 1),
-              oninput: e => { z.artikel = e.target.value; } }),
+            el('div.mat-suche', feld, vorschlaege(feld, z)),
             el('input.field.klein', { maxlength: 40, placeholder: 'Größe (optional)', value: z.groesse, 'aria-label': 'Größe',
               oninput: e => { z.groesse = e.target.value; } })),
-          grund,
-          el('div.stepper',
-            el('button', { type: 'button', 'aria-label': 'weniger', onclick: () => { if (z.menge > 1) { z.menge--; menge.textContent = z.menge; } } }, icon('minus')),
-            menge,
-            el('button', { type: 'button', 'aria-label': 'mehr', onclick: () => { if (z.menge < 999) { z.menge++; menge.textContent = z.menge; } } }, icon('plus'))),
+          grundWahl(z),
+          stepper(z.menge, w => { z.menge = w; zeichnen(); }, 1),
           el('button.mz-weg', { type: 'button', 'aria-label': 'Zeile entfernen', onclick: () => { zeilen.splice(i, 1); zeichnen(); } }, icon('x'))));
       });
       if (zeilen.length < MAX) zeilenBox.append(el('button.row.mz-neu', { type: 'button', onclick: () => neu() }, icon('plus'), el('span', 'Artikel hinzufügen')));
     }
 
-    function neu(vorgabe = {}) {
-      zeilen.push({ artikel: '', groesse: '', menge: 1, grund: 'verbraucht', ...vorgabe });
-      zeichnen();
-      if (!vorgabe.artikel) zeilenBox.querySelectorAll('.mz input[list]')[zeilen.length - 1]?.focus();
+    // Liste wie in der Checkliste: Menge 0 = nicht angefordert
+    function zeichnenListe() {
+      leeren(katBox);
+      if (!bereiche.length) { katBox.append(el('div.foot', 'Für diesen KTW gibt es keine Checkliste.')); return; }
+      for (const b of bereiche) {
+        const pos = b.positionen.filter(p => p.aktiv !== false);
+        if (!pos.length) continue;
+        katBox.append(el('div.sect.mat-bereich', el('span', { class: 'streifen ' + (b.farbe || '') }), b.name));
+        katBox.append(el('div.list', pos.map(p => {
+          const z = zeilen.find(x => x.artikel === p.artikel);
+          const menge = z ? z.menge : 0;
+          const setzen = w => {
+            if (w <= 0) { if (z) zeilen.splice(zeilen.indexOf(z), 1); }
+            else if (z) z.menge = w;
+            else if (zeilen.filter(x => x.artikel.trim()).length < MAX) {
+              const leer = zeilen.findIndex(x => !x.artikel.trim());
+              if (leer >= 0) zeilen.splice(leer, 1);
+              zeilen.push({ artikel: p.artikel, groesse: '', menge: w, grund: 'verbraucht' });
+            }
+            zeichnen();
+          };
+          return el('div.row.mk' + (menge ? '.an' : ''),
+            el('div.t', el('b', p.artikel), p.hinweis ? el('span', p.hinweis) : null),
+            z ? grundWahl(z) : null,
+            stepper(menge, setzen, 0));
+        })));
+      }
     }
+
+    function zeichnen() {
+      for (const b of root.querySelectorAll('[data-weg] button')) {
+        const an = b.dataset.v === weg;
+        b.classList.toggle('on', an); b.setAttribute('aria-selected', String(an));
+      }
+      zeilenBox.hidden = weg !== 'suchen';
+      katBox.hidden = weg !== 'liste';
+      weg === 'suchen' ? zeichnenSuchen() : zeichnenListe();
+    }
+    for (const b of root.querySelectorAll('[data-weg] button')) b.onclick = () => { weg = b.dataset.v; zeichnen(); };
+
+    function neu() {
+      zeilen.push({ artikel: '', groesse: '', menge: 1, grund: 'verbraucht' });
+      zeichnen();
+      zeilenBox.querySelectorAll('.mat-suche input')[zeilen.length - 1]?.focus();
+    }
+
+    // Artikel der Checkliste: Vorschläge und Liste
+    if (fz.vorlage_id) api.vorlage(fz.vorlage_id).then(b => {
+      bereiche = b.filter(x => x.aktiv !== false);
+      namen = [...new Set(bereiche.flatMap(x => x.positionen.map(p => p.artikel)))].sort((a, c) => a.localeCompare(c, 'de'));
+      if (weg === 'liste') zeichnen();
+    }).catch(() => { /* ohne Liste geht es auch */ });
 
     // Aus der Checkliste übergeben: fehlende Artikel schon eingetragen
     const vorgaben = (ctx.extra && ctx.extra.positionen) || [];

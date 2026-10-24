@@ -49,7 +49,7 @@ BK.modul('ausgabe', {
         el('div.sub2', `Material angefordert am ${mac.kurz(m.erstellt_am)} für ${m.fahrzeug.name} · angefordert durch ${m.gemeldet_von}`),
         // Spalten wie auf dem Papier: Artikel, Größe, angeforderte und erhaltene Menge, Verbr./Abgel. angekreuzt
         el('table.tab.aus-tab',
-          el('thead', el('tr', el('th', 'Artikel'), el('th', 'Größe'), el('th.num', 'Angeforderte Menge'), el('th.num', 'Erhaltene Menge'), el('th.kreuz', 'Verbr.'), el('th.kreuz', 'Abgel.'))),
+          el('thead', el('tr', el('th', 'Artikel'), el('th', 'Größe'), el('th.num', 'Angeforderte Menge'), el('th.num', 'Erhaltene Menge'), el('th.kreuz', 'Verbraucht'), el('th.kreuz', 'Abgelaufen'))),
           el('tbody', m.positionen.map(p => {
             erhalten[p.id] = p.erhalten ?? p.menge;
             return el('tr', el('td', p.artikel), el('td', p.groesse || '–'), el('td.num', String(p.menge)),
@@ -90,7 +90,7 @@ BK.modul('ausgabe', {
     root.querySelector('[data-export]').onclick = () => {
       const zeilen = gefiltert().flatMap(m => m.positionen.map(p => ({
         KTW: m.fahrzeug.name, Angefordert: BK.datum(m.erstellt_am), Von: m.gemeldet_von, Artikel: p.artikel, Größe: p.groesse,
-        'Angeforderte Menge': p.menge, 'Erhaltene Menge': p.erhalten, 'Verbr.': p.grund === 'verbraucht' ? 'x' : '', 'Abgel.': p.grund === 'abgelaufen' ? 'x' : '', Status: mac.STATUS[m.status],
+        'Angeforderte Menge': p.menge, 'Erhaltene Menge': p.erhalten, 'Verbraucht': p.grund === 'verbraucht' ? 'x' : '', 'Abgelaufen': p.grund === 'abgelaufen' ? 'x' : '', Status: mac.STATUS[m.status],
         'Ausgegeben durch': (m.bearbeitung || {}).ausgegeben_von || '' })));
       if (!exportCSV('material-' + new Date().toISOString().slice(0, 10) + '.csv', zeilen)) alertDialog('Nichts zu exportieren', 'Die Liste ist leer.');
     };

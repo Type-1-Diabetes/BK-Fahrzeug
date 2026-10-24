@@ -42,7 +42,7 @@ BK.modul('mangel', {
     const sig = root.querySelector('[data-sig]');
     const sigZeichnen = () => {
       const n = (form.werte().gemeldet_von || '').trim();
-      sig.textContent = n ? [n, jetzt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ' ' + uhr, ctx.ich.rolle ? 'am Mac' : 'Tablet ' + fz.name].join(' · ') : 'Name unter „Gemeldet durch“ eintragen';
+      sig.textContent = n ? [n, jetzt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ' ' + uhr, ctx.ich.rolle ? 'am Mac' : 'Tablet ' + fz.name].join(' · ') : '';
       sig.classList.toggle('leer', !n);
     };
     formBox.addEventListener('input', sigZeichnen);

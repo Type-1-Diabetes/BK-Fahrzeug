@@ -202,14 +202,14 @@
     app.className = 'huelle-tablet';
     leeren(app).append(
       el('header.topnav',
-        el('div.brandmini', BK.logo(), 'Blauer Kreis'),
+        el('div.topnav-links', el('div.brandmini', BK.logo(), 'Blauer Kreis'),
+          el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
+            el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue)),
         el('nav.ftabs', { 'aria-label': 'Bereiche' }, reiter(liste).map(r =>
           el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
-        el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
-          el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue),
-        window.pwaIsStandalone() ? null : el('button.tb.tablet-ab', { type: 'button', title: 'Als App auf dem Home-Bildschirm installieren', onclick: installBlatt }, icon('download'), 'App installieren'),
-        themeKnopf('tablet-ab'),
-        el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden')),
+        el('div.topnav-rechts', window.pwaIsStandalone() ? null : el('button.tb.tablet-ab', { type: 'button', title: 'Als App auf dem Home-Bildschirm installieren', onclick: installBlatt }, icon('download'), 'App installieren'),
+        themeKnopf('tablet-ab.thema-knopf'),
+        el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden'))),
       inhalt);
     BK.warteschlange.beiAenderung(l => {
       queue.hidden = !l.length;
@@ -283,7 +283,7 @@
         el('button', { type: 'button', role: 'tab', 'aria-selected': String(m === modus), class: m === modus ? 'on' : null,
           onclick: () => m !== modus && startSeite('', m) }, t)));
     const inhalt = modus === 'koppeln' ? koppelFormular(fehler) : anmeldeFormular(fehler);
-    leeren(app).append(el('div.login', themeKnopf('login-theme'),
+    leeren(app).append(el('div.login', themeKnopf('login-theme.thema-knopf'),
       el('div.login-kopf', BK.logo('gross'), el('h1', 'BK Fahrzeug'), el('p', 'Blauer Kreis · Krankenbeförderung')),
       el('div.login-karte', nurKoppeln ? null : wahl, inhalt.form, fehler)));
     inhalt.fokus.focus();

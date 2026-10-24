@@ -6,7 +6,25 @@
 .mz { flex-wrap: wrap; }
 .mz .t { display: flex; flex-direction: column; gap: 4px; min-width: 200px; }
 .mz .t .field.klein { font-size: 15px; color: var(--label2); }
-.mz .grund { flex: none; width: 180px; }
-.mz .grund button { min-height: 44px; font-size: 14px; }
+.mz .grund, .mk .grund { flex: none; width: 240px; }
+.mz .grund button, .mk .grund button { min-height: 44px; font-size: 14px; }
 .mz-weg { width: 44px; height: 44px; border-radius: 50%; color: var(--label2); display: grid; place-items: center; font-size: 18px; }
 .mz-neu { color: var(--tint); min-height: 52px; }
+.mat-weg { margin-bottom: 12px; }
+/* Suche: große Vorschläge unter dem Feld, gut für Finger */
+.mat-suche { position: relative; }
+.mat-vorschlag { position: absolute; z-index: 20; left: -8px; right: -8px; top: calc(100% + 6px); max-height: 50vh; overflow: auto;
+  background: var(--bg2); border-radius: 12px; box-shadow: var(--schatten-fenster); padding: 4px; }
+.mat-vorschlag button { display: block; width: 100%; min-height: 48px; padding: 0 14px; border-radius: 8px; text-align: left; font-size: 17px; }
+.mat-vorschlag button:active { background: var(--fill2); }
+@media (hover: hover) { .mat-vorschlag button:hover { background: var(--fill); } }
+/* Liste durchgehen: Menge 0 = nicht angefordert */
+.mat-bereich { display: flex; align-items: center; gap: 8px; }
+.mat-bereich .streifen { width: 4px; height: 16px; border-radius: 2px; background: var(--label3); }
+.mat-bereich .streifen.blau { background: var(--b-blau); } .mat-bereich .streifen.orange { background: var(--b-orange); } .mat-bereich .streifen.rot { background: var(--b-rot); }
+.mat-bereich .streifen.gruen { background: var(--b-gruen); } .mat-bereich .streifen.gelb { background: var(--b-gelb); }
+.mk { min-height: 60px; flex-wrap: wrap; }
+.mk .t { flex: 1; min-width: 180px; }
+.mk.an { background: color-mix(in srgb, var(--navy2) 8%, var(--bg2)); }
+.mk.an .q { font-weight: 700; }
+.stepper button:disabled { opacity: .35; }

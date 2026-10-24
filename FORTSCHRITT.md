@@ -147,3 +147,14 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 ## Fensterschatten (2026-10-24)
 - Neue Variable `--schatten-fenster` (basis.css, hell und dunkel) für Bestätigungsfenster, Blätter und Code-Fenster. Dunkel: feine helle Kante statt großem dunklem Hof.
 - Offen: im Browser prüfen.
+
+## Tablet-Feinschliff, Material, Kennzeichen (2026-10-24)
+- Tablet-Übersicht: Box „Was jetzt tun“ nur, wenn etwas ansteht; Abschnitt „Aktuell“ nur bei Meldungen.
+- Tablet-Kopfzeile als Raster: links Logo + KTW (Tablet-Menü), Mitte Reiter (Icons 21px), rechts Hell/Dunkel (feste Breite) und Abmelden.
+- Mängelmeldung: Platzhalter „Name unter Gemeldet durch eintragen“ entfernt.
+- Materialanforderung: Umschalter „Suchen“ (große Vorschlagsliste statt datalist) / „Liste durchgehen“ (Positionen der Checkliste nach Bereich, Menge per Stepper, 0 = nicht angefordert). Beide Ansichten teilen dieselben Zeilen. „Verbraucht“/„Abgelaufen“ ausgeschrieben (auch Ausgabe am Mac).
+- Verlauf: alle Tablet-Aktionen lesbar, unbekannte Aktionen ohne Unterstrich (`BK.aktionText`).
+- Fristen: „Speichern“, „Standard“. Einstellungen: Überschrift „Benachrichtigungen auf dieses Gerät“, Hinweistexte entfernt.
+- Kennzeichen beim Neuen Tablet und Bearbeiten (Migration 017).
+- Migration 017 eingespielt (geprüft: nur `authenticated`).
+- Offen: im Browser prüfen (Vorschau lädt nicht).

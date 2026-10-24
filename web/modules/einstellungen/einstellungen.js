@@ -66,7 +66,7 @@ BK.modul('einstellungen', {
         } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
         geraetZeigen();
       };
-      geraet.append(el('p', sub ? 'Benachrichtigungen kommen auf dieses Gerät.' : 'Auf diesem Gerät kommen noch keine Benachrichtigungen.'), knopf);
+      geraet.append(sub ? '' : el('p', 'Auf diesem Gerät kommen noch keine Benachrichtigungen.'), knopf);
     }
     geraetZeigen().catch(e => geraet.append(el('p', e.message)));
 

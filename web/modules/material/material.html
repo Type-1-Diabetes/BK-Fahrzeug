@@ -6,16 +6,18 @@
   <div class="mat-spalten">
     <div>
       <div class="sect">Artikel</div>
+      <div class="segc mat-weg" role="tablist" aria-label="Artikel eingeben" data-weg>
+        <button type="button" role="tab" data-v="suchen">Suchen</button>
+        <button type="button" role="tab" data-v="liste">Liste durchgehen</button>
+      </div>
       <div class="list" data-zeilen></div>
+      <div class="mat-katalog" data-katalog hidden></div>
       <div class="ffehler" role="alert" data-fehler-zeilen></div>
-      <div class="foot">Artikel aus der Checkliste wählen oder frei eintippen.</div>
     </div>
     <div>
       <label class="sect" for="mat_name">Angefordert durch</label>
       <div class="list"><div class="row"><input class="field" id="mat_name" maxlength="100" autocomplete="name" placeholder="Vor- und Nachname"></div></div>
       <div class="ffehler" role="alert" data-fehler-name></div>
-      <div class="foot">KTW, Datum und Uhrzeit trägt die App ein.</div>
     </div>
   </div>
-  <datalist id="mat_artikel"></datalist>
 </div>

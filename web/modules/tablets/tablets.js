@@ -105,6 +105,7 @@ BK.modul('tablets', {
     const neuWache = root.querySelector('[data-neu-wache]');
     const neuKtw = root.querySelector('[data-neu-ktw]');
     const neuName = root.querySelector('[data-neu-name]');
+    const neuKz = root.querySelector('[data-neu-kz]');
     const neuWeiter = root.querySelector('[data-neu-weiter]');
     let nameGeaendert = false, bearbeiten = null;  // bearbeiten = Tablet beim Ändern
     const neuZu = () => { neuBlatt.hidden = true; };
@@ -130,6 +131,7 @@ BK.modul('tablets', {
       neuWeiter.textContent = t ? 'Sichern' : 'Code erzeugen';
       nameGeaendert = !!t;
       neuKtw.value = fz ? fz.name : '';
+      neuKz.value = fz ? fz.kennzeichen || '' : '';
       neuName.value = t ? t.name : '';
       pruefen();
       neuBlatt.hidden = false;
@@ -143,11 +145,11 @@ BK.modul('tablets', {
       neuWeiter.disabled = true;
       try {
         if (bearbeiten) {
-          await api.tabletBearbeiten(bearbeiten.id, name, ktw, neuWache.value);
+          await api.tabletBearbeiten(bearbeiten.id, name, ktw, neuWache.value, neuKz.value.trim());
           neuZu(); showToast(name + ' gesichert'); laden();
           return;
         }
-        const code = await api.tabletMitFahrzeugAnlegen(neuWache.value, ktw, name);
+        const code = await api.tabletMitFahrzeugAnlegen(neuWache.value, ktw, name, neuKz.value.trim());
         const neu = (await api.tablets()).find(t => t.name === name && !t.gekoppelt_am);
         neuZu();
         codeZeigen('Neues Tablet für ' + ktw, code, neu && neu.id);

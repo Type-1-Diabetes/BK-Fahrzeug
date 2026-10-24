@@ -204,8 +204,8 @@
     // Tablets (Admin) ---------------------------------------------------
     tablets: () => lesen('tablets', 'select=id,name,fahrzeug_id,code_gueltig_bis,gekoppelt_am,gesperrt,zuletzt_online,erstellt_am&order=erstellt_am.desc'),
     tabletAnlegen: (fahrzeugId, name) => rpc('tablet_anlegen', { p_fahrzeug: fahrzeugId, p_name: name }),
-    tabletMitFahrzeugAnlegen: (wacheId, fahrzeug, name) => rpc('tablet_mit_fahrzeug_anlegen', { p_wache: wacheId, p_fahrzeug: fahrzeug, p_name: name }),
-    tabletBearbeiten: (id, name, fahrzeug, wacheId) => rpc('tablet_bearbeiten', { p_tablet: id, p_name: name, p_fahrzeug: fahrzeug, p_wache: wacheId }),
+    tabletMitFahrzeugAnlegen: (wacheId, fahrzeug, name, kennzeichen) => rpc('tablet_mit_fahrzeug_anlegen', { p_wache: wacheId, p_fahrzeug: fahrzeug, p_name: name, p_kennzeichen: kennzeichen || null }),
+    tabletBearbeiten: (id, name, fahrzeug, wacheId, kennzeichen) => rpc('tablet_bearbeiten', { p_tablet: id, p_name: name, p_fahrzeug: fahrzeug, p_wache: wacheId, p_kennzeichen: kennzeichen || null }),
     tabletNeuerCode: id => rpc('tablet_neuer_code', { p_tablet: id }),
     tabletSperren: (id, gesperrt) => rpc('tablet_sperren', { p_tablet: id, p_gesperrt: gesperrt }),
 
