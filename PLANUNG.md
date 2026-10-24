@@ -114,9 +114,8 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 
 - Jedes Fahrzeug hat ein eigenes Tablet. Darauf ist die App installiert, und sie zeigt nur das Menü dieses Fahrzeugs.
 - Kein Login für das Team. Das Tablet selbst ist angemeldet, aber nur für sein Fahrzeug.
-- **Koppeln:** Der Admin legt am Mac ein Tablet an und bekommt Link (`…/?koppeln`) und einmaligen Code. Am Tablet den Link öffnen, Code eingeben, dann die App installieren. Danach öffnet die App nur das Menü dieses KTW. Am Mac erscheint „Tablet ist gekoppelt“.
-  - Chrome und Edge (Android, Windows) teilen den Speicher mit der installierten App: Dort wird schon im Browser gekoppelt.
-  - Safari (iPad, Mac) trennt den Speicher: Dort erst installieren und den Code in der App noch einmal eingeben. Er wird erst dort verbraucht.
+- **Erst installieren:** Im Browser zeigt die App nur „Erst die App installieren“ mit Knopf bzw. Anleitung. Anmelden und Koppeln gibt es nur in der installierten App (PC und Mobilgerät). Ausnahme: lokal (`localhost`) zum Testen.
+- **Koppeln:** Der Admin legt am Mac ein Tablet an und bekommt Link (`…/?koppeln`) und einmaligen Code. Am Tablet den Link öffnen, App installieren, in der App den Code eingeben. Danach öffnet die App nur das Menü dieses KTW. Am Mac erscheint „Tablet ist gekoppelt“.
 - Das Tablet darf nur: Meldungen für sein Fahrzeug anlegen, die Checkliste abhaken, offene Meldungen ansehen. Es darf nichts löschen und keine anderen Fahrzeuge sehen.
 - Geht ein Tablet verloren, sperrt der Admin es mit einem Klick. Ein neues Tablet bekommt einen neuen Code.
 - Das gleiche Fahrzeug-Menü kann auch auf einem Mac geöffnet werden (z. B. in der Wache).

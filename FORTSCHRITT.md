@@ -252,3 +252,10 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Mac: ↑/↓ wechselt in der Liste links bzw. Tabelle, ⌘↩ / Strg+↩ = „Als erledigt markieren“, „Als ausgegeben markieren“, „Gegenzeichnen“ (Knöpfe mit `data-fertig`).
 - Getestet (Browser, Demo-MPGler ohne Daten): Seitenleiste ein/aus, Liste → Akte → zurück, Pfeiltaste, Strg+↩, Querformat unverändert.
 - Offen: Netz-Streifen und Bestätigung auf einem gekoppelten Tablet prüfen (Flugmodus); Mängel-Inspektor hochkant mit echten Daten.
+
+## Erst installieren, dann Anmelden/Koppeln (2026-10-24, bk-v48)
+- Im Browser (nicht installiert) zeigt die Startseite nur „Erst die App installieren“ (Knopf in Chrome/Edge, sonst Anleitung). Anmelden und Koppeln nur in der installierten App. Lokal (`localhost`, `127.0.0.1`) bleibt der Browser zum Testen erlaubt.
+- Entfernt: „Ohne Installation weiter“ und die Seite nach dem Code im Browser (`installSeite`).
+- Wer schon im Browser angemeldet ist, bleibt angemeldet (Sperre gilt nur für Anmelde- und Koppelseite).
+- Getestet: lokal Anmeldeseite wie vorher. Sperrseite nicht getestet (greift nur online, z. B. auf Pages).
+- Hinweis: Firefox am PC kann keine Web-Apps installieren, dort kommt man nicht weiter.
