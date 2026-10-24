@@ -190,6 +190,8 @@
     checklisteEintrag: (checkliste, position, e) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_eintrag', daten: { p_checkliste: checkliste, p_position: position, p_ist: e.ist ?? null, p_verfall: e.verfall || null, p_bemerkung: e.bemerkung || null, p_entfernen: !!e.entfernen } }),
     checklisteAbschliessen: (id, m1, m2) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_abschliessen', daten: { p_checkliste: id, p_mitarbeiter1: m1, p_mitarbeiter2: m2 } }),
     checklisteGegenzeichnen: id => rpc('checkliste_gegenzeichnen', { p_checkliste: id }),
+    meldungLoeschen: id => rpc('meldung_loeschen', { p_id: id }),
+    checklisteLoeschen: id => rpc('checkliste_loeschen', { p_id: id }),
     checklisteZurueck: (id, grund) => rpc('checkliste_zurueck', { p_checkliste: id, p_grund: grund }),
 
     // Verlauf -----------------------------------------------------------

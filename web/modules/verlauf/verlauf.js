@@ -16,6 +16,8 @@
     checkliste_zurueck: () => ['Checkliste zurück ans Team', 'list'],
     tablet_gekoppelt: () => ['Tablet gekoppelt', 'tablet'],
     tablet_entkoppelt: () => ['Tablet entkoppelt', 'tablet'],
+    meldung_geloescht: d => [d.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', 'alert'],
+    checkliste_geloescht: () => ['Checkliste gelöscht', 'list'],
   };
   const FARBE = { wrench: 'f-rot', box: 'f-blau', list: 'f-navy', check: 'f-gruen', alert: 'f-rot', pen: 'f-orange', tablet: 'f-navy' };
 

@@ -80,3 +80,4 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Gegenzeichnen: Reiter „Übersicht“ (Zahlen + nur Abweichungen nach Bereich) und „Ganze Liste“ im Stil der Papierliste (farbige Bereichszeile, Nr., Artikel, Soll, Ist, Verfall/Prüfung, Bemerkung). Im Druck beides.
 - Tablet-Checkliste wie Papierliste: farbiger Bereichskopf, Spalten Vorh. · Nr. · Artikel · Soll/Ist, Lfd. Nr. aus der Vorlage („Nr. 1.2“). bk-v19.
 - Benachrichtigungen: gehen (waren beim Nutzer nur aus).
+- Löschen: Mängelmeldungen, Materialanforderungen und Checklisten am Mac (MPGler der Wache, Admin), mit Rückfrage. Verlauf behält einen Eintrag (Migration 012). bk-v20.

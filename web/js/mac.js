@@ -34,6 +34,13 @@
       return true;
     },
 
+    // Endgültig löschen nach Rückfrage. Gibt true zurück, wenn gelöscht.
+    loeschKnopf: (was, aktion, danach) => BK.el('button.pbtn.rot', { type: 'button', onclick: async () => {
+      if (!await confirmDialog(`${was} löschen?`, 'Das lässt sich nicht rückgängig machen. Im Verlauf des KTW bleibt ein Eintrag.')) return;
+      try { await aktion(); showToast(`${was} gelöscht`); danach(); }
+      catch (e) { alertDialog('Nicht gelöscht', e.message); }
+    } }, 'Löschen'),
+
     // Rechte Seitenansicht schließen: Knopf oben rechts und Esc
     zuKnopf: fn => BK.el('button.tb.insp-zu', { type: 'button', title: 'Schließen (Esc)', 'aria-label': 'Schließen', onclick: fn }, BK.icon('x')),
     escZu(root, insp, fn) {

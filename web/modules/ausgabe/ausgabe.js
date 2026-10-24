@@ -52,8 +52,9 @@ BK.modul('ausgabe', {
                 'aria-label': 'Ausgegeben: ' + p.artikel, oninput: e => { erhalten[p.id] = e.target.value === '' ? null : Math.max(0, Math.min(999, Number(e.target.value))); } })));
           }))),
         fertig ? '' : el('div.foot.aus-hinweis', 'Fehlt etwas im Lager? Menge in „Ausgegeben“ anpassen.'),
-        fertig ? '' : el('div.acts',
-          el('button.pbtn.def.gross', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => ausgeben(m, erhalten, true)) }, BK.icon('check'), 'Als ausgegeben markieren')));
+        el('div.acts',
+          mac.loeschKnopf('Materialanforderung', () => api.meldungLoeschen(m.id), () => { gewaehlt = null; laden(); }),
+          fertig ? '' : el('button.pbtn.def.gross', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => ausgeben(m, erhalten, true)) }, BK.icon('check'), 'Als ausgegeben markieren')));
     }
 
     async function ausgeben(m, erhalten, erledigt) {

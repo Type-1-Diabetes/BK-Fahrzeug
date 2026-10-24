@@ -72,7 +72,8 @@ BK.modul('gegenzeichnen', {
         el('div.gz-kurz' + (ganz ? '.gz-aus' : ''), uebersicht(c, pos, gesamt, befund)),
         // Ganze Liste wie die Papierliste: am Bildschirm über den Reiter, im Druck immer
         el('div.gz-voll' + (ganz ? '.zeigen' : ''), BK.papierliste(bereiche, c.eintraege)),
-        warten ? el('div.acts',
+        el('div.acts', mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); }),
+        ...(warten ? [
           el('button.pbtn', { type: 'button', onclick: async () => {
             const grund = await promptDialog('Zurück ans Team?', 'Das Team sieht den Grund auf dem Tablet und kann die Checkliste ändern.', { placeholder: 'z. B. Bereich Sauerstoff bitte nochmal prüfen', confirmLabel: 'Zurückgeben' });
             if (grund == null) return;
@@ -81,7 +82,7 @@ BK.modul('gegenzeichnen', {
           el('button.pbtn.def', { type: 'button', onclick: async () => {
             if (!await confirmDialog('Gegenzeichnen?', `${c.fahrzeug.name}, ${quartal(c.zeitraum)}. Dein Name und die Uhrzeit werden gespeichert.`)) return;
             try { await api.checklisteGegenzeichnen(c.id); showToast(`${c.fahrzeug.name} gegengezeichnet`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
-          } }, 'Gegenzeichnen')) : '');
+          } }, 'Gegenzeichnen')] : [])));
     }
 
     // Kurz: Zahlen oben, darunter nur, was nicht stimmt, nach Bereich

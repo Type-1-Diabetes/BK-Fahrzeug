@@ -134,6 +134,7 @@
           el('div.ih', 'Verlauf'), verlauf,
           el('div.acts',
             el('span.ungesichert', { dataset: { ungesichert: '' }, hidden: true }, 'Nicht gesichert'),
+            mac.loeschKnopf('Mängelmeldung', () => api.meldungLoeschen(m.id), () => { ungesichert = false; gewaehlt = null; laden(true); }),
             el('button.pbtn', { type: 'button', onclick: async () => {
               try { if (await mac.ampelAendern(fz, mac.titel(m))) laden(true); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
             } }, fz.ampel === 'einsatzbereit' ? 'KTW nicht einsatzbereit …' : 'KTW einsatzbereit …'),
