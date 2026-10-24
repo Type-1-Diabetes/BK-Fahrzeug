@@ -11,3 +11,6 @@
 .code-link { font-size: 13px; padding: 8px 10px; margin-bottom: 10px; background: var(--fill); border-radius: 8px; word-break: break-all; }
 .code-box .code-stand { margin: 12px 0 0; text-align: center; font-size: 13px; }
 .code-box .code-stand.ok { color: var(--ok-ink); font-weight: 600; }
+.tablets-inhalt table.tab td { height: 52px; padding-top: 8px; padding-bottom: 8px; vertical-align: middle; border-bottom: .5px solid var(--sep); }
+.tablets-inhalt table.tab tbody tr:nth-child(even) td { background: none; }
+.tablets-inhalt td .pbtn { vertical-align: middle; }

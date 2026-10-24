@@ -5,6 +5,7 @@ BK.modul('material', {
     const fz = ctx.fahrzeug;
     const zeilenBox = root.querySelector('[data-zeilen]');
     const name = root.querySelector('#mat_name');
+    if (ctx.ich.rolle) name.value = ctx.ich.name || '';
     const knopf = root.querySelector('[data-senden]');
     const MAX = 30;
     const zeilen = [];  // { artikel, groesse, menge, grund }
@@ -61,8 +62,9 @@ BK.modul('material', {
       if (fehlerZ.textContent || fehlerN.textContent) return;
       knopf.disabled = true;
       try {
-        await api.meldungMelden({ art: 'material', gemeldet_von: name.value.trim(), positionen });
-        await alertDialog('Material angefordert', navigator.onLine
+        const vomMac = !!ctx.ich.rolle;
+        await (vomMac ? api.meldungAnlegen : api.meldungMelden)({ art: 'material', fahrzeug_id: fz.id, gemeldet_von: name.value.trim(), positionen });
+        await alertDialog('Materialanforderung gesendet', vomMac ? 'Sie steht jetzt in der Liste und auf dem Tablet des KTW.' : navigator.onLine
           ? 'Die MPGler sehen die Anforderung jetzt in ihrer Liste.'
           : 'Kein Netz. Die Anforderung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
         ctx.oeffnen('uebersicht');

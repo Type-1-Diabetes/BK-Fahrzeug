@@ -35,6 +35,28 @@
     document.querySelectorAll('[data-modul]').forEach(b => b.classList.toggle('on', b.dataset.modul.split(',').includes(name)));
   }
 
+  // Mac: Tablet-Formular (Mängelmeldung, Materialanforderung) als Blatt für ein bestimmtes Fahrzeug
+  BK.blatt = async (name, fahrzeug, fertig) => {
+    const inhalt = el('div.blatt-inhalt');
+    const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, icon('x'));
+    const overlay = el('div.blatt-overlay', el('div.blatt', { role: 'dialog', 'aria-modal': 'true', 'aria-label': fahrzeug.name }, zu, inhalt));
+    const schliessen = gesendet => {
+      overlay.remove(); document.removeEventListener('keydown', esc);
+      if (module[name].stop) try { module[name].stop(); } catch { /* egal */ }
+      if (gesendet && fertig) fertig();
+    };
+    const esc = e => { if (e.key === 'Escape' && !document.querySelector('._ad-open')) schliessen(false); };
+    zu.onclick = () => schliessen(false);
+    overlay.addEventListener('mousedown', e => { if (e.target === overlay) schliessen(false); });
+    document.addEventListener('keydown', esc);
+    document.body.append(overlay);
+    try {
+      await laden(name);
+      inhalt.innerHTML = await fetch(`modules/${name}/${name}.html`).then(r => r.ok ? r.text() : '');  // nur eigene Moduldateien
+      await module[name].start(inhalt, { ...ctx, fahrzeug, oeffnen: () => schliessen(true) });
+    } catch (e) { inhalt.append(el('div.leer', el('p', 'Das Formular lässt sich gerade nicht laden.'), el('p.foot', e.message))); }
+  };
+
   // Mehrere Module unter einem Reiter (z. B. Melden): Umschalter oben im Inhalt
   function umschalter(name, ziel) {
     const m = BK.MODULE.find(x => x.name === name);

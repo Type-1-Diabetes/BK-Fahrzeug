@@ -26,7 +26,7 @@ BK.modul('mangel', {
         platzhalter: 'Kurz beschreiben, was nicht funktioniert.' },
       { name: 'fotos', typ: 'fotos', label: 'Fotos', max: 5, hinweis: 'Höchstens 5 Fotos.' },
       { name: 'gemeldet_von', typ: 'text', label: 'Gemeldet von', pflicht: true, max: 100,
-        platzhalter: 'Vor- und Nachname', autocomplete: 'name' },
+        platzhalter: 'Vor- und Nachname', autocomplete: 'name', standard: ctx.ich.rolle ? ctx.ich.name : undefined },
     ];
 
     const form = BK.formular.bauen(root.querySelector('[data-formular]'), FELDER);
@@ -38,8 +38,10 @@ BK.modul('mangel', {
       if (w.gemeldet_von.length < 2) return alertDialog('Name zu kurz', 'Bitte Vor- und Nachnamen eintragen.');
       knopf.disabled = true;
       try {
-        await api.meldungMelden({
+        const vomMac = !!ctx.ich.rolle;
+        await (vomMac ? api.meldungAnlegen : api.meldungMelden)({
           art: 'mangel',
+          fahrzeug_id: fz.id,
           betrifft: w.betrifft,
           gegenstand: w.betrifft === 'fahrzeug' ? w.gegenstand : null,
           geraet_id: w.betrifft === 'mpg' && w.geraet_id !== 'anders' ? w.geraet_id : null,
@@ -47,7 +49,7 @@ BK.modul('mangel', {
           beschreibung: w.beschreibung,
           gemeldet_von: w.gemeldet_von,
         }, w.fotos || []);
-        await alertDialog('Mängelmeldung gesendet', navigator.onLine
+        await alertDialog('Mängelmeldung gesendet', vomMac ? 'Sie steht jetzt in der Liste und auf dem Tablet des KTW.' : navigator.onLine
           ? 'Die MPGler sehen ihn jetzt in ihrer Liste.'
           : 'Kein Netz. Die Meldung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
         ctx.oeffnen('uebersicht');

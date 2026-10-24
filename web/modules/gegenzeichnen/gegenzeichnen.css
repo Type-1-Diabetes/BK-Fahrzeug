@@ -1,6 +1,13 @@
 /* Modul Gegenzeichnen (Mac) */
+.gz-wahl { margin: 18px 0 10px; }
+.gz-fuss { padding: 8px 0 0; }
 .gz-voll { display: none; }
+.gz-voll.zeigen { display: table; }
+.gz-aus { display: none; }
+.gz-voll tr.abw td { color: var(--warn-ink); font-weight: 600; }
 @media print {
   .gz-voll { display: table; margin-top: 16px; }
+  .gz-aus { display: table; }
+  .gz-wahl { display: none; }
   .vfile .foot { color: #444; }
 }

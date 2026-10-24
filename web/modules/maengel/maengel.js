@@ -17,9 +17,9 @@
       { key: 'intern_von', typ: 'text', label: 'Intern erledigt von', max: 80 },
       { key: 'extern_durch', typ: 'text', label: 'Extern durch', max: 120 },
       { key: 'termin', typ: 'datum', label: 'Termin' },
-      { key: 'kv', typ: 'check', label: 'KV', text: 'angefordert' },
-      { key: 'einsatzbereit_am', typ: 'datum', label: 'Wieder einsatzbereit', hinweis: 'Setzt den Mangel beim Sichern auf erledigt.' },
-      { key: 'unreparabel', typ: 'check', label: '', text: 'nicht reparierbar' },
+      { key: 'kv', typ: 'check', label: 'Kostenvoranschlag', text: 'angefordert' },
+      { key: 'einsatzbereit_am', typ: 'datum', label: 'Wieder einsatzbereit', hinweis: 'Datum eintragen: Der Mangel wird beim Sichern erledigt.' },
+      { key: 'unreparabel', typ: 'check', label: 'Nicht reparierbar', text: 'ja' },
       { key: 'reparatur_bemerkung', typ: 'textarea', label: 'Bemerkung', max: 500 },
     ] },
   ];
@@ -103,7 +103,7 @@
       async function inspektor() {
         const m = alle.find(x => x.id === gewaehlt);
         leeren(insp);
-        if (!m) return insp.append(el('div.mleer', 'Mangel links auswählen.'));
+        if (!m) return insp.append(el('div.mleer', 'Mängelmeldung links auswählen.'));
         const fz = fzVon(m);
         const werte = { ...(m.bearbeitung || {}) };
         const fotos = el('div.fotos-m');
@@ -116,7 +116,7 @@
           el('div.note', m.beschreibung || 'Keine Beschreibung.'),
           fotos,
           ...ABSCHNITTE.flatMap(a => [el('div.ih', a.titel), el('div.kv', ...a.felder.flatMap(f => [
-            el('span.l', f.label), el('div', feld(f, werte), f.hinweis ? el('div.foot', { style: 'padding:4px 0 0' }, f.hinweis) : null)]))]),
+            el('span.l', f.label), el('div', feld(f, werte), f.hinweis ? el('div.feld-hinweis', f.hinweis) : null)]))]),
           el('div.ih', 'Verlauf'), verlauf,
           el('div.acts',
             el('button.pbtn', { type: 'button', onclick: async () => {

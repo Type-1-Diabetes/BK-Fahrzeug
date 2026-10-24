@@ -2,12 +2,13 @@
 BK.modul('einstellungen', {
   async start(root, ctx) {
     const { el, api, leeren } = BK;
+    // [Schlüssel, Titel, Erklärung, Gruppe]
     const PUSH = [
-      ['ampel_rot', 'ein KTW nicht einsatzbereit ist'],
-      ['neuer_mangel', 'ein neuer Mangel gemeldet wird'],
-      ['neues_material', 'Material angefordert wird'],
-      ['checkliste_fertig', 'eine Checkliste zum Gegenzeichnen bereit ist'],
-      ['checkliste_ueberfaellig', 'eine Checkliste überfällig ist'],
+      ['ampel_rot', 'KTW nicht einsatzbereit', 'Sobald ein KTW auf Rot gesetzt wird.', 'Fahrzeuge'],
+      ['neuer_mangel', 'Neue Mängelmeldung', 'Ein Team meldet einen Mangel.', 'Meldungen'],
+      ['neues_material', 'Neue Materialanforderung', 'Ein Team fordert Material an.', 'Meldungen'],
+      ['checkliste_fertig', 'Checkliste zum Gegenzeichnen', 'Ein Team hat die Checkliste abgeschlossen.', 'Checklisten'],
+      ['checkliste_ueberfaellig', 'Checkliste überfällig', 'Das Quartal ist um und die Checkliste fehlt.', 'Checklisten'],
     ];
     const box = root.querySelector('[data-push]');
     const werte = Object.fromEntries(PUSH.map(([k]) => [k, true]));  // ohne Eintrag: an
@@ -22,7 +23,13 @@ BK.modul('einstellungen', {
 
     async function laden() {
       try { for (const z of await api.pushEinstellungen()) werte[z.schluessel] = z.an; } catch { /* Standard: alles an */ }
-      leeren(box).append(...PUSH.map(([k, t]) => el('label.cb', el('input', { type: 'checkbox', checked: werte[k], onchange: e => { werte[k] = e.target.checked; } }), t)));
+      leeren(box);
+      for (const gruppe of [...new Set(PUSH.map(p => p[3]))]) {
+        box.append(el('div.es-gruppe', gruppe), el('div.es-karte', PUSH.filter(p => p[3] === gruppe).map(([k, t, erkl]) =>
+          el('label.es-zeile',
+            el('span.es-text', el('b', t), el('span', erkl)),
+            el('input.schalter', { type: 'checkbox', role: 'switch', checked: werte[k], onchange: e => { werte[k] = e.target.checked; } })))));
+      }
       if (sl) sl.clean();
     }
 

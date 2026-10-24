@@ -7,7 +7,7 @@ BK.modul('gegenzeichnen', {
     root.querySelector('[data-csv]').append(icon('export'), 'Tabelle');
     root.querySelector('[data-pdf]').append(icon('export'), 'PDF');
     const vorlagen = {};  // vorlage_id → Bereiche
-    let alle = [], gewaehlt = null;
+    let alle = [], gewaehlt = null, ganz = false;
     const quartal = z => `${z.slice(-1)}. Quartal ${z.slice(0, 4)}`;
 
     async function vorlage(id) {
@@ -67,21 +67,23 @@ BK.modul('gegenzeichnen', {
           el('div', el('span', 'Mitarbeiter 2'), el('b', c.mitarbeiter2 || '–'))),
         c.gegengezeichnet_am ? el('div.sub2', 'Gegengezeichnet am ' + BK.datum(c.gegengezeichnet_am)) : '',
         c.zurueck_grund && !c.abgeschlossen_am ? el('div.sub2.red', 'Zurück ans Team: ' + c.zurueck_grund) : '',
-        el('div.ih', `Abweichungen (${c.eintraege.length} von ${gesamt || '?'})`),
-        el('table.tab',
+        el('div.gz-wahl', el('div.mseg', { role: 'tablist', 'aria-label': 'Ansicht' },
+          el('button', { type: 'button', role: 'tab', class: ganz ? null : 'on', 'aria-selected': String(!ganz), onclick: () => { ganz = false; datei(); } }, `Abweichungen (${c.eintraege.length})`),
+          el('button', { type: 'button', role: 'tab', class: ganz ? 'on' : null, 'aria-selected': String(ganz), onclick: () => { ganz = true; datei(); } }, `Ganze Liste (${gesamt || '?'})`))),
+        el('table.tab' + (ganz ? '.gz-aus' : ''),
           el('thead', el('tr', el('th', 'Bereich'), el('th', 'Artikel'), el('th', 'Befund'), el('th', 'Bemerkung'))),
           el('tbody', c.eintraege.length ? c.eintraege.map(e => {
             const p = pos.get(e.position_id);
             return el('tr', el('td', el('span', { class: 'stripe ' + ((p && p.bereich.farbe) || '') }), p ? p.bereich.name : '–'),
               el('td', p ? p.artikel : 'Position'), el('td.warnt', befund(p, e)), el('td', e.bemerkung || '–'));
           }) : el('tr', el('td.mleer', { colspan: 4 }, 'Keine Abweichung.')))),
-        el('div.foot', { style: 'padding:8px 0 0' }, `${gesamt - c.eintraege.length} Positionen vollständig. Die ganze Liste steht im PDF.`),
-        // Nur im Druck: ganze Liste
-        el('table.tab.gz-voll',
+        ganz ? '' : el('div.foot.gz-fuss', `${gesamt - c.eintraege.length} Positionen vollständig.`),
+        // Ganze Liste: am Bildschirm über den Umschalter, im Druck immer
+        el('table.tab.gz-voll' + (ganz ? '.zeigen' : ''),
           el('thead', el('tr', el('th', 'Nr.'), el('th', 'Bereich'), el('th', 'Artikel'), el('th.num', 'Soll'), el('th.num', 'Ist'), el('th', 'Bemerkung'))),
           el('tbody', [...pos.values()].map(p => {
             const e = c.eintraege.find(x => x.position_id === p.id);
-            return el('tr', el('td', String(p.nr)), el('td', p.bereich.name), el('td', p.artikel), el('td.num', String(p.soll)),
+            return el('tr', { class: e ? 'abw' : null }, el('td', String(p.nr)), el('td', el('span', { class: 'stripe ' + (p.bereich.farbe || '') }), p.bereich.name), el('td', p.artikel), el('td.num', String(p.soll)),
               el('td.num', e && e.ist != null ? String(e.ist) : String(p.soll)), el('td', e ? [e.verfall && 'Verfall ' + BK.datum(e.verfall, false), e.bemerkung].filter(Boolean).join(' · ') : 'vollständig'));
           }))),
         warten ? el('div.acts',

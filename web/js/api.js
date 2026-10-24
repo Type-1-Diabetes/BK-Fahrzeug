@@ -135,6 +135,8 @@
       const client_id = daten.client_id || crypto.randomUUID();
       return BK.warteschlange.hinzufuegen({ typ: 'meldung', daten: { ...daten, client_id, erstellt_am: new Date().toISOString() }, fotos });
     },
+    // Mac (MPGler/Admin): direkt senden, Fahrzeug steht in daten.fahrzeug_id
+    meldungAnlegen: (daten, fotos = []) => api._senden.meldung({ daten: { ...daten, client_id: crypto.randomUUID() }, fotos }),
     meldungBearbeiten: (id, status, bearbeitung) => rpc('meldung_bearbeiten', { p_meldung: id, p_status: status, p_bearbeitung: bearbeitung }),
     materialAusgeben: (id, positionen, erledigt) => rpc('material_ausgeben', { p_meldung: id, p_positionen: positionen, p_erledigt: erledigt }),
     async fotoUrl(pfad) {

@@ -1,18 +1,22 @@
-// Modul Fahrzeuge › Übersicht (Mac): links die KTW nach Wache, rechts Ampel, Zahlen und Reiter des gewählten KTW
+// Modul Fahrzeuge › Übersicht (Mac): erst alle KTW als Kacheln nach Wache, ein Klick öffnet die Akte mit Reitern
 BK.modul('fahrzeuge', {
   async start(root, ctx) {
     const { el, api, leeren, mac } = BK;
     const liste = root.querySelector('[data-liste]');
     const akte = root.querySelector('[data-akte]');
+    const zurueck = root.querySelector('[data-zurueck]');
+    zurueck.prepend(BK.icon('chevL'));
+    zurueck.onclick = () => { gewaehlt = null; zeichnen(); };
     const suche = root.querySelector('[data-suche]');
     const jetzt = new Date();
     const zeitraum = `${jetzt.getFullYear()}-Q${Math.floor(jetzt.getMonth() / 3) + 1}`;
     const quartalsende = new Date(jetzt.getFullYear(), Math.floor(jetzt.getMonth() / 3) * 3 + 3, 0);
-    let fahrzeuge = [], meldungen = [], checklisten = [], tablets = [], wache = '', gewaehlt = null, reiter = 'meldungen';
+    let fahrzeuge = [], meldungen = [], checklisten = [], tablets = [], wache = '', gewaehlt = (ctx.extra && ctx.extra.fahrzeug) || null, reiter = 'meldungen';
 
     async function laden() {
       try {
         [fahrzeuge, meldungen, checklisten] = await Promise.all([api.fahrzeuge(), api.meldungen({ seitTagen: 365 }), api.checklisten()]);
+        fahrzeuge.sort((a, b) => a.wache.name.localeCompare(b.wache.name, 'de') || a.name.localeCompare(b.name, 'de', { numeric: true }));
       } catch (e) { leeren(liste).append(el('div.mleer', 'Liste lässt sich nicht laden: ' + e.message)); return; }
       if (ctx.ich.rolle === 'admin') tablets = await api.tablets().catch(() => []);
       const wachen = [...new Map(fahrzeuge.map(f => [f.wache.id, f.wache.name])).entries()];
@@ -31,30 +35,37 @@ BK.modul('fahrzeuge', {
       if (c && c.gegengezeichnet_am) return ['erledigt', 'Checkliste erledigt'];
       if (c && c.abgeschlossen_am) return ['warte', 'wartet auf Gegenzeichnung'];
       if (c) return ['warte', 'Checkliste läuft'];
-      return [jetzt > quartalsende ? 'rot' : 'warte', 'fällig ' + quartalsende.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + '.'];
+      return [jetzt > quartalsende ? 'rot' : 'warte', 'fällig ' + quartalsende.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })];
     };
-    const zusammenfassung = f => {
-      if (f.ampel !== 'einsatzbereit') return 'nicht einsatzbereit';
-      const mg = offeneVon(f, 'mangel').length, mt = offeneVon(f, 'material').length;
-      const teile = [mg && (mg === 1 ? '1 Mangel' : mg + ' Mängel'), mt && mt + ' Material'].filter(Boolean);
-      return teile.length ? teile.join(' · ') : 'alles in Ordnung';
-    };
-
+    // Ohne Auswahl: Kacheln. Mit Auswahl: Akte des KTW.
     function zeichnen() {
       const q = suche.value.trim().toLowerCase();
       const l = fahrzeuge.filter(f => (!wache || f.wache.id === wache) && (!q || [f.name, f.kennzeichen, f.kennnummer].join(' ').toLowerCase().includes(q)));
-      if (!l.some(f => f.id === gewaehlt)) gewaehlt = (l.find(f => f.ampel !== 'einsatzbereit') || l[0] || {}).id;
+      const auswahl = fahrzeuge.find(x => x.id === gewaehlt);
+      root.classList.toggle('fz-akte', !!auswahl);
+      zurueck.hidden = !auswahl;
       leeren(liste);
-      let gruppe = null;
+      if (auswahl) return datei();
+      leeren(akte);
+      let gruppe = null, raster = null;
       for (const f of l) {
-        if (f.wache.name !== gruppe) { gruppe = f.wache.name; liste.append(el('div.vgrp', gruppe)); }
-        const mg = offeneVon(f, 'mangel').length;
-        liste.append(el('button', { type: 'button', class: 'vr' + (f.id === gewaehlt ? ' on' : ''), onclick: () => { gewaehlt = f.id; zeichnen(); } },
-          el('i', { class: f.ampel !== 'einsatzbereit' ? 'rot' : mg ? 'orange' : 'gruen' }),
-          el('div', el('b', f.name), el('span', [f.kennzeichen, zusammenfassung(f)].filter(Boolean).join(' · ')))));
+        if (f.wache.name !== gruppe) {
+          gruppe = f.wache.name;
+          raster = el('div.fz-raster');
+          liste.append(el('h2.fz-wache', gruppe), raster);
+        }
+        const mg = offeneVon(f, 'mangel').length, mt = offeneVon(f, 'material').length;
+        const [ck, ckText] = checkStand(f);
+        const rot = f.ampel !== 'einsatzbereit';
+        raster.append(el('button', { type: 'button', class: 'fz-kachel' + (rot ? ' rot' : ''), onclick: () => { gewaehlt = f.id; reiter = 'meldungen'; zeichnen(); } },
+          el('div.fz-kopf', el('b', f.name), el('span', { class: 'amp klein ' + f.ampel }, rot ? 'Nicht einsatzbereit' : 'Einsatzbereit')),
+          rot && f.ampel_grund ? el('div.fz-grund-k', f.ampel_grund) : el('div.fz-kz', f.kennzeichen || ''),
+          el('dl.fz-zahlen',
+            el('div', el('dt', 'Mängel'), el('dd', { class: mg ? 'red' : null }, String(mg))),
+            el('div', el('dt', 'Material'), el('dd', String(mt))),
+            el('div', el('dt', 'Checkliste'), el('dd', { class: ck === 'rot' ? 'red' : ck === 'warte' ? 'warnt' : 'gruen-t' }, ckText)))));
       }
       if (!l.length) liste.append(el('div.mleer', 'Kein KTW gefunden.'));
-      datei();
     }
 
     async function datei() {
@@ -66,15 +77,19 @@ BK.modul('fahrzeuge', {
       const [ck, ckText] = checkStand(f);
       const inhalt = el('div');
       akte.append(
-        el('div.hd', el('h2', f.name), el('span', { class: 'amp ' + f.ampel }, f.ampel === 'einsatzbereit' ? 'Einsatzbereit' : 'Nicht einsatzbereit'), el('span.sp'),
-          el('button.pbtn', { type: 'button', onclick: async () => {
-            try { if (await mac.ampelAendern(f)) laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
-          } }, f.ampel === 'einsatzbereit' ? 'Nicht einsatzbereit …' : 'Wieder einsatzbereit …')),
+        el('div.hd', el('h2', f.name), el('span', { class: 'amp ' + f.ampel }, f.ampel === 'einsatzbereit' ? 'Einsatzbereit' : 'Nicht einsatzbereit')),
         el('div.sub2', [f.kennzeichen, f.kennnummer && 'Kennnummer ' + f.kennnummer, f.wache.name, tab && 'Tablet zuletzt online ' + mac.kurz(tab.zuletzt_online)].filter(Boolean).join(' · ')),
         f.ampel !== 'einsatzbereit' && f.ampel_grund ? el('div.fz-grund', f.ampel_grund + (f.ampel_am ? ' · seit ' + BK.datum(f.ampel_am) : '')) : '',
+        el('div.fz-aktionen',
+          el('button', { type: 'button', class: 'pbtn gross ' + (f.ampel === 'einsatzbereit' ? 'stopp' : 'los'), onclick: async () => {
+            try { if (await mac.ampelAendern(f)) laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+          } }, BK.icon(f.ampel === 'einsatzbereit' ? 'alert' : 'check'), f.ampel === 'einsatzbereit' ? 'Nicht einsatzbereit melden' : 'Wieder einsatzbereit'),
+          el('span.fz-trenner'),
+          el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('mangel', f, laden) }, BK.icon('wrench'), 'Mängelmeldung erstellen'),
+          el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('material', f, laden) }, BK.icon('box'), 'Material anfordern')),
         el('div.kpis',
           el('div.kpi', el('span', 'Offene Mängel'), el('b', { class: mg.length ? 'red' : null }, String(mg.length))),
-          el('div.kpi', el('span', 'Material offen'), el('b', mt.length === 1 ? '1 Anforderung' : `${mt.length} Anforderungen`)),
+          el('div.kpi', el('span', 'Offene Materialanforderungen'), el('b', String(mt.length))),
           el('div.kpi', el('span', 'Checkliste'), el('b', { class: ck === 'rot' ? 'red' : ck === 'warte' ? 'warnt' : null }, ckText)),
           el('div.kpi', el('span', 'Nächste STK/MTK'), el('b', { 'data-stk': '' }, '…'))),
         el('div.tabs', { role: 'tablist' }, [['meldungen', 'Meldungen'], ['checklisten', 'Checklisten'], ['geraete', 'Geräte'], ['verlauf', 'Verlauf']].map(([k, t]) =>
@@ -94,7 +109,7 @@ BK.modul('fahrzeuge', {
       if (reiter === 'meldungen') {
         const ms = meldungen.filter(m => m.fahrzeug_id === f.id).slice(0, 50);
         inhalt.append(tabelle(['Status', 'Meldung', 'Art', 'Gemeldet', 'Von'],
-          ms.map(m => el('tr', { onclick: () => ctx.oeffnen(m.art === 'material' ? 'ausgabe' : 'maengel') },
+          ms.map(m => el('tr', { dataset: { klick: '' }, onclick: () => ctx.oeffnen(m.art === 'material' ? 'ausgabe' : 'maengel') },
             el('td', mac.pill(m.status)), el('td', mac.titel(m)), el('td', m.art === 'material' ? 'Materialanforderung' : 'Mängelmeldung'), el('td', mac.kurz(m.erstellt_am)), el('td', m.gemeldet_von))),
           'Noch keine Meldungen.'));
       } else if (reiter === 'checklisten') {
@@ -116,7 +131,7 @@ BK.modul('fahrzeuge', {
           inhalt.append(tabelle(['Wann', 'Was', 'Wer'], v.map(e => el('tr', el('td', BK.datum(e.am)),
             el('td', ({ gemeldet: 'Meldung', status: 'Status: ' + (mac.STATUS[e.details.nach] || ''), bearbeitet: 'Meldung bearbeitet',
               ampel: e.details.ampel === 'einsatzbereit' ? 'Einsatzbereit gesetzt' : 'Nicht einsatzbereit: ' + (e.details.grund || ''),
-              ausgegeben: 'Material ausgegeben', teilweise_ausgegeben: 'Material teilweise ausgegeben', checkliste_begonnen: 'Checkliste begonnen',
+              ausgegeben: 'Material ausgegeben', teilweise_ausgegeben: 'Material zum Teil ausgegeben', checkliste_begonnen: 'Checkliste begonnen',
               checkliste_abgeschlossen: 'Checkliste abgeschlossen', gegengezeichnet: 'Checkliste gegengezeichnet', checkliste_zurueck: 'Checkliste zurück ans Team',
               tablet_gekoppelt: 'Tablet gekoppelt' })[e.aktion] || e.aktion),
             el('td', e.wer_name || '–'))), 'Noch nichts passiert.'));

@@ -1,4 +1,4 @@
-// Modul Material ausgeben (Mac). Der MPGler trägt die erhaltene Menge ein, „ausgegeben durch“ und Datum setzt die App.
+// Modul Materialanforderungen (Mac). Ausgegebene Menge ist vorbelegt, bei weniger Ware anpassen. „Ausgegeben durch“ und Datum setzt die App.
 BK.modul('ausgabe', {
   async start(root) {
     const { el, icon, api, leeren, mac } = BK;
@@ -44,16 +44,16 @@ BK.modul('ausgabe', {
         el('div.hd', el('h2', 'Material für ' + m.fahrzeug.name), mac.pill(m.status)),
         el('div.sub2', `Angefordert ${mac.kurz(m.erstellt_am)} von ${m.gemeldet_von}` + (b.ausgegeben_von ? ` · ausgegeben durch ${b.ausgegeben_von} am ${BK.datum(b.ausgegeben_am, false)}` : '')),
         el('table.tab', { style: 'margin-top:14px' },
-          el('thead', el('tr', el('th', 'Artikel'), el('th', 'Größe'), el('th.num', 'Angefordert'), el('th', 'Grund'), el('th.num', 'Erhalten'))),
+          el('thead', el('tr', el('th', 'Artikel'), el('th', 'Größe'), el('th.num', 'Angefordert'), el('th', 'Grund'), el('th.num', 'Ausgegeben'))),
           el('tbody', m.positionen.map(p => {
-            erhalten[p.id] = p.erhalten;
+            erhalten[p.id] = p.erhalten ?? p.menge;
             return el('tr', el('td', p.artikel), el('td', p.groesse || '–'), el('td.num', String(p.menge)), el('td', p.grund || '–'),
-              el('td.num', fertig ? String(p.erhalten ?? 0) : el('input.tf.sm', { type: 'number', min: 0, max: 999, inputmode: 'numeric', value: p.erhalten ?? '', placeholder: '0',
-                'aria-label': 'Erhalten: ' + p.artikel, oninput: e => { erhalten[p.id] = e.target.value === '' ? null : Math.max(0, Math.min(999, Number(e.target.value))); } })));
+              el('td.num', fertig ? String(p.erhalten ?? 0) : el('input.tf.sm', { type: 'number', min: 0, max: 999, inputmode: 'numeric', value: p.erhalten ?? p.menge,
+                'aria-label': 'Ausgegeben: ' + p.artikel, oninput: e => { erhalten[p.id] = e.target.value === '' ? null : Math.max(0, Math.min(999, Number(e.target.value))); } })));
           }))),
+        fertig ? '' : el('div.foot.aus-hinweis', 'Fehlt etwas im Lager? Menge in „Ausgegeben“ anpassen.'),
         fertig ? '' : el('div.acts',
-          el('button.pbtn', { type: 'button', onclick: () => ausgeben(m, erhalten, false) }, 'Teilweise ausgegeben'),
-          el('button.pbtn.def', { type: 'button', onclick: () => ausgeben(m, erhalten, true) }, 'Ausgegeben')));
+          el('button.pbtn.def.gross', { type: 'button', onclick: () => ausgeben(m, erhalten, true) }, BK.icon('check'), 'Als ausgegeben markieren')));
     }
 
     async function ausgeben(m, erhalten, erledigt) {
@@ -65,7 +65,7 @@ BK.modul('ausgabe', {
     root.querySelector('[data-export]').onclick = () => {
       const zeilen = gefiltert().flatMap(m => m.positionen.map(p => ({
         KTW: m.fahrzeug.name, Angefordert: BK.datum(m.erstellt_am), Von: m.gemeldet_von, Artikel: p.artikel, Größe: p.groesse,
-        Menge: p.menge, Grund: p.grund, Erhalten: p.erhalten, Status: mac.STATUS[m.status],
+        Menge: p.menge, Grund: p.grund, Ausgegeben: p.erhalten, Status: mac.STATUS[m.status],
         'Ausgegeben durch': (m.bearbeitung || {}).ausgegeben_von || '' })));
       if (!exportCSV('material-' + new Date().toISOString().slice(0, 10) + '.csv', zeilen)) alertDialog('Nichts zu exportieren', 'Die Liste ist leer.');
     };
