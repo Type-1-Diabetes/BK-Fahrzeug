@@ -4,22 +4,22 @@ BK.modul('checkliste', {
     const { el, icon, api, leeren } = BK;
     const fz = ctx.fahrzeug;
     const box = root.querySelector('[data-ckl]');
-    const jetzt = new Date();
-    const zeitraum = `${jetzt.getFullYear()}-Q${Math.floor(jetzt.getMonth() / 3) + 1}`;
-    const zeitraumText = z => `${z.slice(-1)}. Quartal ${z.slice(0, 4)}`;
+    const zeitraumText = BK.fristen.zeitraumText;
 
     const meldung = (titel, text, knopf) => leeren(box).append(el('div.ckl-start',
       el('span.logo-platzhalter.gross', icon('list')), el('h1', titel), ...[].concat(text), knopf || null));
 
     if (!fz.vorlage_id) return meldung('Keine Checkliste', 'Für diesen KTW ist noch keine Checkliste hinterlegt.');
 
-    let bereiche, liste;
+    let bereiche, liste, fristen;
     try {
-      [bereiche, liste] = await Promise.all([api.vorlage(fz.vorlage_id), api.checklisten({ fahrzeugId: fz.id, offen: true })]);
+      [bereiche, liste, fristen] = await Promise.all([api.vorlage(fz.vorlage_id), api.checklisten({ fahrzeugId: fz.id, offen: true }), api.fristen().catch(() => [])]);
     } catch (e) {
       return meldung('Checkliste lässt sich nicht laden', e.offline ? 'Kein Netz und noch nichts auf dem Tablet gespeichert.' : e.message);
     }
     bereiche = bereiche.filter(b => b.positionen.length);
+    const frist = BK.fristen.fuer(fristen, fz);
+    const zeitraum = frist.key;
     const offen = liste.find(c => !c.abgeschlossen_am);
     const wartet = liste.find(c => c.abgeschlossen_am);
 
@@ -31,7 +31,7 @@ BK.modul('checkliste', {
       } }, 'Checkliste beginnen');
       const anzahl = bereiche.reduce((n, b) => n + b.positionen.length, 0);
       return meldung('Überprüfung Vollzähligkeit',
-        [el('p', `${zeitraumText(zeitraum)} · ${anzahl} Positionen in ${bereiche.length} Bereichen.`),
+        [el('p', `${zeitraumText(zeitraum)}, fällig bis ${frist.bis} · ${anzahl} Positionen in ${bereiche.length} Bereichen.`),
           wartet ? el('p', `Die letzte Checkliste (${zeitraumText(wartet.zeitraum)}) wartet auf die Gegenzeichnung.`) : el('p', 'Die App speichert, wann ihr beginnt und wann ihr abschließt.')],
         knopf);
     }

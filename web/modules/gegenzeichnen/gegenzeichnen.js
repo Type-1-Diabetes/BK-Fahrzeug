@@ -8,10 +8,10 @@ BK.modul('gegenzeichnen', {
     root.querySelector('[data-pdf]').append(icon('export'), 'PDF');
     const vorlagen = {};  // vorlage_id → Bereiche
     let alle = [], gewaehlt = null, ganz = false;
-    const quartal = z => `${z.slice(-1)}. Quartal ${z.slice(0, 4)}`;
+    const quartal = BK.fristen.zeitraumText;
 
     async function vorlage(id) {
-      if (!vorlagen[id]) vorlagen[id] = await api.vorlage(id);
+      if (!vorlagen[id]) vorlagen[id] = await api.vorlage(id, { alle: true });
       return vorlagen[id];
     }
 

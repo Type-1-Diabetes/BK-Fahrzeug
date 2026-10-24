@@ -111,6 +111,11 @@
     async anmelden(email, passwort) {
       setzeSitzung(await roh('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email, password: passwort }) }));
     },
+    // Demo: anonyme Sitzung, dann Rolle wählen (Migration 011)
+    async demoAnmelden(rolle) {
+      if (!sitzung) setzeSitzung(await roh('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ data: {} }) }));
+      await rpc('demo_anmelden', { p_rolle: rolle });
+    },
     async abmelden() {
       try { await mitLogin('/auth/v1/logout', { method: 'POST' }); } catch { /* egal */ }
       setzeSitzung(null);
@@ -131,7 +136,7 @@
 
     // Fahrzeuge ---------------------------------------------------------
     async fahrzeug(id) {
-      const d = await lesen('fahrzeuge', `id=eq.${id}&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,module,vorlage_id,wache:wachen(name)`);
+      const d = await lesen('fahrzeuge', `id=eq.${id}&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,module,vorlage_id,wache_id,wache:wachen(id,name)`);
       return d[0] || null;
     },
     // Nur Fahrzeugstatus, immer frisch vom Server (für die Live-Anzeige)
@@ -165,7 +170,19 @@
     },
 
     // Checklisten -------------------------------------------------------
-    vorlage: vorlageId => lesen('vorlage_bereiche', `vorlage_id=eq.${vorlageId}&select=id,name,farbe,reihenfolge,positionen:vorlage_positionen(id,nr,artikel,hinweis,soll,pruefart,optional)&order=reihenfolge&positionen.order=nr`),
+    // alle = auch ausgeblendete Positionen (für alte Checklisten)
+    vorlage: (vorlageId, { alle } = {}) => lesen('vorlage_bereiche', `vorlage_id=eq.${vorlageId}&select=id,name,farbe,reihenfolge,aktiv,positionen:vorlage_positionen(id,nr,artikel,hinweis,soll,pruefart,optional,aktiv)&order=reihenfolge&positionen.order=nr`
+      + (alle ? '' : '&aktiv=eq.true&positionen.aktiv=eq.true')),
+    vorlagen: () => lesen('checklisten_vorlagen', 'select=id,name&order=name'),
+    fristen: () => lesen('fristen', 'select=id,wache_id,fahrzeug_id,intervall,vorlauf_tage'),
+    wachen: () => lesen('wachen', 'select=id,name&order=name'),
+    fristSetzen: (wache, intervall, vorlauf) => rpc('frist_setzen', { p_wache: wache, p_intervall: intervall, p_vorlauf: vorlauf }),
+    fristEntfernen: wache => rpc('frist_entfernen', { p_wache: wache }),
+    bereichSpeichern: (id, vorlage, name, farbe) => rpc('vorlage_bereich_speichern', { p_id: id, p_vorlage: vorlage, p_name: name, p_farbe: farbe }),
+    bereichLoeschen: id => rpc('vorlage_bereich_loeschen', { p_id: id }),
+    positionSpeichern: (id, bereich, p) => rpc('vorlage_position_speichern', { p_id: id, p_bereich: bereich, p_artikel: p.artikel, p_hinweis: p.hinweis, p_soll: p.soll, p_pruefart: p.pruefart, p_optional: p.optional }),
+    positionLoeschen: id => rpc('vorlage_position_loeschen', { p_id: id }),
+    verschieben: (art, id, richtung) => rpc('vorlage_verschieben', { p_art: art, p_id: id, p_richtung: richtung }),
     checklisten: ({ fahrzeugId, offen } = {}) => lesen('checklisten',
       ['select=id,client_id,fahrzeug_id,vorlage_id,zeitraum,begonnen_am,abgeschlossen_am,mitarbeiter1,mitarbeiter2,gegengezeichnet_am,zurueck_grund,fahrzeug:fahrzeuge(name),eintraege:checklisten_eintraege(position_id,ist,verfall,bemerkung)', 'order=begonnen_am.desc']
         .concat(fahrzeugId ? ['fahrzeug_id=eq.' + fahrzeugId] : [], offen ? ['gegengezeichnet_am=is.null'] : []).join('&')),

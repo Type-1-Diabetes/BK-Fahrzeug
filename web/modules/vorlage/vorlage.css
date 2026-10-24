@@ -1,0 +1,12 @@
+/* Modul Vorlage bearbeiten (Admin) */
+.vo-kopf { display: flex; align-items: center; gap: 8px; padding: 12px 10px 10px; border-bottom: .5px solid var(--sep); }
+.vo-kopf h2 { font-size: 17px; margin-right: auto; display: flex; align-items: center; }
+.vo-kopf .stripe { height: 18px; }
+.vo-pfeile { display: inline-flex; gap: 2px; }
+.vo-pfeile .tb { height: 24px; padding: 0 5px; font-size: 14px; }
+.vo-pfeile .tb:disabled { opacity: .3; }
+table.tab td.vo-hinweis { color: var(--label2); max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+table.tab tbody tr.sel td.vo-hinweis { color: rgba(255,255,255,.8); }
+.vr .stripe { height: 22px; margin-right: 0; flex: none; }
+.vo-form { display: flex; flex-direction: column; gap: 4px; }
+.vo-form .kv { margin-top: 10px; }

@@ -50,7 +50,7 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 
 - „Mangel melden“ ist eine eigene Seite statt Blatt über der Übersicht.
 - Unter „Melden“ wechselt ein Umschalter zwischen Mangel und Material (im Mockup nicht gezeigt).
-- Fristen, Vorlagen, Benutzer und Wachen fehlen am Mac: kommen laut 10a erst auf den eigenen Webserver.
+- Fristen und Vorlage-Editor sind schon in der Demo (Admin › Checklisten). Benutzer und Wachen fehlen noch (laut 10a später).
 - „Wache wechseln“ und Reiter „Module“ in der Fahrzeug-Übersicht fehlen (Verwaltung, später).
 
 ## Offen
@@ -58,6 +58,15 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 1. Mac mit echtem Login testen (Admin und MPGler): Mangel bearbeiten, Ampel, Material ausgeben, Gegenzeichnen.
 2. Benachrichtigungen: Versand läuft bis zur Function (Empfänger gefunden). Fehlt: echter Empfang auf einem Mac oder iPad testen.
 3. Fotos nach 30 Tagen löschen (geplanter Job in Supabase).
-4. Erinnerung, wenn die Checkliste fällig ist.
+4. Erinnerung (Push), wenn die Checkliste fällig ist. Anzeige „fällig bis“ läuft schon über die Fristen.
+7. Migration 010 im SQL Editor ausführen, dann Fristen, Vorlage-Editor und Entkoppeln (löscht das Tablet) mit Admin-Login testen.
 5. „Neues Tablet“: KTW-Auswahl als richtige Liste statt Nummer.
 6. Tablet einrichten auf echtem iPad und Android testen (Installieren, Code in der App).
+
+## Stand 24.10.2026 (bk-v15, nicht deployt)
+
+- Entkoppeln löscht das Tablet jetzt aus der Liste (Migration 010).
+- Fristen: Admin › Checklisten › Fristen. Intervall (Monat, Quartal, Halbjahr, Jahr) und Erinnerung in Tagen, Standard und je Wache. Tablet, Übersicht, Fahrzeuge und Gegenzeichnen rechnen damit (`js/fristen.js`).
+- Vorlage bearbeiten: Admin › Checklisten. Bereiche (Name, Farbe, Reihenfolge) und Positionen (Artikel, Hinweis, Soll, Prüfung, optional) anlegen, ändern, verschieben, löschen. Benutzte Einträge werden nur ausgeblendet.
+- Getestet: Syntax. Nicht getestet: im Browser mit Login (braucht 010).
+- Demo-Login: Statt E-Mail und Passwort zwei Knöpfe „Als MPGler“ / „Als Admin“ (anonyme Sitzung + `demo_anmelden`, Migration 011). Jeder kann so Admin werden: nur für die Demo, vor dem eigenen Webserver entfernen. bk-v16.

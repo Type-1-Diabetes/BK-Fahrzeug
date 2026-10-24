@@ -9,14 +9,13 @@ BK.modul('fahrzeuge', {
     zurueck.onclick = () => { gewaehlt = null; zeichnen(); };
     const suche = root.querySelector('[data-suche]');
     const jetzt = new Date();
-    const zeitraum = `${jetzt.getFullYear()}-Q${Math.floor(jetzt.getMonth() / 3) + 1}`;
-    const quartalsende = new Date(jetzt.getFullYear(), Math.floor(jetzt.getMonth() / 3) * 3 + 3, 0);
+    let fristen = [];
     let ampelVorher = null, geaendert = new Set();
     let fahrzeuge = [], meldungen = [], checklisten = [], tablets = [], wache = '', gewaehlt = (ctx.extra && ctx.extra.fahrzeug) || null, reiter = 'meldungen';
 
     async function laden() {
       try {
-        [fahrzeuge, meldungen, checklisten] = await Promise.all([api.fahrzeuge(), api.meldungen({ seitTagen: 365 }), api.checklisten()]);
+        [fahrzeuge, meldungen, checklisten, fristen] = await Promise.all([api.fahrzeuge(), api.meldungen({ seitTagen: 365 }), api.checklisten(), api.fristen().catch(() => [])]);
         if (ampelVorher) geaendert = new Set(fahrzeuge.filter(f => ampelVorher[f.id] && ampelVorher[f.id] !== f.ampel).map(f => f.id));
         ampelVorher = Object.fromEntries(fahrzeuge.map(f => [f.id, f.ampel]));
         fahrzeuge.sort((a, b) => a.wache.name.localeCompare(b.wache.name, 'de') || a.name.localeCompare(b.name, 'de', { numeric: true }));
@@ -34,11 +33,12 @@ BK.modul('fahrzeuge', {
 
     const offeneVon = (f, art) => meldungen.filter(m => m.fahrzeug_id === f.id && m.art === art && m.status !== 'erledigt');
     const checkStand = f => {
-      const c = checklisten.find(x => x.fahrzeug_id === f.id && x.zeitraum === zeitraum);
+      const fr = BK.fristen.fuer(fristen, f);
+      const c = checklisten.find(x => x.fahrzeug_id === f.id && x.zeitraum === fr.key);
       if (c && c.gegengezeichnet_am) return ['erledigt', 'Checkliste erledigt'];
       if (c && c.abgeschlossen_am) return ['warte', 'wartet auf Gegenzeichnung'];
       if (c) return ['warte', 'Checkliste läuft'];
-      return [jetzt > quartalsende ? 'rot' : 'warte', 'fällig ' + quartalsende.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })];
+      return [fr.tage < 0 ? 'rot' : 'warte', 'fällig ' + fr.bis];
     };
     // Ohne Auswahl: Kacheln. Mit Auswahl: Akte des KTW.
     function zeichnen() {
@@ -118,7 +118,7 @@ BK.modul('fahrzeuge', {
       } else if (reiter === 'checklisten') {
         const cs = checklisten.filter(c => c.fahrzeug_id === f.id);
         inhalt.append(tabelle(['Zeitraum', 'Begonnen', 'Abgeschlossen', 'Team', 'Abweichungen', 'Gegengezeichnet'],
-          cs.map(c => el('tr', el('td', `${c.zeitraum.slice(-1)}. Quartal ${c.zeitraum.slice(0, 4)}`), el('td', BK.datum(c.begonnen_am)),
+          cs.map(c => el('tr', el('td', BK.fristen.zeitraumText(c.zeitraum)), el('td', BK.datum(c.begonnen_am)),
             el('td', c.abgeschlossen_am ? BK.datum(c.abgeschlossen_am) : '–'), el('td', [c.mitarbeiter1, c.mitarbeiter2].filter(Boolean).join(', ') || '–'),
             el('td', String(c.eintraege.length)), el('td', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '–'))),
           'Noch keine Checkliste.'));

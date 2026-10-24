@@ -244,22 +244,17 @@
     inhalt.fokus.focus();
   }
 
+  // Demo: Rolle per Knopf statt E-Mail und Passwort
   function anmeldeFormular(fehler) {
-    const email = el('input.field', { type: 'email', autocomplete: 'username', placeholder: 'E-Mail', required: true, 'aria-label': 'E-Mail' });
-    const pw = el('input.field', { type: 'password', autocomplete: 'current-password', placeholder: 'Passwort', required: true, 'aria-label': 'Passwort' });
-    const knopf = el('button.btn', { type: 'submit' }, 'Anmelden');
-    const form = el('form', { onsubmit: async e => {
-      e.preventDefault();
+    const knoepfe = [['mpg', 'Als MPGler'], ['admin', 'Als Admin']].map(([rolle, text]) => el('button.btn', { type: 'button', onclick: async e => {
       fehler.textContent = '';
-      knopf.disabled = true;
-      try { await api.anmelden(email.value.trim(), pw.value); await starten(); }
-      catch (err) { fehler.textContent = err.offline ? 'Keine Verbindung. Zum Anmelden braucht das Gerät Internet.' : err.message; pw.select(); }
-      knopf.disabled = false;
-    } },
-      el('p.login-text', 'Für MPGler und Admins.'),
-      el('div.list', el('div.row', email), el('div.row', pw)),
-      knopf);
-    return { form, fokus: email };
+      knoepfe.forEach(k => { k.disabled = true; });
+      try { await api.demoAnmelden(rolle); await starten(); }
+      catch (err) { fehler.textContent = err.offline ? 'Keine Verbindung. Zum Anmelden braucht das Gerät Internet.' : err.message; }
+      knoepfe.forEach(k => { k.disabled = false; });
+    } }, text));
+    const form = el('div.login-demo', el('p.login-text', 'Demo: Wähle, wie du die App sehen willst.'), ...knoepfe);
+    return { form, fokus: knoepfe[0] };
   }
 
   // 6 Felder wie im Mockup. Tippen springt weiter, Einfügen verteilt den ganzen Code.

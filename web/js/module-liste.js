@@ -15,6 +15,8 @@ window.BK.MODULE = [
   { name: 'maengel',       label: 'Mängelmeldungen', icon: 'inbox',  fuer: ['mpg', 'admin'], bereich: 'Meldungen' },
   { name: 'ausgabe',       label: 'Materialanforderungen', icon: 'box',    fuer: ['mpg', 'admin'], bereich: 'Meldungen' },
   { name: 'gegenzeichnen', label: 'Gegenzeichnen', icon: 'list',   fuer: ['mpg', 'admin'], bereich: 'Checklisten' },
+  { name: 'vorlage',       label: 'Vorlage bearbeiten', icon: 'pen', fuer: ['admin'],      bereich: 'Checklisten' },
+  { name: 'fristen',       label: 'Fristen',       icon: 'clock',  fuer: ['admin'],        bereich: 'Checklisten' },
   { name: 'tablets',       label: 'Tablets',       icon: 'tablet', fuer: ['admin'],        bereich: 'Verwaltung' },
   { name: 'einstellungen', label: 'Einstellungen', icon: 'gear',   fuer: ['mpg', 'admin'], bereich: 'Verwaltung' },
 ];

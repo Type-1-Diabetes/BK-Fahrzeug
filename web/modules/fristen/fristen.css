@@ -1,0 +1,9 @@
+/* Modul Fristen (Admin) */
+.fr-inhalt { flex: 1; overflow: auto; padding: 18px 22px; }
+.fr-inhalt .grp { max-width: 640px; }
+.fr-zeile { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 10px; padding: 8px 0; }
+.fr-zeile + .fr-zeile { border-top: .5px solid var(--sep); }
+.fr-zeile b { font-weight: 500; }
+.fr-zeile .fr-info { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; font-weight: 400; }
+.fr-tage { display: inline-flex; align-items: center; gap: 6px; color: var(--label2); white-space: nowrap; }
+.fr-tage .tf { width: 52px; text-align: right; }

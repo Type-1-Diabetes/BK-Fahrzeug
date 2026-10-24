@@ -22,18 +22,15 @@ BK.modul('uebersicht', {
     }
 
     // Ein Satz: was das Team jetzt tun sollte
-    function tunZeigen(checkliste, meldungen) {
-      const jetzt = new Date();
-      const ende = new Date(jetzt.getFullYear(), Math.floor(jetzt.getMonth() / 3) * 3 + 3, 0);
-      const tage = Math.ceil((ende - jetzt) / 864e5);
-      const bis = ende.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    function tunZeigen(checkliste, meldungen, frist) {
+      const { tage, bis } = frist;
       const offen = meldungen.filter(m => m.status !== 'erledigt').length;
       let titel, text, ziel = null, warn = false;
       if (checkliste && checkliste.zurueck_grund && !checkliste.abgeschlossen_am) {
         [titel, text, ziel, warn] = ['Checkliste korrigieren', 'Zurück vom MPGler: ' + checkliste.zurueck_grund, 'checkliste', true];
       } else if (checkliste && !checkliste.abgeschlossen_am) {
         [titel, text, ziel] = ['Checkliste weitermachen', `Angefangen, aber noch nicht abgeschlossen. Fällig bis ${bis}.`, 'checkliste'];
-      } else if (!checkliste && tage <= 14) {
+      } else if (!checkliste && frist.bald) {
         [titel, text, ziel, warn] = [tage < 0 ? 'Checkliste überfällig' : `Checkliste fällig bis ${bis}`, 'Vollzähligkeit prüfen und abschließen.', 'checkliste', true];
       } else {
         titel = 'Alles erledigt';
@@ -57,12 +54,11 @@ BK.modul('uebersicht', {
     async function laden() {
       try { fz = (await api.fahrzeug(fz.id)) || fz; } catch { /* alter Stand */ }
       ampelZeigen();
-      const jetzt = new Date();
-      const zeitraum = `${jetzt.getFullYear()}-Q${Math.floor(jetzt.getMonth() / 3) + 1}`;
       try {
-        const [alle, cl] = await Promise.all([api.meldungen({ fahrzeugId: fz.id, seitTagen: 60 }), api.checklisten({ fahrzeugId: fz.id }).catch(() => [])]);
+        const [alle, cl, fristen] = await Promise.all([api.meldungen({ fahrzeugId: fz.id, seitTagen: 60 }), api.checklisten({ fahrzeugId: fz.id }).catch(() => []), api.fristen().catch(() => [])]);
+        const frist = BK.fristen.fuer(fristen, fz);
         const meldungen = alle.filter(m => m.status !== 'erledigt' || Date.now() - new Date(m.erledigt_am) < 7 * 864e5);
-        tunZeigen(cl.find(c => c.zeitraum === zeitraum), meldungen);
+        tunZeigen(cl.find(c => c.zeitraum === frist.key), meldungen, frist);
         leeren(liste);
         if (!meldungen.length) liste.append(el('div.row', el('div.t', el('b', 'Keine offenen Meldungen.'), el('span', 'Neue Meldungen erscheinen hier, bis sie erledigt sind.'))));
         for (const m of meldungen) {
