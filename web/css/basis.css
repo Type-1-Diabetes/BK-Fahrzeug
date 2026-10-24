@@ -5,6 +5,8 @@
   --label: #0b0b1e; --label2: rgba(40,40,67,.66); --label3: rgba(60,60,67,.34); --sep: rgba(60,60,67,.22);
   --tint: var(--navy2); --ok: #2fa84f; --ok-ink: #1d7a37; --bad: #e2001a; --bad-ink: #c00016; --warn: #f08a00; --warn-ink: #a85a00;
   --bar: rgba(250,250,252,.94); --mac-side: #ececf1;
+  /* Fenster und Blätter: feine Kante, kurzer Kontaktschatten, weicher Tiefenschatten */
+  --schatten-fenster: 0 0 0 .5px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.08), 0 16px 40px -8px rgba(0,0,0,.22);
   /* Bereichsfarben wie Legende MPG.doc: Sauerstoff, Hygiene, Wundversorgung, Diagnostik, Immobilisation */
   --b-blau: #8fb4e3; --b-orange: #ffc000; --b-rot: #ff0000; --b-gruen: #92d050; --b-gelb: #f2e200;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
@@ -18,6 +20,7 @@
   --label: #fff; --label2: rgba(235,235,245,.64); --label3: rgba(235,235,245,.32); --sep: rgba(84,84,88,.6);
   --tint: #8f9bff; --ok: #30d158; --ok-ink: #30d158; --bad: #ff453a; --bad-ink: #ff6961; --warn: #ff9f0a; --warn-ink: #ffb340;
   --bar: rgba(30,30,33,.94); --mac-side: #212124; --navy2: #2a2d8f;
+  --schatten-fenster: inset 0 0 0 .5px rgba(255,255,255,.1), 0 0 0 .5px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.3), 0 18px 40px -10px rgba(0,0,0,.45);
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }

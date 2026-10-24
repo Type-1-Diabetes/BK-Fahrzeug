@@ -143,3 +143,7 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 ## Hell/Dunkel auf Login und Tablet (2026-10-24)
 - Knopf „Dunkel“/„Hell“ (Mond/Sonne) oben rechts auf der Anmeldeseite und in der Tablet-Kopfzeile (`themeKnopf` in `app.js`). Speichert wie Mac-Einstellungen in `bk_theme`, nur dieses Gerät.
 - Offen: im Browser prüfen (iPad quer, Login).
+
+## Fensterschatten (2026-10-24)
+- Neue Variable `--schatten-fenster` (basis.css, hell und dunkel) für Bestätigungsfenster, Blätter und Code-Fenster. Dunkel: feine helle Kante statt großem dunklem Hof.
+- Offen: im Browser prüfen.
