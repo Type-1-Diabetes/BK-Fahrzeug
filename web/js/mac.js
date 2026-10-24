@@ -104,7 +104,7 @@
     const { el } = BK;
     return el('div.druck',
       el('table.dr-kopf', el('tbody', el('tr',
-        el('td.dr-logo', el('img', { src: 'icons/icon.svg', alt: 'Blauer Kreis' })),
+        el('td.dr-logo', el('img', { src: 'icons/logo-256.png', alt: 'Blauer Kreis' })),
         el('td.dr-titel', el('b', 'Organisationshandbuch'), el('span', bereich), el('u', titel)),
         el('td.dr-dok', el('span', 'Dok.: ' + dok), el('span', 'Version: ' + version + ' Freigegeben von GL'))))),
       ...inhalt,

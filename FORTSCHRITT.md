@@ -101,3 +101,10 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Mängel und Material (Mac): Auswahl „+ Neu“ in der Werkzeugleiste. KTW wählen, dann öffnet sich das Formular als Blatt (wie in der Fahrzeug-Akte). Getestet im Browser (Material für KTW 3/4 geöffnet, nicht gesendet).
 - Zahlen in der Seitenleiste werden nach jedem Speichern oder Löschen sofort neu geholt (Ereignis `bk:geschrieben`).
 - Service Worker und Modul-HTML fragen jetzt immer beim Server nach (`cache: 'no-cache'`). Vorher kamen alte Dateien aus dem Browser-Cache (z. B. noch „Betrifft“ und eine alte Zahl).
+
+## Stand 24.10.2026 (bk-v26): Logo und Banner
+
+- Rundes Firmenlogo (`icons/logo.png`, daraus `logo-256`, `icon-192/512`, `icon-maskable-512`, `apple-touch-icon`, `favicon-32/16`): Mac-Seitenleiste, Tablet-Kopf, Seite „App installieren“, Druckkopf, Homescreen, Favicon, Benachrichtigungen.
+- Banner (`icons/banner.png`, ohne roten Kontaktbalken) oben auf der Anmelde- und Koppelseite, auf weißer Fläche, so breit wie die Karte.
+- Getestet: Dateien laden (200), Logo in der Seitenleiste, Banner-Breite. Anmeldeseite nur als Testansicht, nicht abgemeldet. Homescreen-Icon nicht auf echtem iPad/Android.
+- `icons/icon.svg` wird nicht mehr benutzt.

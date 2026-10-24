@@ -20,6 +20,9 @@
     for (const k of kinder.flat()) if (k != null && k !== false) e.append(k instanceof Node ? k : String(k));
     return e;
   };
+  // Rundes Firmenlogo (icons/logo.png) und Banner (icons/banner.png)
+  window.BK.logo = (klasse = '') => window.BK.el('img', { src: 'icons/logo-256.png', alt: 'Blauer Kreis', class: ('logo-bild ' + klasse).trim(), width: 256, height: 256 });
+  window.BK.banner = () => window.BK.el('img', { src: 'icons/banner.png', alt: 'Blauer Kreis GmbH, Krankenbeförderung', class: 'login-banner' });
   window.BK.leeren = function (e) { while (e.firstChild) e.firstChild.remove(); return e; };
   window.BK.datum = (d, zeit = true) => d ? new Date(d).toLocaleString('de-DE', zeit
     ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }

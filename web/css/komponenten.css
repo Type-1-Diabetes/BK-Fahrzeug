@@ -86,7 +86,12 @@ select.field { appearance: none; min-height: 36px; }
 .huelle-mac { display: flex; height: 100dvh; font-size: 13px; background: var(--bg2); }
 .mside { width: 220px; flex: none; background: var(--mac-side); display: flex; flex-direction: column; padding: 14px 10px 10px; border-right: .5px solid var(--sep); overflow: auto; }
 .mlogo { display: flex; align-items: center; gap: 8px; padding: 4px 8px 8px; font-weight: 700; font-size: 14px; }
-.mlogo .logo-platzhalter { width: 26px; height: 26px; font-size: 10px; }
+.mlogo .logo-bild { width: 28px; height: 28px; }
+/* Firmenlogo: rund, keine Verzerrung */
+.logo-bild { width: 30px; height: 30px; border-radius: 50%; object-fit: contain; flex: none; }
+.logo-bild.gross { width: 96px; height: 96px; }
+/* Banner auf der Startkarte: auf weißer Fläche, auch im Dunkelmodus */
+.login-banner { align-self: stretch; width: 100%; box-sizing: border-box; height: auto; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 0 0 .5px var(--sep); }
 .mside h6 { margin: 12px 10px 4px; font-size: 11px; font-weight: 600; color: var(--label2); }
 .si { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 10px; border-radius: 6px; text-align: left; }
 .si svg { color: var(--brand); font-size: 16px; }
@@ -116,7 +121,7 @@ table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 .huelle-start { min-height: 100dvh; display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top)) 16px 24px; }
 .login { width: min(420px, 100%); display: flex; flex-direction: column; gap: 24px; }
 .login-kopf { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
-.login-kopf .logo-platzhalter { margin-bottom: 8px; }
+.login-kopf .logo-platzhalter, .login-kopf .logo-bild { margin-bottom: 8px; }
 .login-kopf h1 { font-size: 28px; }
 .login-kopf p { margin: 0; color: var(--label2); font-size: 15px; }
 .login-karte { background: var(--bg2); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }

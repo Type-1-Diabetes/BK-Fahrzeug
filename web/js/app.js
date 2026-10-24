@@ -163,7 +163,7 @@
     app.className = 'huelle-tablet';
     leeren(app).append(
       el('header.topnav',
-        el('div.brandmini', el('span.logo-platzhalter', 'BK'), 'Blauer Kreis'),
+        el('div.brandmini', BK.logo(), 'Blauer Kreis'),
         el('nav.ftabs', { 'aria-label': 'Bereiche' }, reiter(liste).map(r =>
           el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
         el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
@@ -185,7 +185,7 @@
   function macHuelle() {
     const liste = erlaubteModule();
     const inhalt = el('main.mmain', { id: 'inhalt' });
-    const nav = el('nav.mside', { 'aria-label': 'Bereiche' }, el('div.mlogo', el('span.logo-platzhalter', 'BK'), 'Blauer Kreis'));
+    const nav = el('nav.mside', { 'aria-label': 'Bereiche' }, el('div.mlogo', BK.logo(), 'Blauer Kreis'));
     let bereich = null;
     for (const m of liste) {
       if (m.bereich !== bereich) { bereich = m.bereich; nav.append(el('h6', bereich)); }
@@ -243,7 +243,7 @@
           onclick: () => m !== modus && startSeite('', m) }, t)));
     const inhalt = modus === 'koppeln' ? koppelFormular(fehler) : anmeldeFormular(fehler);
     leeren(app).append(el('div.login',
-      el('div.login-kopf', el('span.logo-platzhalter.gross', 'BK'), el('h1', 'BK Fahrzeug'), el('p', 'Blauer Kreis · Krankenbeförderung')),
+      el('div.login-kopf', BK.banner(), el('h1', 'BK Fahrzeug'), el('p', 'Mängel, Material und Checklisten für die KTW')),
       el('div.login-karte', nurKoppeln ? null : wahl, inhalt.form, fehler)));
     inhalt.fokus.focus();
   }
@@ -331,7 +331,7 @@
       ? 'Installiere jetzt die App. Danach öffnest du nur noch das App-Symbol, es zeigt direkt diesen KTW.'
       : 'Installiere die App wie unten beschrieben. Öffne sie dann über das neue Symbol und gib dort denselben Code noch einmal ein.';
     leeren(app).append(el('div.login',
-      el('div.login-kopf', el('span.logo-platzhalter.gross', 'BK'), el('h1', titel), el('p', text)),
+      el('div.login-kopf', BK.logo('gross'), el('h1', titel), el('p', text)),
       el('div.login-karte', status, knopf, anleitung,
         fahrzeug ? el('button.login-link', { type: 'button', onclick: () => starten() }, 'Im Browser weiter')
                  : el('button.login-link', { type: 'button', onclick: () => startSeite('', 'koppeln') }, 'Zurück zum Code'))));
