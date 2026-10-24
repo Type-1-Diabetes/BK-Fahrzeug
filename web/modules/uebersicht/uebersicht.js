@@ -27,11 +27,11 @@ BK.modul('uebersicht', {
       const { tage, bis } = frist;
       let titel, text, ziel = null, warn = false;
       if (checkliste && checkliste.zurueck_grund && !checkliste.abgeschlossen_am) {
-        [titel, text, ziel, warn] = ['Checkliste korrigieren', 'Zurück vom MPGler: ' + checkliste.zurueck_grund, 'checkliste', true];
+        [titel, text, ziel, warn] = ['Fahrzeug Überprüfung korrigieren', 'Zurück vom MPGler: ' + checkliste.zurueck_grund, 'checkliste', true];
       } else if (checkliste && !checkliste.abgeschlossen_am) {
-        [titel, text, ziel] = ['Checkliste weitermachen', `Angefangen, aber noch nicht abgeschlossen. Fällig bis ${bis}.`, 'checkliste'];
+        [titel, text, ziel] = ['Fahrzeug Überprüfung weitermachen', `Angefangen, aber noch nicht abgeschlossen. Fällig bis ${bis}.`, 'checkliste'];
       } else if (!checkliste && frist.bald) {
-        [titel, text, ziel, warn] = [tage < 0 ? 'Checkliste überfällig' : `Checkliste fällig bis ${bis}`, 'Vollzähligkeit prüfen und abschließen.', 'checkliste', true];
+        [titel, text, ziel, warn] = [tage < 0 ? 'Fahrzeug Überprüfung überfällig' : `Fahrzeug Überprüfung fällig bis ${bis}`, 'Vollzähligkeit prüfen und abschließen.', 'checkliste', true];
       } else {
         tun.hidden = true;  // nichts steht an
         return;
@@ -50,7 +50,7 @@ BK.modul('uebersicht', {
     root.querySelector('[data-kacheln]').append(
       kachel('mangel', 'f-rot', 'wrench', 'Mängelmeldung'),
       kachel('material', 'f-blau', 'box', 'Materialanforderung'),
-      kachel('checkliste', 'f-navy', 'list', 'Checkliste'));
+      kachel('checkliste', 'f-navy', 'list', 'Fahrzeug Überprüfung'));
 
     async function laden() {
       try { fz = (await api.fahrzeug(fz.id)) || fz; } catch { /* alter Stand */ }

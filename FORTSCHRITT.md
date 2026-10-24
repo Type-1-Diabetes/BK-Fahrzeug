@@ -205,3 +205,17 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Material: Zeile bricht nicht mehr um, X steht rechts.
 - Checkliste-Start: Titel „Fahrzeug Überprüfung“, Untertitel „§ 20 Abs. 2 HmbRDG Überprüfung von Krankentransportwagen“, ohne Positionszahl und ohne Hinweis zum Speichern.
 - Melden-Umschalter: Icons 22 px.
+
+## Feinschliff Seitenleiste, Material, Gegenzeichnen (2026-10-24)
+- Seitenleiste: keine waagerechte Scrollleiste (Touch 248 px breit, 15 px Schrift).
+- Material „Liste durchgehen“: Zeile wächst nicht mehr, wenn Verbraucht/Abgelaufen erscheint.
+- Tablet-Mängelmeldung: Rückfrage beim Verlassen nur nach echter Eingabe (vorher schlug sie wegen Vorbelegungen fälschlich an).
+- Ausgabe: × größer. „Nicht im KTW“ heißt „Nicht vorhanden“.
+- Ganze Liste (Gegenzeichnen, Druck): ohne Lfd. Nr. Am Bildschirm Bereich als Farbstreifen, Gruppen als kleine Überschrift, Kopfzeile ohne Lücke. Druck behält Farbflächen.
+- Offen: im Browser prüfen.
+
+## Zwei Checklisten auf dem Tablet (2026-10-24)
+- Reiter „Checkliste“ mit Umschalter: „Fahrzeug Überprüfung“ (bisherige Checkliste, § 20 Abs. 2 HmbRDG, wird gegengezeichnet) und „Checkliste“ (neues Modul `sollliste`).
+- `sollliste`: Soll-Ausstattung aus der Vorlage zum Nachschauen, nach Bereichen, mit Suche, Soll-Zahl und „Wo“. Haken nur lokal auf dem Tablet (localStorage), nichts wird gesendet, „Haken entfernen“ setzt zurück.
+- Übersicht-Kachel und Hinweise heißen „Fahrzeug Überprüfung“.
+- Offen: auf dem iPad prüfen.

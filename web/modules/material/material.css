@@ -25,7 +25,8 @@
 .mat-bereich .streifen { width: 4px; height: 16px; border-radius: 2px; background: var(--label3); }
 .mat-bereich .streifen.blau { background: var(--b-blau); } .mat-bereich .streifen.orange { background: var(--b-orange); } .mat-bereich .streifen.rot { background: var(--b-rot); }
 .mat-bereich .streifen.gruen { background: var(--b-gruen); } .mat-bereich .streifen.gelb { background: var(--b-gelb); }
-.mk { min-height: 60px; flex-wrap: wrap; }
+.mk { min-height: 68px; flex-wrap: nowrap; }
+.mk .grund button { min-height: 40px; }  /* gleich hoch wie der Stepper, die Zeile wächst nicht */
 .mk .t { flex: 1; min-width: 180px; }
 .mk.an { background: color-mix(in srgb, var(--navy2) 8%, var(--bg2)); }
 .mk.an .q { font-weight: 700; }

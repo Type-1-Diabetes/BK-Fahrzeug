@@ -79,21 +79,19 @@
     const abw = new Map((eintraege || []).map(e => [e.position_id, e]));
     const frist = { verfall: 'Verfall', stk: 'STK', mtk: 'MTK' };
     return el('table.tab.pliste',
-      el('thead', el('tr', el('th', 'Lfd. Nr.'), el('th', 'Material/ Ausstattung'), el('th', 'Artikel, wenn vorhanden SN und Hersteller'),
+      el('thead', el('tr', el('th', 'Material/ Ausstattung'), el('th', 'Artikel, wenn vorhanden SN und Hersteller'),
         el('th.num', 'Anzahl soll'), el('th.num', 'Anzahl ist'), el('th', 'Verfallsdatum, STK/ MTK'), el('th', 'Wo'), el('th', 'Bemerkung'))),
       ...bereiche.map((b, i) => el('tbody',
-        b.gruppe && b.gruppe !== (bereiche[i - 1] || {}).gruppe ? el('tr.pl-gruppe', el('td'), el('td', { colspan: 7 }, b.gruppe)) : null,
+        b.gruppe && b.gruppe !== (bereiche[i - 1] || {}).gruppe ? el('tr.pl-gruppe', el('td', { colspan: 7 }, b.gruppe)) : null,
         ...b.positionen.map((p, j) => {
           const e = abw.get(p.id);
           const fehlt = e && e.ist != null && e.ist < p.soll;
           const l = BK.lfd(p);
           if (e && e.durchgestrichen) return el('tr.durch',
-            el('td.pl-nr', l.nr),
             j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
             el('td.pl-art', el('b', p.artikel)), el('td.num', String(p.soll)), el('td.num', '–'), el('td'), el('td', p.wo || ''),
-            el('td', e.bemerkung ? 'Nicht im KTW · ' + e.bemerkung : 'Nicht im KTW'));
+            el('td', e.bemerkung ? 'Nicht vorhanden · ' + e.bemerkung : 'Nicht vorhanden'));
           return el('tr', { class: e ? 'abw' : null },
-            el('td.pl-nr', l.nr),
             j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
             el('td.pl-art', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), l.text ? el('span', l.text) : null),
             el('td.num', String(p.soll)),

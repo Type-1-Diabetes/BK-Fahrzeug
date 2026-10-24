@@ -87,7 +87,7 @@ select.field { appearance: none; min-height: 36px; }
 
 /* Hülle Mac -------------------------------------------------------------- */
 .huelle-mac { display: flex; height: 100dvh; font-size: 13px; background: var(--bg2); }
-.mside { width: 220px; flex: none; background: var(--mac-side); display: flex; flex-direction: column; padding: 14px 10px 10px; border-right: .5px solid var(--sep); overflow: auto; }
+.mside { width: 220px; flex: none; background: var(--mac-side); display: flex; flex-direction: column; padding: 14px 10px 10px; border-right: .5px solid var(--sep); overflow-y: auto; overflow-x: hidden; }
 .mlogo { display: flex; align-items: center; gap: 8px; padding: 4px 8px 8px; font-weight: 700; font-size: 14px; }
 .mlogo .logo-bild { width: 28px; height: 28px; }
 /* Firmenlogo: rund, keine Verzerrung */
@@ -507,7 +507,6 @@ button.veh:active { background: var(--fill); }
 .pliste td { white-space: normal; vertical-align: top; padding-top: 7px; padding-bottom: 7px; height: auto; }
 .pliste tbody tr:nth-child(even) td { background: none; }
 .pliste tbody tr:nth-child(odd):not(.pl-bereich) td { background: color-mix(in srgb, var(--fill) 70%, transparent); }
-.pliste .pl-nr { color: var(--label2); width: 56px; }
 .pliste .pl-art b { font-weight: 500; }
 .pliste .pl-art span { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; }
 .pliste tr.abw td { background: color-mix(in srgb, var(--warn) 9%, var(--bg2)) !important; }
@@ -538,7 +537,10 @@ button.veh:active { background: var(--fill); }
 @media (pointer: coarse) {
   /* Ziele mindestens 44 px hoch */
   .huelle-mac .pbtn, .huelle-mac .tb { height: auto; min-height: 44px; padding: 0 16px; font-size: 15px; border-radius: 9px; }
-  .huelle-mac .si, .huelle-mac .sl-nav-item { min-height: 44px; font-size: 16px; }
+  .huelle-mac .si, .huelle-mac .sl-nav-item { min-height: 44px; font-size: 15px; }
+  /* Seitenleiste ohne waagerechte Scrollleiste: etwas breiter, lange Namen kürzen statt überlaufen */
+  .huelle-mac .mside { width: 248px; overflow-x: hidden; }
+  .huelle-mac .si { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .huelle-mac .si svg { font-size: 20px; }
   .huelle-mac .mseg button { min-height: 40px; padding: 0 14px; font-size: 15px; }
   .huelle-mac .tabs button { min-height: 44px; padding: 0 16px; font-size: 15px; }
@@ -567,4 +569,20 @@ button.veh:active { background: var(--fill); }
   .code-overlay .tf { height: 44px; font-size: 16px; }
   /* Kein grauer Tipp-Blitz, kein Doppeltipp-Zoom auf Knöpfen */
   button, a, [role="button"], table.tab tbody tr { touch-action: manipulation; }
+}
+
+/* Ganze Liste am Bildschirm übersichtlicher: Bereich als farbiger Streifen statt Farbfläche, Gruppen als ruhige Überschrift.
+   Der Druck behält die Farbflächen wie auf Papier. */
+@media screen {
+  .pliste td.pl-mat, .pliste td.pl-mat.blau, .pliste td.pl-mat.orange, .pliste td.pl-mat.rot, .pliste td.pl-mat.gruen, .pliste td.pl-mat.gelb {
+    width: 170px; text-decoration: none; color: var(--label); font-weight: 600;
+    background: var(--bg2) !important; border-left: 4px solid var(--label3); }
+  .pliste td.pl-mat.blau { border-left-color: var(--b-blau); } .pliste td.pl-mat.orange { border-left-color: var(--b-orange); }
+  .pliste td.pl-mat.rot { border-left-color: var(--b-rot); } .pliste td.pl-mat.gruen { border-left-color: var(--b-gruen); }
+  .pliste td.pl-mat.gelb { border-left-color: var(--b-gelb); }
+  .pliste tbody { border-top: 8px solid var(--bg2); }
+  .pl-gruppe td { text-decoration: none; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; color: var(--label2); padding: 14px 10px 4px; }
+  .pliste td.num { font-variant-numeric: tabular-nums; }
+  /* Kopfzeile klebt ohne Lücke an der Werkzeugleiste (vfile hat 18 px Innenabstand oben) */
+  .vfile table.pliste th { top: -18px; z-index: 1; }
 }

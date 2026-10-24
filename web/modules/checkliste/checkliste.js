@@ -129,7 +129,7 @@ BK.modul('checkliste', {
           da ? ok.delete(p.id) : ok.add(p.id); sichern(); seite();
         } }, durch ? icon('minus') : e ? icon('alert') : da ? icon('check') : null);
       const l = BK.lfd(p);
-      const zweite = durch ? (e.bemerkung ? 'Nicht im KTW · ' + e.bemerkung : 'Nicht im KTW') : e && e.bemerkung ? e.bemerkung : l.text;
+      const zweite = durch ? (e.bemerkung ? 'Nicht vorhanden · ' + e.bemerkung : 'Nicht vorhanden') : e && e.bemerkung ? e.bemerkung : l.text;
       const wrap = el('div', { class: 'ck-wrap ' + (b.farbe || '') + (durch ? ' durch' : e ? ' dev' : '') },
         el('div.ck', haken, el('button.ck-text', { type: 'button', 'aria-expanded': String(offenePosition === p.id), onclick: () => { offenePosition = offenePosition === p.id ? null : p.id; seite(); } },
           el('div.t', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), zweite ? el('span', zweite) : null),
@@ -155,7 +155,7 @@ BK.modul('checkliste', {
         lokalSetzen(p.id, neu);
         offenePosition = null;
         seite();
-        try { await api.checklisteEintrag(offen.id, p.id, neu || { entfernen: true }); showToast(!neu ? `${p.artikel}: vollständig` : neu.durchgestrichen ? `${p.artikel}: nicht im KTW` : `${p.artikel}: Abweichung gemerkt`); }
+        try { await api.checklisteEintrag(offen.id, p.id, neu || { entfernen: true }); showToast(!neu ? `${p.artikel}: vollständig` : neu.durchgestrichen ? `${p.artikel}: nicht vorhanden` : `${p.artikel}: Abweichung gemerkt`); }
         catch (err) { alertDialog('Nicht gespeichert', err.message); }
       };
       return el('div.ck-edit',
@@ -168,7 +168,7 @@ BK.modul('checkliste', {
         el('span', 'Bemerkung'), bem,
         el('div.acts',
           e ? el('button.btn.sec', { type: 'button', onclick: () => speichern(true) }, 'Doch vollständig') : null,
-          e && e.durchgestrichen ? null : el('button.btn.sec', { type: 'button', title: 'Wie auf Papier durchstreichen: bekannt, nicht im KTW', onclick: () => speichern(false, true) }, 'Nicht im KTW'),
+          e && e.durchgestrichen ? null : el('button.btn.sec', { type: 'button', title: 'Wie auf Papier durchstreichen: bekannt, nicht vorhanden', onclick: () => speichern(false, true) }, 'Nicht vorhanden'),
           el('button.btn', { type: 'button', onclick: () => speichern(false) }, 'Übernehmen')));
     }
 

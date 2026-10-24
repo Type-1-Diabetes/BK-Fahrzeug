@@ -7,7 +7,9 @@ window.BK.MODULE = [
   // Mangel und Material teilen sich den Reiter „Melden“ (wie im Mockup), oben ein Umschalter
   { name: 'mangel',     label: 'Mängelmeldung',     icon: 'wrench', fuer: ['tablet'], schalter: 'mangel',   tab: 'Melden' },
   { name: 'material',   label: 'Materialanforderung', icon: 'box',   fuer: ['tablet'], schalter: 'material', tab: 'Melden' },
-  { name: 'checkliste', label: 'Checkliste', icon: 'list',  fuer: ['tablet'], schalter: 'checkliste' },
+  // Fahrzeug Überprüfung (§ 20 HmbRDG, wird gegengezeichnet) und Checkliste zum Nachschauen teilen sich den Reiter „Checkliste“
+  { name: 'checkliste', label: 'Fahrzeug Überprüfung', icon: 'list', fuer: ['tablet'], schalter: 'checkliste', tab: 'Checkliste' },
+  { name: 'sollliste',  label: 'Checkliste',  icon: 'check', fuer: ['tablet'], schalter: 'checkliste', tab: 'Checkliste' },
   { name: 'verlauf',    label: 'Verlauf',   icon: 'clock',  fuer: ['tablet'], schalter: 'verlauf' },
 
   // MPGler und Admin (Mac)

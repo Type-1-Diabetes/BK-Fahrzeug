@@ -35,7 +35,10 @@ BK.modul('mangel', {
     const formBox = root.querySelector('[data-formular]');
     const form = BK.formular.bauen(formBox, FELDER);
     let gesendet = false;
-    BK.vorVerlassen = async () => gesendet || !Object.values(form.werte()).some(v => v && String(v).trim())
+    // Nur echte Eingaben zählen (Tippen, Foto, Auswahl), Vorbelegungen nicht
+    let beruehrt = false;
+    for (const t of ['input', 'change']) formBox.addEventListener(t, e => { if (e.isTrusted) beruehrt = true; }, true);
+    BK.vorVerlassen = async () => gesendet || !beruehrt
       || await confirmDialog('Mängelmeldung nicht gesendet', 'Du hast schon etwas eingetragen. Ohne Senden geht es verloren. Trotzdem verlassen?');
     // Kopfzeile wie auf dem Blatt direkt unter „Art“
     formBox.firstElementChild.after(root.querySelector('[data-kopf]'));
