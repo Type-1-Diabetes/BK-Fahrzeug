@@ -26,6 +26,7 @@
   };
 
   const HAKEN = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
+  const UHR = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 
   let toastBox = null;
   window.showToast = function (text, art) {
@@ -55,14 +56,15 @@
     } finally { knopf.classList.remove('laedt'); knopf.disabled = false; }
   };
 
-  window.erfolg = function (titel, text, ms) {
+  // art 'wartet': orange Uhr statt grünem Haken (auf dem Gerät gespeichert, noch nicht gesendet)
+  window.erfolg = function (titel, text, ms, art) {
     return new Promise(ok => {
       const o = document.createElement('div');
-      o.className = 'erfolg';
+      o.className = 'erfolg' + (art === 'wartet' ? ' wartet' : '');
       o.setAttribute('role', 'status');
       const kreis = document.createElement('div');
       kreis.className = 'erfolg-kreis';
-      kreis.innerHTML = HAKEN;
+      kreis.innerHTML = art === 'wartet' ? UHR : HAKEN;
       const h = document.createElement('h2'); h.textContent = titel;
       const p = document.createElement('p'); p.textContent = text || '';
       o.append(kreis, h, p);

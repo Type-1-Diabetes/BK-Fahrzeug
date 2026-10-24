@@ -80,7 +80,7 @@ BK.modul('ausgabe', {
         el('div.acts',
           el('button.pbtn', { type: 'button', title: 'Drucken oder als PDF speichern (⌘P / Strg+P)', onclick: () => window.print() }, 'Drucken'),
           mac.loeschKnopf('Materialanforderung', () => api.meldungLoeschen(m.id), () => { gewaehlt = null; laden(); }),
-          fertig ? '' : el('button.pbtn.def.gross', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => ausgeben(m, erhalten, true)) }, BK.icon('check'), 'Als ausgegeben markieren')));
+          fertig ? '' : el('button.pbtn.def.gross', { type: 'button', dataset: { fertig: '' }, title: 'Als ausgegeben markieren (⌘↩ / Strg+↩)', onclick: e => mitStatus(e.currentTarget, () => ausgeben(m, erhalten, true)) }, BK.icon('check'), 'Als ausgegeben markieren')));
     }
 
     async function ausgeben(m, erhalten, erledigt) {

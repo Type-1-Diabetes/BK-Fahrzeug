@@ -46,6 +46,7 @@
       aktiv = { name, def: module[name] };
       await module[name].start(ziel, { ...ctx, oeffnen: (n, x) => navigieren(n, x), extra });
       umschalter(name, ziel);
+      if (!ctx.ich.tablet_id) hochformat(ziel);
     } catch (e) {
       ziel.append(el('div.leer', el('p', 'Dieser Bereich lässt sich gerade nicht laden.'), el('p.foot', e.message)));
     }
@@ -218,23 +219,37 @@
     const liste = erlaubteModule();
     const inhalt = el('main.content', { id: 'inhalt' });
     const fz = ctx.fahrzeug;
-    const queue = el('span.queue-badge', { hidden: true });
+    const streifen = el('button.netz-streifen', { type: 'button', role: 'status', hidden: true });
     app.className = 'huelle-tablet';
+    document.removeEventListener('keydown', macTasten);
     leeren(app).append(
       el('header.topnav',
         el('div.topnav-links', el('div.brandmini', BK.logo(), 'Blauer Kreis'),
           el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
-            el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue)),
+            el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')))),
         el('nav.ftabs', { 'aria-label': 'Bereiche' }, reiter(liste).map(r =>
           el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
         el('div.topnav-rechts', window.pwaIsStandalone() ? null : el('button.tb.tablet-ab', { type: 'button', title: 'Als App auf dem Home-Bildschirm installieren', onclick: installBlatt }, icon('download'), 'App installieren'),
         themeKnopf('tablet-ab.thema-knopf'),
         el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden'))),
-      inhalt);
-    BK.warteschlange.beiAenderung(l => {
-      queue.hidden = !l.length;
-      queue.textContent = l.length === 1 ? '1 nicht gesendet' : l.length + ' nicht gesendet';
-    });
+      streifen, inhalt);
+    let warten = [];
+    const meldungen = n => n === 1 ? '1 Meldung' : n + ' Meldungen';
+    // Streifen: offline, wartet oder Fehler. Tippen öffnet den Verlauf (dort Erneut/Verwerfen).
+    const streifenZeigen = () => {
+      const fehler = warten.filter(e => e.fehler).length, offen = warten.length - fehler, online = navigator.onLine;
+      const [art, ic, text] = fehler ? ['fehler', 'alert', `${meldungen(fehler)} nicht gesendet · Antippen`]
+        : !online ? ['', 'clock', offen ? `Offline · ${meldungen(offen)} ${offen === 1 ? 'wartet' : 'warten'}` : 'Offline · Meldungen werden gespeichert und später gesendet']
+        : offen ? ['sendet', 'clock', `${meldungen(offen)} ${offen === 1 ? 'wird' : 'werden'} gesendet …`] : [null];
+      streifen.hidden = art == null;
+      if (art == null) return;
+      streifen.className = 'netz-streifen' + (art ? ' ' + art : '');
+      leeren(streifen).append(icon(ic), text);
+    };
+    streifen.onclick = () => { if (liste.some(m => m.name === 'verlauf')) navigieren('verlauf'); };
+    window.addEventListener('online', streifenZeigen);
+    window.addEventListener('offline', streifenZeigen);
+    BK.warteschlange.beiAenderung(l => { warten = l; streifenZeigen(); });
     navigieren = (name, extra) => oeffnen(name, inhalt, extra);
     navigieren(liste[0].name);
     vorladen(liste);
@@ -258,12 +273,53 @@
       el('div', el('b', ctx.ich.name), el('span', ctx.ich.rolle === 'admin' ? 'Admin' : 'MPGler')),
       el('button.tb', { type: 'button', 'aria-label': 'Abmelden', title: 'Abmelden', onclick: abmelden }, icon('logout'))));
     app.className = 'huelle-mac';
-    leeren(app).append(nav, inhalt);
+    nav.addEventListener('click', e => { if (e.target.closest('.si')) app.classList.remove('seite-offen'); });
+    const abdeckung = el('div.seite-abdeckung', { onclick: () => app.classList.remove('seite-offen') });
+    leeren(app).append(nav, abdeckung, inhalt);
+    document.removeEventListener('keydown', macTasten);
+    document.addEventListener('keydown', macTasten);
     navigieren = async (name, extra) => { if (await oeffnen(name, inhalt, extra) === false) return; zaehlen(); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ } };
     const letztes = localStorage.getItem('bk_modul');
     navigieren(liste.some(m => m.name === letztes) ? letztes : liste[0].name);
     vorladen(liste);
     statusBeobachten();
+  }
+
+  // iPad hochkant: Knopf für die Seitenleiste in die Werkzeugleiste, Liste und Akte nacheinander (CSS blendet um)
+  function hochformat(ziel) {
+    const tool = ziel.querySelector('.tool');
+    if (tool) tool.prepend(el('button.tb.seite-knopf', { type: 'button', 'aria-label': 'Bereiche zeigen', title: 'Bereiche',
+      onclick: () => app.classList.toggle('seite-offen') }, icon('menu')));
+    for (const body of ziel.querySelectorAll('.mbody')) {
+      if (!body.querySelector(':scope > .vlist') || !body.querySelector(':scope > .vfile')) continue;
+      body.prepend(el('button.tb.zur-liste', { type: 'button', onclick: () => body.classList.remove('akte-offen') }, icon('chevL'), 'Liste'));
+      body.addEventListener('click', e => { if (e.target.closest('.vlist .vr')) setTimeout(() => body.classList.add('akte-offen')); });
+    }
+  }
+
+  // Mac-Tastatur: ↑/↓ wechselt in der Liste links, ⌘↩ / Strg+↩ löst den Hauptknopf (erledigt, ausgegeben, gegenzeichnen) aus
+  function macTasten(e) {
+    if (document.querySelector('._ad-open, .blatt-overlay, .auswahl-liste, dialog[open]')) return;
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      const k = document.querySelector('#inhalt [data-fertig]:not(:disabled)');
+      if (k) { e.preventDefault(); k.click(); }
+      return;
+    }
+    if ((e.key !== 'ArrowDown' && e.key !== 'ArrowUp') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target.closest('input, textarea, select, [contenteditable], .auswahl-knopf')) return;
+    const zeilen = [...document.querySelectorAll('#inhalt .vlist .vr, #inhalt table.tab tbody tr[data-id]')];
+    if (!zeilen.length) return;
+    const jetzt = zeilen.findIndex(z => z.classList.contains('on') || z.classList.contains('sel'));
+    const ziel = zeilen[jetzt < 0 ? 0 : Math.max(0, Math.min(zeilen.length - 1, jetzt + (e.key === 'ArrowDown' ? 1 : -1)))];
+    e.preventDefault();
+    if (ziel === zeilen[jetzt]) return;
+    const id = ziel.dataset.id, liste = ziel.parentElement;
+    ziel.click();
+    // Liste wird neu gezeichnet: neue gewählte Zeile wieder in Sicht und fokussieren
+    setTimeout(() => {
+      const neu = (id && liste.querySelector(`tr[data-id="${id}"]`)) || document.querySelector('#inhalt .vlist .vr.on');
+      if (neu) { neu.scrollIntoView({ block: 'nearest' }); if (neu.tagName === 'BUTTON') neu.focus({ preventScroll: true }); }
+    }, 50);
   }
 
   // Zahlen in der Mac-Seitenleiste wie im Mockup (rot = wartet auf dich)

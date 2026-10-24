@@ -164,7 +164,7 @@
     // Tablet: Meldung in die Warteschlange, wird gesendet sobald Netz da ist
     meldungMelden(daten, fotos = []) {
       const client_id = daten.client_id || crypto.randomUUID();
-      return BK.warteschlange.hinzufuegen({ typ: 'meldung', daten: { ...daten, client_id, erstellt_am: new Date().toISOString() }, fotos });
+      return BK.warteschlange.hinzufuegen({ typ: 'meldung', daten: { ...daten, client_id, erstellt_am: new Date().toISOString() }, fotos }, { warten: true });
     },
     // Mac (MPGler/Admin): direkt senden, Fahrzeug steht in daten.fahrzeug_id
     meldungAnlegen: (daten, fotos = []) => api._senden.meldung({ daten: { ...daten, client_id: crypto.randomUUID() }, fotos }),
@@ -194,7 +194,7 @@
         .concat(fahrzeugId ? ['fahrzeug_id=eq.' + fahrzeugId] : [], offen ? ['gegengezeichnet_am=is.null'] : []).join('&')),
     checklisteStarten: zeitraum => rpc('checkliste_starten', { p_client_id: crypto.randomUUID(), p_zeitraum: zeitraum }),
     checklisteEintrag: (checkliste, position, e) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_eintrag', daten: { p_checkliste: checkliste, p_position: position, p_ist: e.ist ?? null, p_verfall: e.verfall || null, p_bemerkung: e.bemerkung || null, p_entfernen: !!e.entfernen, p_durchgestrichen: !!e.durchgestrichen } }),
-    checklisteAbschliessen: (id, m1, m2) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_abschliessen', daten: { p_checkliste: id, p_mitarbeiter1: m1, p_mitarbeiter2: m2 } }),
+    checklisteAbschliessen: (id, m1, m2) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_abschliessen', daten: { p_checkliste: id, p_mitarbeiter1: m1, p_mitarbeiter2: m2 } }, { warten: true }),
     checklisteGegenzeichnen: id => rpc('checkliste_gegenzeichnen', { p_checkliste: id }),
     meldungLoeschen: id => rpc('meldung_loeschen', { p_id: id }),
     checklisteLoeschen: id => rpc('checkliste_loeschen', { p_id: id }),

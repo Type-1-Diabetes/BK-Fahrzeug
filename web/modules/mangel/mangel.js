@@ -52,7 +52,7 @@ BK.modul('mangel', {
       knopf.disabled = true; knopf.classList.add('laedt');
       try {
         const vomMac = !!ctx.ich.rolle;
-        await (vomMac ? api.meldungAnlegen : api.meldungMelden)({
+        const r = await (vomMac ? api.meldungAnlegen : api.meldungMelden)({
           art: 'mangel',
           fahrzeug_id: fz.id,
           betrifft: w.betrifft,
@@ -63,9 +63,9 @@ BK.modul('mangel', {
           gemeldet_von: w.gemeldet_von,
         }, w.fotos || []);
         if (vomMac) showToast(`Mängelmeldung für ${fz.name} gesendet`);
-        else await erfolg('Mängelmeldung gesendet', navigator.onLine
-          ? 'Die MPGler sehen sie jetzt in ihrer Liste.'
-          : 'Kein Netz. Sie ist auf dem Tablet gespeichert und geht raus, sobald wieder Netz da ist.', navigator.onLine ? 2000 : 4000);
+        else await (r.gesendet
+          ? erfolg('Gesendet', 'Die MPGler sehen die Mängelmeldung jetzt in ihrer Liste.')
+          : erfolg('Gespeichert', 'Kein Netz. Die Mängelmeldung wird gesendet, sobald Netz da ist. Bitte nicht noch einmal melden.', 4000, 'wartet'));
         gesendet = true;
         ctx.oeffnen('uebersicht');
       } catch (e) {

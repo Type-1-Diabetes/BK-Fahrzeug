@@ -99,7 +99,7 @@ BK.modul('gegenzeichnen', {
             if (grund == null) return;
             try { await api.checklisteZurueck(c.id, grund.trim().slice(0, 300)); showToast('Checkliste ist zurück beim Team'); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
           } }, 'Zurück ans Team'),
-          el('button.pbtn.def', { type: 'button', onclick: async () => {
+          el('button.pbtn.def', { type: 'button', dataset: { fertig: '' }, title: 'Gegenzeichnen (⌘↩ / Strg+↩)', onclick: async () => {
             if (!await confirmDialog('Gegenzeichnen?', `${c.fahrzeug.name}, ${quartal(c.zeitraum)}. Dein Name und die Uhrzeit werden gespeichert.`)) return;
             try { await api.checklisteGegenzeichnen(c.id); showToast(`${c.fahrzeug.name} gegengezeichnet`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
           } }, 'Gegenzeichnen')] : [])));

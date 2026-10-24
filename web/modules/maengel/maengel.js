@@ -187,7 +187,7 @@
             el('button.pbtn', { type: 'button', title: 'Speichern (⌘S / Strg+S)', dataset: { sichern: '' }, onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, null)) }, 'Speichern'),
             m.status === 'erledigt'
               ? el('button.pbtn.def', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'in_bearbeitung')) }, 'Wieder öffnen')
-              : el('button.pbtn.def', { type: 'button', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'erledigt')) }, 'Als erledigt markieren')));
+              : el('button.pbtn.def', { type: 'button', dataset: { fertig: '' }, title: 'Als erledigt markieren (⌘↩ / Strg+↩)', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'erledigt')) }, 'Als erledigt markieren')));
 
         sichtbar(werte);
         for (const f of m.fotos || []) api.fotoUrl(f.pfad)

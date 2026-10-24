@@ -183,9 +183,11 @@ BK.modul('checkliste', {
         if (nichtGeprueft.length && !await confirmDialog('Noch nicht alles geprüft', `${nichtGeprueft.length} Positionen sind noch nicht abgehakt. Trotzdem abschließen?`)) return;
         knopf.disabled = true; knopf.classList.add('laedt');
         try {
-          await api.checklisteAbschliessen(offen.id, m1.value.trim(), m2.value.trim());
+          const r = await api.checklisteAbschliessen(offen.id, m1.value.trim(), m2.value.trim());
           try { localStorage.removeItem(SPEICHER); } catch { /* egal */ }
-          await erfolg('Checkliste abgeschlossen', 'Der MPGler zeichnet sie jetzt gegen.');
+          await (r.gesendet
+            ? erfolg('Abgeschlossen', 'Der MPGler zeichnet die Fahrzeug Überprüfung jetzt gegen.')
+            : erfolg('Gespeichert', 'Kein Netz. Die Fahrzeug Überprüfung wird gesendet, sobald Netz da ist.', 4000, 'wartet'));
           ctx.oeffnen('uebersicht');
         } catch (e) { knopf.disabled = false; knopf.classList.remove('laedt'); alertDialog('Nicht gespeichert', e.message); }
       } }, 'Abschließen');

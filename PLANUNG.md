@@ -21,8 +21,8 @@ Die Oberfläche bauen wir mit **HTML, CSS und JavaScript**, ohne großes Framewo
 ## 2. Was problemlos geht
 
 - **Formulare**
-  - Mängelmeldung: Fahrzeug, Gerät, wie dringend, Foto, Beschreibung
-  - Materialanforderung: Fahrzeug, Rucksack, Fach, Artikel, Menge
+  - Mängelmeldung: Art (KTW oder MPG mit Gerät), Gegenstand, Beschreibung, bis 5 Fotos, Gemeldet durch
+  - Materialanforderung: Artikel (Suche oder Liste durchgehen), Größe, Menge, Verbraucht/Abgelaufen, Angefordert durch
 - **Status für das nächste Team**: offen, in Bearbeitung, erledigt. Mit Uhrzeit und Kommentar vom MPGler. Wer das Fahrzeug übernimmt, sieht sofort, was schon bekannt oder erledigt ist.
 - **Admin-Bereich mit Login** für MPGler: Liste aller Meldungen, Filter nach Fahrzeug und Status, Status ändern.
 - **Fotos** direkt mit der Kamera aufnehmen und hochladen.
@@ -74,7 +74,8 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 - Zwei Status pro Fahrzeug:
   - **Einsatzbereit** (grün)
   - **Nicht einsatzbereit** (rot)
-- Nur MPGler und Admins setzen den Status, in beide Richtungen. Das Tablet kann ihn nicht ändern.- Sichtbar auf dem Tablet (groß oben) und in der Admin-Übersicht aller Fahrzeuge.
+- Nur MPGler und Admins setzen den Status, in beide Richtungen. Das Tablet kann ihn nicht ändern.
+- Sichtbar auf dem Tablet (groß oben) und in der Admin-Übersicht aller Fahrzeuge.
 - Jeder Wechsel kommt in den Verlauf (wer, wann, warum).
 - Später erweiterbar (z. B. gelb „eingeschränkt“).
 
@@ -119,7 +120,8 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 - Das Tablet darf nur: Meldungen für sein Fahrzeug anlegen, die Checkliste abhaken, offene Meldungen ansehen. Es darf nichts löschen und keine anderen Fahrzeuge sehen.
 - Geht ein Tablet verloren, sperrt der Admin es mit einem Klick. Ein neues Tablet bekommt einen neuen Code.
 - Das gleiche Fahrzeug-Menü kann auch auf einem Mac geöffnet werden (z. B. in der Wache).
-- Menü am Tablet: 4 Reiter wie im Mockup – Übersicht, Melden (Umschalter Mangel / Material), Checkliste, Verlauf.
+- Menü am Tablet: 4 Reiter wie im Mockup – Übersicht, Melden (Umschalter Mangel / Material), Checkliste (Umschalter „Fahrzeug Überprüfung“ zum Gegenzeichnen / „Checkliste“ zum Nachschauen), Verlauf.
+- In der Demo gilt **Tablet = KTW**: „Neues Tablet“ legt den KTW gleich mit an (Wache, Name, Kennzeichen). KTW ohne Tablet sind ausgeblendet. Entkoppeln löst nur die Kopplung, der KTW bleibt.
 
 ## 5b. Modularer Aufbau
 
@@ -136,7 +138,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 
 - Kein Netz in der Fahrzeughalle? Die Meldung wird auf dem Gerät gespeichert.
 - Sobald wieder Netz da ist, wird sie verschickt. Auf iPhone und iPad passiert das beim nächsten Öffnen der App, nicht im Hintergrund (Apple erlaubt das nicht).
-- Die App zeigt klar an: „Noch nicht gesendet“ oder „Gesendet“.
+- Die App zeigt klar an: „Gesendet“ (grüner Haken) oder „Gespeichert, wird gesendet, sobald Netz da ist“. Ein Streifen oben zeigt „Offline · x Meldungen warten“.
 - Die letzten Daten (Fahrzeuge, Checklisten, offene Meldungen) sind auch offline lesbar.
 - Die Tablet-Module sind im Service Worker gespeichert, damit das Tablet auch ohne Netz startet. Eine Checkliste beginnen braucht einmal Netz, abhaken und abschließen geht danach offline.
 
@@ -147,7 +149,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - Technik in der Demo: Ein neuer Eintrag im Verlauf löst einen Trigger aus (Migration 004). Der ruft die Edge Function `push-senden` auf, die per Web Push (VAPID) verschickt. Abgelaufene Geräte werden automatisch entfernt.
 - Geheimnisse liegen nur in Supabase (Edge Functions › Secrets und Vault), nie im Repo.
 - iPad/iPhone: nur in der installierten App (Home-Bildschirm), ab iOS 16.4.
-- Noch offen: Erinnerung und Meldung „Checkliste überfällig“ (braucht einen täglichen Job).
+- Erinnerung „Fahrzeug Überprüfung überfällig“ kommt erst auf dem eigenen Webserver (siehe Abschnitt 12).
 
 ---
 
@@ -187,7 +189,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 
 ### Empfehlung
 - **Demo:** Supabase Cloud (Frankfurt).
-- **Fertiges Produkt:** Entscheidung später. Entweder Supabase selbst betreiben, PocketBase oder ein eigenes kleines Backend mit PostgreSQL. PocketBase ist am einfachsten zu betreiben (eine einzige Datei, ca. 15 MB) und reicht für diese Datenmenge locker.
+- **Fertiges Produkt:** eigener Webserver mit Node.js und eigener Datenbank, nicht Supabase. Welche Datenbank genau, entscheiden wir beim Umzug.
 - **Damit der Wechsel leicht bleibt:** Die Oberfläche spricht nie direkt mit Supabase, sondern nur über eine Datei `api.js`. Beim Wechsel tauschen wir nur diese Datei aus.
 
 ## 8. Datenschutz und Schutz vor Angriffen
@@ -207,7 +209,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - Content Security Policy: Die Seite lädt nur Skripte von uns selbst.
 - Nur HTTPS (GitHub Pages macht das automatisch).
 - Fotos: nur Bilder erlaubt, Größe begrenzt, privater Speicher.
-- Begrenzung, wie viele Meldungen pro Minute möglich sind (gegen Spam).
+- Begrenzung, wie viele Meldungen pro Minute möglich sind (gegen Spam). In der Demo bisher nur für Kopplungscodes gebaut.
 - Abhängigkeiten klein halten und mit GitHub Dependabot prüfen.
 - Vor dem echten Betrieb: Abstimmung mit dem Datenschutzbeauftragten (Medizinprodukte, MPBetreibV).
 
@@ -217,7 +219,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - Zielgeräte: **Mac-Monitore** und **iPads**. Android und Windows sollen auch funktionieren.
 - Das iPad wird mit dem Finger bedient: große Schaltflächen, im Querformat und Hochformat nutzbar.
 - Die App soll sich wie eine echte Apple-App anfühlen: schnell, ruhig, vertraute Bedienung.
-- **Hell ist fester Standard**, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel gibt es nur auf Wunsch am Mac (Einstellungen › Konto › Darstellung). Das Tablet ist immer hell.
+- **Hell ist fester Standard**, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel gibt es nur auf Wunsch per Knopf (Anmeldeseite, Tablet-Kopfzeile, Mac › Einstellungen › Konto › Darstellung). Gilt nur auf diesem Gerät.
 - Verbindliche Vorlage für die Oberfläche ist `mockup/ui-mockup.html`. Was davon abweicht, steht in `FORTSCHRITT.md`.
 - **Schrift:** Wir nutzen die Systemschrift. Sie ist immer da und sieht offline gleich aus. Soll später doch die Website-Schrift Source Sans rein, legen wir die Schriftdateien in `web/` ab und speichern sie per Service Worker auf dem Gerät. Dann funktioniert auch das ohne Netz. Nicht über Google Fonts laden.
 - Skills für die Umsetzung:
@@ -239,7 +241,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - [x] Checkliste: Mitarbeiter 1 und 2 tippen ihre Namen ein
 - [x] Material: Artikel aus der Checkliste oder frei eintippen. Keine Auswahl „Für“, alles ist für den Blauen Kreis.
 - [x] Push: Jeder MPGler oder Admin stellt selbst ein, worüber er Bescheid bekommt
-- [x] Fotos: höchstens 5 pro Meldung, 30 Tage nach Erledigt gelöscht. Vorher kann man sie lokal herunterladen.
+- [x] Fotos: höchstens 5 pro Meldung, Standard 30 Tage nach Erledigt gelöscht (auf dem Webserver einstellbar). Vorher kann man sie lokal herunterladen.
 - [x] Wachen, KTW, Listen, Geräte: legt der Admin selbst an (viele Konfigurationen möglich)
 - [x] Export: PDF pro Checkliste, CSV für Meldungen
 - [x] Logo: in der Demo nur ein Platzhalter (Repo ist öffentlich)
@@ -268,11 +270,11 @@ Am Mac für MPGler und Admins:
 Im Hintergrund:
 - Funktioniert auch ohne Netz, sendet später automatisch
 - Benachrichtigungen aufs Gerät, jeder stellt selbst ein, welche
-- Erinnerung, wenn die Checkliste fällig ist
+- Anzeige „fällig bis“ / „überfällig“ auf dem Tablet (die Push-Erinnerung kommt erst auf dem Webserver)
 - Jede Änderung wird protokolliert
-- Fotos werden nach 30 Tagen gelöscht
+- Fotos löschen nach 30 Tagen: nicht in der Demo, kommt auf dem Webserver als einstellbare Aufbewahrung (Abschnitt 12)
 
-Daten: nur Testdaten. Wachen, Fahrzeuge und Benutzer sind fest vorgegeben.
+Daten: nur Testdaten. Wachen und Benutzer sind fest vorgegeben. KTW entstehen über „Neues Tablet“. Anmeldung per Demo-Knopf „Als MPGler“ / „Als Admin“ ohne Passwort.
 
 **Finale Version (eigener Webserver)**
 
@@ -305,7 +307,7 @@ Quelle: `Projects/Website schrietz/httpdocs/admin` (Node/Express + MySQL). Die D
 - **Rollen und Rechte** (`config/roles.js`, `requireTab`/`requirePerm`): Rollen mit Bereichen und feinen Rechten, Ausnahmen pro Account. Als Tabellen, geprüft per RLS.
 - **Accounts anlegen** (`routes/accounts.js`): Admin lädt Benutzer ein, vergibt Rolle und Wachen. Über Supabase Auth (Einladungs-Mail).
 - **Push-Einstellungen pro Person** (`notifQueue.js` mit `PUSH_META`, `pushService.js`): jeder wählt selbst, worüber er Bescheid bekommt.
-- **Löschfristen** (`retention.js`): täglicher Job, z. B. Fotos 30 Tage nach Erledigt löschen. Als Supabase-Cron.
+- **Löschfristen** (`retention.js`): täglicher Job auf dem Webserver, Fristen einstellbar (Abschnitt 12).
 - **Protokoll** (`audit()`): jede Aktion mit wer und wann. Grundlage für den Verlauf.
 
 Was davon erst mit dem eigenen Webserver kommt, steht in Abschnitt 12.
@@ -317,23 +319,35 @@ Alles Konfigurieren bauen wir erst, wenn die App auf einem eigenen Webserver lä
 **In der Demo stattdessen:** feste Testdaten aus einer Seed-Datei (Wachen Osdorf mit KTW 4/1, 4/2, 4/3, 4/4, N-KTW 9/3 und Bergedorf mit KTW 3/4, 3/9, 4/5; Geräte je KTW: AED, Absauggerät, Pulsoximeter, Thermometer, EKG, Fahrtrage, Raupenstuhl; Vorlage „KTW Standard“, je ein Test-MPGler und Test-Admin, ein gekoppeltes Tablet). **Später auf dem eigenen Webserver:** Wachen, Fahrzeuge und Geräte frei anlegen und ändern. Die Verwaltungs-Bereiche am Mac zeigen diese Daten nur an. Die Tabellen bauen wir trotzdem schon so, dass das Konfigurieren später ohne Umbau dazukommt.
 
 **Konfigurieren (Admin-Bereich)**
-- Wachen anlegen, ändern, archivieren
-- KTW anlegen, Wache zuordnen und umhängen (z. B. Ersatzfahrzeug), Module pro KTW ein- und ausschalten
-- Geräte pro KTW mit Seriennummer, Hersteller und Prüffrist (STK/MTK)
+- Wachen und KTW vollständig frei anlegen, ändern, umhängen (z. B. Ersatzfahrzeug), archivieren. Keine fest vorgegebenen Daten. Module pro KTW ein- und ausschalten.
+- Geräte genauso vollständig frei anlegen und konfigurieren wie Wachen und KTW (z. B. Name, Art, Seriennummer, Hersteller, Prüffrist STK/MTK, KTW-Zuordnung, umhängen, archivieren)
 - Checklisten-Vorlagen: Bereiche, Artikel, Soll-Mengen, Hinweise, Farben. Pro KTW anpassbar.
 - Fristen und Erinnerungen: Standard, Ausnahmen pro Wache oder KTW
-- Benutzer einladen, Rolle und Wachen vergeben, sperren
+- Erinnerung „Fahrzeug Überprüfung überfällig“ per Push: täglicher Job (auf dem Webserver über die Job-Liste, in Supabase wäre es `pg_cron`), sendet über die vorhandene Funktion `push-senden`
+- Benutzer anlegen (E-Mail und Passwort), Rolle **MPGler** oder **Admin** und Wachen vergeben, sperren
+- Aufbewahrung einstellbar: wie lange abgeschlossene Materialanforderungen, Mängelmeldungen und Checklisten sowie Fotos bleiben (z. B. Fotos 30 Tage nach Erledigt). Löschen übernimmt ein täglicher Job auf dem Webserver.
 - Rollen und Rechte verwalten (Rollen mit Bereichen und feinen Rechten, Ausnahmen pro Account)
 
 **Anmeldung und Sicherheit (aus Schrietz übernehmen)**
+- Login mit E-Mail und Passwort, jeder Account hat die Rolle MPGler oder Admin
+- Der erste Admin-Account wird per Terminal angelegt (z. B. Node.js-Skript), direkt in der neuen Datenbank. Danach legt der Admin weitere Accounts in der App an.
 - Anmeldung mit Sitzungs-Cookie (httpOnly), Schutz gegen gefälschte Anfragen (CSRF), Geräte-Bindung
 - Passwortregeln und Zwei-Faktor mit Wiederherstellungscodes (`passwordPolicy.js`, `recoveryCodes.js`)
 - Automatische IP-Sperre bei Angriffen, Sicherheitsvorfälle protokollieren (`security.js`)
 - Zeitaufgaben über eine zentrale Liste mit Sperre gegen doppelte Ausführung (`jobRegistry.js`, `leader.js`)
 - Feste Bedeutung der Statuscodes (401 abgemeldet, 403 keine Rechte, 419 CSRF abgelaufen, 429 zu viele Anfragen)
 
+**Was in der Demo anders ist und auf dem Webserver ersetzt wird**
+- Demo-Login per Knopf (jeder kann Admin werden, Migration 011) → echte Anmeldung mit Passwort und Zwei-Faktor
+- Tablet = KTW (KTW entsteht über „Neues Tablet“) → KTW frei anlegen, Tablet nur zuordnen
+- Feste Wachen und Benutzer → Wachen, KTW und Benutzer vollständig frei anlegen
+- Geräte nur ansehen → Geräte vollständig frei anlegen und konfigurieren
+- Fotos-Löschen fehlt → einstellbare Aufbewahrung für Meldungen, Checklisten und Fotos
+- Supabase Cloud → eigenes Backend mit eigener Datenbank (nicht Supabase), nur `api.js` wird getauscht
+- Zeitaufgaben (Fotos löschen, Erinnerung überfällig) → zentrale Job-Liste
+
 **Umzug**
-- Backend-Entscheidung treffen (Supabase selbst betreiben, PocketBase oder eigenes Backend, siehe Abschnitt 7)
+- Backend: eigener Server (Node.js), eigene Datenbank, nicht Supabase (siehe Abschnitt 7)
 - Nur `web/js/api.js` austauschen, die Oberfläche bleibt
 - Testdaten durch echte Daten ersetzen, vorher Abstimmung mit dem Datenschutzbeauftragten
 

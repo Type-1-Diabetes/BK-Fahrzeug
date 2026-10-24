@@ -30,10 +30,13 @@
     hoerer.forEach(fn => { try { fn(liste); } catch { /* egal */ } });
   }
 
-  async function hinzufuegen(eintrag) {
-    await tx('readwrite', s => s.add({ ...eintrag, erstellt: Date.now(), fehler: null }));
+  // warten: liefert { gesendet } (true = beim Server, false = wartet auf dem Gerät), höchstens 8 s
+  async function hinzufuegen(eintrag, { warten } = {}) {
+    const nr = await tx('readwrite', s => s.add({ ...eintrag, erstellt: Date.now(), fehler: null }));
     await melden();
-    senden();
+    if (!warten) { senden(); return; }
+    await Promise.race([senden(), new Promise(ok => setTimeout(ok, 8000))]);
+    return { gesendet: !(await tx('readonly', s => s.get(nr))) };
   }
 
   // Der Reihe nach senden. Ohne Netz: abbrechen und später erneut. Fehler vom Server: Eintrag markieren.

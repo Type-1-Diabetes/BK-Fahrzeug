@@ -23,7 +23,8 @@ Baut die bekannten Papierformulare des Blauen Kreises 1:1 in Reihenfolge und Beg
 ## Operating Context
 - Vorlagen: „BK_Formulare_Mängelmeldung“ (2025-01-14), „Material-Anforderung“ (2015-04-23), „Überprüfung Vollzähligkeit KTW“ (MPG.doc, 14.04.2025). Details in `PLANUNG.md` Abschnitt 2a.
 - Checkliste einmal pro Quartal, in Ruhe. Meldungen kurz zwischen Einsätzen oder nach Schichtende.
-- Fahrzeughalle teils ohne Netz: Offline-Warteschlange.
+- Fahrzeughalle teils ohne Netz: Offline-Warteschlange, klare Anzeige „Gesendet“ / „Gespeichert“ und Netz-Streifen.
+- MPGler arbeiten am Mac mit Maus und Tastatur (↑/↓, ⌘↩, ⌘S, ⌘P) und am iPad mit Finger.
 
 ## Capabilities and Constraints
 - Rollen: Tablet (kein Login, Kopplungscode, nur eigenes Fahrzeug), MPGler, Admin. Rechte per RLS in der Datenbank.
@@ -33,10 +34,10 @@ Baut die bekannten Papierformulare des Blauen Kreises 1:1 in Reihenfolge und Beg
 - Nur Testdaten, keine Patientendaten, keine echten Kennzeichen oder Seriennummern.
 
 ## Brand Commitments
-Orientierung an www.blauer-kreis.de: Navy (Kopf/Fuß), Rot (Wortmarke „Krankenbeförderung“), Logo-Blau, rundes BK-Logo. Website-Schrift Source Sans. iPad wird fast immer quer genutzt. Standard ist der helle Modus.
+Orientierung an www.blauer-kreis.de: Navy (Kopf/Fuß), Rot (Wortmarke „Krankenbeförderung“), Logo-Blau, rundes BK-Logo. Schrift: Systemschrift (Source Sans der Website nur später, lokal eingebunden). iPad im Fahrzeug fast immer quer, MPGler-iPad auch hochkant. Standard ist der helle Modus.
 
 ## Evidence on Hand
-Papierformulare (beschrieben in `PLANUNG.md`). Keine Logos oder Markendateien im Repo.
+Papierformulare (beschrieben in `PLANUNG.md`). Rundes Firmenlogo und Banner in `web/icons/` (Logo, App-Icons, Favicon). UI-Vorlage `mockup/ui-mockup.html`.
 
 ## Product Principles
 - Wie auf Papier: gleiche Reihenfolge, gleiche Begriffe.
@@ -46,4 +47,4 @@ Papierformulare (beschrieben in `PLANUNG.md`). Keine Logos oder Markendateien im
 - Texte kurz, einfach, verständlich.
 
 ## Accessibility & Inclusion
-Touch-Ziele für iPad groß genug, Hoch- und Querformat. Hell- und Dunkelmodus.
+Touch-Ziele mindestens 44 px (Tablet und MPGler-iPad), Hoch- und Querformat. Felder mit 16 px Schrift (kein Zoom in Safari). Hell- und Dunkelmodus pro Gerät. Bewegung nur kurz, `prefers-reduced-motion` wird beachtet. Benutzereingaben immer als Text.

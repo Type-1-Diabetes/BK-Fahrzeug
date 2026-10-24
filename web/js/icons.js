@@ -12,6 +12,7 @@
     gear: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
     cam: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
     chevR: '<path d="m9 5 7 7-7 7"/>', chevL: '<path d="m15 5-7 7 7 7"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
     plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>',
     check: '<path d="m5 12.5 4.5 4.5L19 7"/>', alert: '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17.5v.01"/>',
     upload: '<path d="M12 16V5M7 10l5-5 5 5"/><path d="M5 19h14"/>', logout: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>',

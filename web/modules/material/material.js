@@ -134,11 +134,11 @@ BK.modul('material', {
       knopf.disabled = true; knopf.classList.add('laedt');
       try {
         const vomMac = !!ctx.ich.rolle;
-        await (vomMac ? api.meldungAnlegen : api.meldungMelden)({ art: 'material', fahrzeug_id: fz.id, gemeldet_von: name.value.trim(), positionen });
+        const r = await (vomMac ? api.meldungAnlegen : api.meldungMelden)({ art: 'material', fahrzeug_id: fz.id, gemeldet_von: name.value.trim(), positionen });
         if (vomMac) showToast(`Materialanforderung für ${fz.name} gesendet`);
-        else await erfolg('Materialanforderung gesendet', navigator.onLine
-          ? 'Die MPGler sehen die Anforderung jetzt in ihrer Liste.'
-          : 'Kein Netz. Die Anforderung ist auf dem Tablet gespeichert und wird gesendet, sobald wieder Verbindung da ist.');
+        else await (r.gesendet
+          ? erfolg('Gesendet', 'Die MPGler sehen die Materialanforderung jetzt in ihrer Liste.')
+          : erfolg('Gespeichert', 'Kein Netz. Die Materialanforderung wird gesendet, sobald Netz da ist. Bitte nicht noch einmal anfordern.', 4000, 'wartet'));
         gesendet = true;
         ctx.oeffnen('uebersicht');
       } catch (e) {

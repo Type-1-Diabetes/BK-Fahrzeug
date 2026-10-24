@@ -74,7 +74,6 @@ select.field { appearance: none; min-height: 36px; }
 .ftabs button.on { background: var(--navy2); color: #fff; }
 .veh { min-width: 0; text-align: left; font-size: 14px; color: var(--label2); display: flex; flex-direction: column; align-items: flex-start; }
 .veh b { color: var(--label); font-size: 15px; }
-.queue-badge { margin-top: 2px; font-size: 12px; font-weight: 600; color: var(--warn-ink); }
 .content { flex: 1; overflow: auto; padding: 0 28px 28px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 .large { font-size: 32px; font-weight: 700; padding: 6px 0 12px; }
 .reiter-wahl { max-width: 480px; margin: 4px auto 8px; }
@@ -419,6 +418,16 @@ input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 @keyframes erfolg-ein { from { opacity: 0; } }
 @keyframes erfolg-pop { from { transform: scale(.5); opacity: 0; } }
 @keyframes haken { to { stroke-dashoffset: 0; } }
+.erfolg.wartet .erfolg-kreis { background: var(--warn); }
+.erfolg.wartet .erfolg-kreis svg { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
+
+/* Tablet: Streifen unter der Kopfzeile, solange offline oder etwas auf Senden wartet */
+.netz-streifen { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 6px 16px; border: 0; width: 100%;
+  background: var(--warn); color: #1c1c1e; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+.netz-streifen[hidden] { display: none; }
+.netz-streifen.sendet { background: var(--brand); color: #fff; }
+.netz-streifen.fehler { background: var(--bad); color: #fff; }
+.netz-streifen svg { width: 20px; height: 20px; flex: none; }
 
 /* Geänderter Status leuchtet kurz auf */
 .aufleuchten { animation: aufleuchten 1.6s ease-out 2; }
@@ -586,3 +595,23 @@ button.veh:active { background: var(--fill); }
   /* Kopfzeile klebt ohne Lücke an der Werkzeugleiste (vfile hat 18 px Innenabstand oben) */
   .vfile table.pliste th { top: -18px; z-index: 1; }
 }
+
+/* iPad hochkant und schmale Hochkant-Fenster (MPGler): Seitenleiste schiebt sich über den Inhalt, Liste und Akte nacheinander */
+.seite-knopf, .zur-liste, .seite-abdeckung { display: none; }
+@media (orientation: portrait) and (max-width: 1100px) {
+  .huelle-mac .seite-knopf { display: inline-flex; margin-left: -6px; }
+  .huelle-mac .mside { position: fixed; z-index: 60; inset: 0 auto 0 0; padding-top: max(14px, env(safe-area-inset-top));
+    transform: translateX(-100%); transition: transform .25s cubic-bezier(.2,.8,.2,1); box-shadow: none; }
+  .huelle-mac.seite-offen .mside { transform: none; box-shadow: 0 0 40px rgba(0,0,0,.25); }
+  .huelle-mac.seite-offen .seite-abdeckung { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(0,0,0,.25); }
+  .huelle-mac .mbody:has(> .vlist) { flex-direction: column; }
+  .huelle-mac .mbody > .vlist { width: auto; flex: 1; border: 0; }
+  .huelle-mac .mbody:has(> .vlist) > .vfile { display: none; }
+  .huelle-mac .mbody.akte-offen > .vlist { display: none; }
+  .huelle-mac .mbody.akte-offen > .vfile { display: block; flex: 1; }
+  .huelle-mac .mbody.akte-offen > .zur-liste { display: inline-flex; align-self: flex-start; margin: 8px 8px 0; color: var(--brand); }
+  /* Tabelle mit Inspektor (Mängel): Inspektor als Blatt von rechts */
+  .huelle-mac .mbody > .insp { position: fixed; z-index: 50; inset: 0 0 0 auto; width: min(440px, 92vw); max-height: none;
+    background: var(--bg2); border-left: .5px solid var(--sep); box-shadow: -10px 0 40px rgba(0,0,0,.18); padding-top: max(16px, env(safe-area-inset-top)); }
+}
+@media (prefers-reduced-motion: reduce) { .huelle-mac .mside { transition: none; } }

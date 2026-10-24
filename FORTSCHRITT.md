@@ -1,6 +1,6 @@
 # Fortschritt Demo
 
-Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md` (Abschnitt 2a, 10a).
+Stand: 24.10.2026 (bk-v47). Oben die Übersicht, unten das Tagebuch der Änderungen. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md` (Abschnitt 2a, 10a).
 
 ## Fertig
 
@@ -31,6 +31,18 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 | Demo auf Anfang und Checkliste nach Papierliste MPG.doc (25 Bereiche, 186 Positionen, SN XXXX), Migration 008 | Server | fertig | ja, Zahlen in Supabase geprüft |
 | Tablet entkoppeln mit PIN: am Tablet (Fahrzeugname oben rechts antippen) und am Mac (Tablets › Entkoppeln); Admin legt PIN fest (Tablets › PIN festlegen); Tablet merkt Entkoppeln vom Mac selbst; Migration 009 | beide | fertig | Ablauf mit Testdaten, 009 in Supabase geprüft |
 | Hover und Druck-Rückmeldung für alle klickbaren Elemente (Kacheln, Checklisten-Zeilen, Bereiche, Tab-Leiste, Fotos, Stepper, Tabellenzeilen) | beide | fertig | Mac mit Testdaten |
+| Demo-Login per Knopf „Als MPGler“ / „Als Admin“ (Migration 011) | Mac | fertig | ja |
+| Fristen und Vorlage-Editor (Admin › Checklisten) | Mac | fertig | Ansicht ja |
+| Tablet = KTW: „Neues Tablet“ legt den KTW mit an, Bearbeiten, Kennzeichen, KTW ausblenden, Entkoppeln behält KTW (Migrationen 014–019) | Mac | fertig | Migrationen geprüft, Blatt nicht mit Login |
+| Löschen von Meldungen und Checklisten mit Rückfrage (Migration 012) | Mac | fertig | Ansicht ja |
+| Druck im Papierlayout (Mängelmeldung, Material, Checkliste) | Mac | fertig | ja |
+| Zweite Checkliste „Checkliste“ (Soll-Liste zum Nachschauen, Haken nur lokal) | iPad | fertig | nein |
+| Geräte mit Prüffrist auf der Tablet-Übersicht | iPad | fertig | nein |
+| Live-Abgleich Mac ↔ Tablet alle 10 s, Rückfrage bei ungespeicherten Eingaben | beide | fertig | nein (braucht zwei Geräte) |
+| Senden-Bestätigung „Gesendet“ / „Gespeichert“, Netz-Streifen | iPad | fertig | nein (braucht gekoppeltes Tablet) |
+| Touch-Ebene, Hochformat (Seitenleiste einklappbar, Liste/Akte nacheinander), Tastatur ↑/↓ und ⌘↩ | Mac/iPad | fertig | Browser, Demo-MPGler |
+| Hell/Dunkel-Knopf auf Anmeldeseite, Tablet und Mac › Einstellungen | beide | fertig | ja |
+| Logo und App-Icons (`icons/logo.png` usw.) | beide | fertig | Browser ja, Homescreen nicht |
 
 „Ansicht ja“ heißt: mit Testdaten im Browser geprüft, ohne echten Mac-Login.
 
@@ -42,26 +54,37 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Bezeichnungen: „Mängelmeldung“ und „Materialanforderung“ (Tablet), am Mac „Mängelmeldungen“ und „Materialanforderungen“.
 - Demo-Daten (Migration 006): Osdorf (KTW 4/1, 4/2, 4/3, 4/4, N-KTW 9/3), Bergedorf (KTW 3/4, 3/9, 4/5), 7 Geräte je KTW. Später frei anlegbar auf dem eigenen Webserver.
 
-- Hell ist fest Standard, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel nur am Mac unter Einstellungen › Konto › Darstellung.
-- Tablet: 4 Reiter wie im Mockup (Übersicht, Melden, Checkliste, Verlauf).
+- Hell ist fest Standard, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel per Knopf (Anmeldeseite, Tablet-Kopfzeile) oder Mac › Einstellungen › Konto › Darstellung, gilt nur auf diesem Gerät.
+- Tablet: 4 Reiter wie im Mockup (Übersicht, Melden, Checkliste, Verlauf). „Melden“ und „Checkliste“ haben je einen Umschalter (Mangel/Material, Fahrzeug Überprüfung/Checkliste).
 - Mac-Seitenleiste mit Zahlen (rot = wartet auf dich) und Kürzel wie im Mockup.
 
 ## Abweichungen zum Mockup (bewusst)
 
 - „Mangel melden“ ist eine eigene Seite statt Blatt über der Übersicht.
 - Unter „Melden“ wechselt ein Umschalter zwischen Mangel und Material (im Mockup nicht gezeigt).
-- Fristen und Vorlage-Editor sind schon in der Demo (Admin › Checklisten). Benutzer und Wachen fehlen noch (laut 10a später).
+- Fristen und Vorlage-Editor sind schon in der Demo (Admin › Checklisten). KTW entstehen über „Neues Tablet“. Benutzer und Wachen fehlen noch (laut 10a später).
 - „Wache wechseln“ und Reiter „Module“ in der Fahrzeug-Übersicht fehlen (Verwaltung, später).
 
 ## Offen
 
-1. Mac mit echtem Login testen (Admin und MPGler): Mangel bearbeiten, Ampel, Material ausgeben, Gegenzeichnen.
-2. Benachrichtigungen: Versand läuft bis zur Function (Empfänger gefunden). Fehlt: echter Empfang auf einem Mac oder iPad testen.
-3. Fotos nach 30 Tagen löschen (geplanter Job in Supabase).
-4. Erinnerung (Push), wenn die Checkliste fällig ist. Anzeige „fällig bis“ läuft schon über die Fristen.
-7. Migration 010 im SQL Editor ausführen, dann Fristen, Vorlage-Editor und Entkoppeln (löscht das Tablet) mit Admin-Login testen.
-5. „Neues Tablet“: KTW-Auswahl als richtige Liste statt Nummer.
-6. Tablet einrichten auf echtem iPad und Android testen (Installieren, Code in der App).
+**Testen**
+1. Gekoppeltes Tablet: Melden, Material, Fahrzeug Überprüfung, Flugmodus (Streifen, „Gespeichert“), Hoch- und Querformat.
+2. Mac mit echtem Login (Admin und MPGler): Mangel bearbeiten, Ampel, Material ausgeben, Gegenzeichnen, Neues Tablet, Fristen, Vorlage.
+3. Push-Empfang auf echtem Mac und iPad (installierte App).
+4. Tablet einrichten auf echtem iPad und Android (Installieren, Code in der App, Homescreen-Icon).
+5. Live-Abgleich mit zwei Geräten.
+
+**Bauen (Demo)**
+7. Spam-Bremse für Meldungen (PLANUNG 8). Bisher nur für Kopplungscodes.
+8. Vorlage-Editor: Gruppe und „Wo“ bearbeiten.
+9. Demo-MPGler sieht 0 KTW und keine Meldungen: prüfen (Wache fehlt in den Testdaten?).
+
+**Verschoben auf den eigenen Webserver (PLANUNG 12)**
+- Erinnerung „Fahrzeug Überprüfung überfällig“ per Push.
+- Wachen, KTW, Geräte und Benutzer vollständig frei anlegen (Login mit E-Mail/Passwort, Rolle MPGler/Admin, erster Admin per Terminal).
+- Einstellbare Aufbewahrung (Fotos, abgeschlossene Meldungen und Checklisten), täglicher Löschjob.
+
+Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues Tablet“ hat eine KTW-Auswahl (bk-v28).
 
 ## Stand 24.10.2026 (bk-v15, nicht deployt)
 
@@ -181,7 +204,7 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 ## Touch-Ebene MPGler-Portal (2026-10-24)
 - `komponenten.css`: Block `@media (pointer: coarse)` am Ende. Nur bei Fingerbedienung: Knöpfe, Seitenleiste, Reiter, Tabellenzeilen, Auswahllisten ≥ 44 px; Felder 44 px hoch mit 16 px Schrift (kein Safari-Zoom); größere Kästchen; `touch-action: manipulation`. Mac mit Maus unverändert.
 - Tastenkürzel (⌘S, ⌘P) haben schon sichtbare Knöpfe, Rechtsklick/Doppelklick wird nicht genutzt.
-- Offen: auf dem iPad prüfen (quer/hoch). Schritt 2 (Hochformat: Seitenleiste einklappen, Liste/Akte zweistufig) noch nicht gemacht.
+- Offen: auf dem iPad prüfen (quer/hoch). Schritt 2 (Hochformat) erledigt, siehe unten.
 
 ## KTW ohne Tablet (2026-10-24)
 - Migration 019: Entkoppeln (Tablet und Mac) löst nur die Kopplung, Tablet-Zeile und KTW bleiben (ersetzt 016). Neue Funktion `fahrzeug_ausblenden` (Admin): KTW `aktiv = false`, Tablets dazu entfernt.
@@ -220,3 +243,12 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Übersicht-Kachel und Hinweise heißen „Fahrzeug Überprüfung“.
 - Offen: auf dem iPad prüfen.
 - Fix: Umschalter „Fahrzeug Überprüfung / Checkliste“ stand auf der Überprüfungsseite links senkrecht (Flex-Zeile), jetzt immer waagerecht oben.
+
+## Senden-Bestätigung, Netz-Streifen, iPad hochkant, Mac-Tastatur (2026-10-24)
+- `warteschlange.hinzufuegen(e, { warten: true })` wartet bis 8 s und meldet `{ gesendet }`. Genutzt bei Mängelmeldung, Materialanforderung und Abschluss der Fahrzeug Überprüfung.
+- Tablet: „Gesendet“ (grüner Haken) nur, wenn der Server es hat. Sonst „Gespeichert“ (orange Uhr) mit „wird gesendet, sobald Netz da ist. Bitte nicht noch einmal melden.“ Danach zurück zur Übersicht. `erfolg(…, 'wartet')`.
+- Tablet: Streifen unter der Kopfzeile statt „x nicht gesendet“: „Offline · 2 Meldungen warten“ (orange), „… wird gesendet …“ (blau), „… nicht gesendet · Antippen“ (rot). Tippen öffnet den Verlauf.
+- MPGler hochkant (≤ 1100 px, iPad und schmale Fenster): Seitenleiste eingeklappt, Knopf ☰ in der Werkzeugleiste, schiebt sich über den Inhalt. Liste und Akte nacheinander mit „‹ Liste“ (Materialanforderungen, Gegenzeichnen, Vorlage). Mängel: Inspektor als Blatt von rechts.
+- Mac: ↑/↓ wechselt in der Liste links bzw. Tabelle, ⌘↩ / Strg+↩ = „Als erledigt markieren“, „Als ausgegeben markieren“, „Gegenzeichnen“ (Knöpfe mit `data-fertig`).
+- Getestet (Browser, Demo-MPGler ohne Daten): Seitenleiste ein/aus, Liste → Akte → zurück, Pfeiltaste, Strg+↩, Querformat unverändert.
+- Offen: Netz-Streifen und Bestätigung auf einem gekoppelten Tablet prüfen (Flugmodus); Mängel-Inspektor hochkant mit echten Daten.
