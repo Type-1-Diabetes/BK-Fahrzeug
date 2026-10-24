@@ -521,3 +521,9 @@ button.veh:active { background: var(--fill); }
 .pl-bereich td.rot { border-color: var(--b-rot); background: color-mix(in srgb, var(--b-rot) 12%, var(--bg2)); }
 .pl-bereich td.gruen { border-color: var(--b-gruen); background: color-mix(in srgb, var(--b-gruen) 14%, var(--bg2)); }
 .pl-bereich td.gelb { border-color: var(--b-gelb); background: color-mix(in srgb, var(--b-gelb) 22%, var(--bg2)); }
+/* Kleines Blatt (z. B. App installieren am Tablet) */
+.blatt.blatt-klein { width: min(480px, 100%); }
+.blatt-klein .blatt-inhalt { padding-top: 12px; }
+.blatt-klein .btn { width: 100%; }
+.blatt-klein #pwaGuide { align-self: stretch; text-align: left; }
+.es-app-text { margin: 0 0 12px; color: var(--label2); }

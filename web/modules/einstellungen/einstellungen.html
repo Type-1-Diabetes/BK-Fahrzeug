@@ -3,6 +3,7 @@
   <nav class="sl-nav" aria-label="Einstellungen">
     <button type="button" class="sl-nav-item" data-sl-page="push">Benachrichtigungen</button>
     <button type="button" class="sl-nav-item" data-sl-page="konto">Konto</button>
+    <button type="button" class="sl-nav-item" data-sl-page="app">App</button>
   </nav>
   <div class="sl-main">
     <section class="sl-page" data-sl-page="push">
@@ -29,6 +30,15 @@
         <div class="kv" data-konto></div>
       </div>
       <div class="foot">Name, Rolle und Wachen ändert später der Admin auf dem eigenen Webserver.</div>
+    </section>
+    <section class="sl-page" data-sl-page="app">
+      <div class="grp" data-sl-nodirty>
+        <h3>Als App installieren</h3>
+        <p class="es-app-text" id="pwaStatus"></p>
+        <button type="button" class="pbtn def" id="pwaInstallBtn" data-install>App installieren</button>
+        <div id="pwaGuide" hidden><ol class="install-schritte" id="pwaGuideList"></ol></div>
+      </div>
+      <div class="foot">Die App öffnet sich in einem eigenen Fenster, ohne Adressleiste, und liegt im Dock bzw. auf dem Home-Bildschirm. In Safari musst du dich in der App einmal neu anmelden.</div>
     </section>
   </div>
 </div>

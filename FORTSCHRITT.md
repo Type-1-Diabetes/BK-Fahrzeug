@@ -108,3 +108,8 @@ Stand: 24.10.2026. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md`
 - Banner (`icons/banner.png`, ohne roten Kontaktbalken) oben auf der Anmelde- und Koppelseite, auf weißer Fläche, so breit wie die Karte.
 - Getestet: Dateien laden (200), Logo in der Seitenleiste, Banner-Breite. Anmeldeseite nur als Testansicht, nicht abgemeldet. Homescreen-Icon nicht auf echtem iPad/Android.
 - `icons/icon.svg` wird nicht mehr benutzt.
+
+## Stand 24.10.2026 (bk-v27): App installieren
+
+- Mac (MPGler/Admin): Einstellungen › App. Installieren-Knopf (Chrome, Edge) oder Anleitung (Safari: Ablage › Zum Dock hinzufügen). Getestet im Browser: Anleitung klappt auf.
+- Tablet: Knopf „App installieren“ in der Kopfzeile, solange es nicht als App läuft. Blatt mit Knopf bzw. Anleitung. Safari: in der App einmal mit neuem Code koppeln. Nicht auf echtem iPad getestet.

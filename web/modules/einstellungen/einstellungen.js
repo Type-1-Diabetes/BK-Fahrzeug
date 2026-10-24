@@ -70,6 +70,10 @@ BK.modul('einstellungen', {
     }
     geraetZeigen().catch(e => geraet.append(el('p', e.message)));
 
+    // App installieren (js/lib/pwa.js füllt Status, Knopf und Anleitung)
+    root.querySelector('[data-install]').onclick = () => window.pwaInstall();
+    window.pwaRenderSettings();
+
     // Darstellung: Hell ist Standard, gilt nur auf diesem Gerät
     const themeKnoepfe = root.querySelectorAll('[data-theme-wahl] button');
     const themeZeigen = () => themeKnoepfe.forEach(b => {

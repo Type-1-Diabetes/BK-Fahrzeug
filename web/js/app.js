@@ -146,6 +146,27 @@
     await abmeldenUndStart('Tablet ist abgemeldet.');
   }
 
+  // Tablet: App nachträglich installieren. Safari trennt den Speicher, dort in der App neu koppeln.
+  function installBlatt() {
+    const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, icon('x'));
+    const teilt = 'BeforeInstallPromptEvent' in window;
+    const overlay = el('div.blatt-overlay', el('div.blatt.blatt-klein', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'App installieren' }, zu,
+      el('div.blatt-inhalt.login-kopf', BK.logo('gross'), el('h1', 'App installieren'),
+        el('p', { id: 'pwaStatus' }),
+        el('button.btn', { type: 'button', id: 'pwaInstallBtn', onclick: () => window.pwaInstall() }, 'App installieren'),
+        el('div', { id: 'pwaGuide', hidden: teilt }, el('ol.install-schritte', { id: 'pwaGuideList' })),
+        el('p.login-hinweis', teilt
+          ? 'Die App bleibt mit diesem KTW gekoppelt.'
+          : 'Danach die App über das neue Symbol öffnen. Dort einmal einen neuen Code vom Admin eingeben (Tablets › Code). Dieses Browser-Fenster kannst du dann schließen.'))));
+    const schliessen = () => { overlay.remove(); document.removeEventListener('keydown', esc); };
+    const esc = e => { if (e.key === 'Escape') schliessen(); };
+    zu.onclick = schliessen;
+    overlay.addEventListener('mousedown', e => { if (e.target === overlay) schliessen(); });
+    document.addEventListener('keydown', esc);
+    document.body.append(overlay);
+    window.pwaRenderSettings();
+  }
+
   async function abmeldenUndStart(hinweis) {
     clearInterval(ampelTimer); ampelStand = null; document.onvisibilitychange = null;
     await api.abmelden();
@@ -168,6 +189,7 @@
           el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
         el('button.veh', { type: 'button', title: 'Tablet-Menü', 'aria-label': 'Tablet-Menü: ' + fz.name, onclick: tabletMenue },
           el('b', fz.name), el('span', [fz.kennzeichen, fz.wache && fz.wache.name].filter(Boolean).join(' · ')), queue),
+        window.pwaIsStandalone() ? null : el('button.tb.tablet-ab', { type: 'button', title: 'Als App auf dem Home-Bildschirm installieren', onclick: installBlatt }, icon('download'), 'App installieren'),
         el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden')),
       inhalt);
     BK.warteschlange.beiAenderung(l => {

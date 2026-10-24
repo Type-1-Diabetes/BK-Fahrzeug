@@ -16,6 +16,7 @@
     check: '<path d="m5 12.5 4.5 4.5L19 7"/>', alert: '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17.5v.01"/>',
     upload: '<path d="M12 16V5M7 10l5-5 5 5"/><path d="M5 19h14"/>', logout: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>',
     search: '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>', export: '<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/>',
+    download: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 19h14"/>',
     chevD: '<path d="m6 9 6 6 6-6"/>', pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/>',
     x: '<path d="M6 6l12 12M18 6 6 18"/>', copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
   };
