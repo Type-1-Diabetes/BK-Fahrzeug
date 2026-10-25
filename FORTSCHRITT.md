@@ -1,6 +1,6 @@
 # Fortschritt Demo
 
-Stand: 24.10.2026 (bk-v47). Oben die Übersicht, unten das Tagebuch der Änderungen. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md` (Abschnitt 2a, 10a).
+Stand: 24.10.2026 (bk-v48). Oben die Übersicht, unten das Tagebuch der Änderungen. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md` (Abschnitt 2a, 10a).
 
 ## Fertig
 
@@ -259,3 +259,8 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Wer schon im Browser angemeldet ist, bleibt angemeldet (Sperre gilt nur für Anmelde- und Koppelseite).
 - Getestet: lokal Anmeldeseite wie vorher. Sperrseite nicht getestet (greift nur online, z. B. auf Pages).
 - Hinweis: Firefox am PC kann keine Web-Apps installieren, dort kommt man nicht weiter.
+
+## Neues App-Icon (2026-10-25, bk-v49)
+- Homescreen-/Desktop-Icon aus der neuen Vorlage (rundes Logo auf weißer, abgerundeter Fläche): `icon-192`, `icon-512` (mit transparenten Ecken), `apple-touch-icon` (weiß, iOS rundet selbst), `icon-maskable-512` (Logo in der Sicherheitszone, weißer Rand), `favicon-16/32`.
+- `logo.png` in der App (Seitenleiste, Kopf, Druck) unverändert.
+- Offen: auf iPad, Android, Mac und Windows prüfen. Bereits installierte Apps übernehmen das neue Icon oft erst nach Neuinstallation (iOS immer).

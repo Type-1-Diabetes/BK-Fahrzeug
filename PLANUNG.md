@@ -321,6 +321,9 @@ Alles Konfigurieren bauen wir erst, wenn die App auf einem eigenen Webserver lä
 - Wachen und KTW vollständig frei anlegen, ändern, umhängen (z. B. Ersatzfahrzeug), archivieren. Keine fest vorgegebenen Daten. Module pro KTW ein- und ausschalten.
 - Geräte genauso vollständig frei anlegen und konfigurieren wie Wachen und KTW (z. B. Name, Art, Seriennummer, Hersteller, Prüffrist STK/MTK, KTW-Zuordnung, umhängen, archivieren)
 - Checklisten-Vorlagen: Bereiche, Artikel, Soll-Mengen, Hinweise, Farben. Pro KTW anpassbar.
+- Eigene, fahrzeugspezifische Checklisten-Vorlagen anlegen: jedes Fahrzeug kann eine individuelle Vorlage bekommen (z. B. wegen eigener Seriennummern, Hersteller und Ausstattung), auch als Kopie einer bestehenden Vorlage.
+- Fotos (z. B. an Mängelmeldungen) öffnen nicht in einem Browser-Tab, sondern in einem großen Fenster innerhalb der App (Vollbild-Ansicht mit Schließen, Blättern zwischen Fotos, Zoomen).
+- Reiter „Vorlage bearbeiten“ (Mac): Design und Layout passend zur Checkliste auf dem Tablet (gleiche Bereiche mit Farbstreifen, gleiche Spalten und Reihenfolge), damit man sieht, wie die Liste später im KTW aussieht.
 - Fristen und Erinnerungen: Standard, Ausnahmen pro Wache oder KTW
 - Erinnerung „Fahrzeug Überprüfung überfällig“ per Push: täglicher Job (auf dem Webserver über die Job-Liste, in Supabase wäre es `pg_cron`), sendet über die vorhandene Funktion `push-senden`
 - Benutzer anlegen (E-Mail und Passwort), Rolle **MPGler** oder **Admin** und Wachen vergeben, sperren
