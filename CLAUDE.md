@@ -12,6 +12,13 @@ Repo: https://github.com/Type-1-Diabetes/BK-Fahrzeug (Branch `main`, dieser Ordn
 - Stand der Arbeit steht in `FORTSCHRITT.md`: vor der Arbeit lesen, nach jeder Änderung nachtragen (fertig, getestet, offen, Abweichungen zum Mockup).
 - UI-Vorlage ist `mockup/ui-mockup.html`. Neue Ansichten damit abgleichen.
 
+## Arbeitsweise
+Nach https://github.com/multica-ai/andrej-karpathy-skills (CLAUDE.md). Bei kleinen, eindeutigen Aufgaben mit Augenmaß anwenden.
+- **Erst denken, dann bauen:** Annahmen nennen. Gibt es mehrere Deutungen, sie aufzeigen statt still eine zu wählen. Gibt es einen einfacheren Weg, ihn vorschlagen. Ist etwas unklar, nachfragen.
+- **Einfach halten:** Nur so viel Code wie nötig. Keine Funktionen auf Vorrat, keine Abstraktion für nur einen Fall, keine Einstellungen, die niemand verlangt hat.
+- **Gezielt ändern:** Nur anfassen, was die Aufgabe braucht. Benachbarten Code nicht umbauen oder neu formatieren. Fremden toten Code nur melden, nicht löschen.
+- **Am Ziel prüfen:** Aufgabe in prüfbare Ziele übersetzen (z. B. Fehler erst in der Vorschau nachstellen, dann beheben und erneut prüfen). Bei mehreren Schritten kurz den Plan nennen, mit Prüfung pro Schritt.
+
 ## Git
 - Commit, Push, Tag und Release **nur auf meinen klaren Befehl**.
 - Release läuft über Tag `v*` (`.github/workflows/release.yml`): schlank, keine Tests, Artefakte 1 Tag.
