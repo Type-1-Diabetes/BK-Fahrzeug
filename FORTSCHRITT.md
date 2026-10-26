@@ -67,17 +67,8 @@ Stand: 24.10.2026 (bk-v48). Oben die Übersicht, unten das Tagebuch der Änderun
 
 ## Offen
 
-**Testen**
-1. Gekoppeltes Tablet: Melden, Material, Fahrzeug Überprüfung, Flugmodus (Streifen, „Gespeichert“), Hoch- und Querformat.
-2. Mac mit echtem Login (Admin und MPGler): Mangel bearbeiten, Ampel, Material ausgeben, Gegenzeichnen, Neues Tablet, Fristen, Vorlage.
-3. Push-Empfang auf echtem Mac und iPad (installierte App).
-4. Tablet einrichten auf echtem iPad und Android (Installieren, Code in der App, Homescreen-Icon).
-5. Live-Abgleich mit zwei Geräten.
-
-**Bauen (Demo)**
-7. Spam-Bremse für Meldungen (PLANUNG 8). Bisher nur für Kopplungscodes.
-8. Vorlage-Editor: Gruppe und „Wo“ bearbeiten.
-9. Demo-MPGler sieht 0 KTW und keine Meldungen: prüfen (Wache fehlt in den Testdaten?).
+**Ausführen**
+- Migration 026 im SQL-Editor (Spam-Bremse, Lesesperre offene Überprüfungen, Vorlage Gruppe/„Wo“, PIN-Text).
 
 **Verschoben auf den eigenen Webserver (PLANUNG 12)**
 - Erinnerung „Fahrzeug Überprüfung überfällig“ per Push.
@@ -354,9 +345,9 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 
 ## Überprüfung abbrechen, Ergebnis erst nach Abschluss (2026-10-26, bk-v58, Migration 025)
 - Tablet: „Überprüfung abbrechen“ links unter dem Fortschritt (mit Rückfrage). Löscht die offene Liste des eigenen KTW, danach „Checkliste beginnen“. Braucht Netz. Verlauf: „Überprüfung abgebrochen“.
-- Migration 025 `checkliste_abbrechen`: nur offene Liste, nur `intern.tablet_fahrzeug()`, atomar per `DELETE … RETURNING`. **Noch nicht ausgeführt** (Supabase-MCP nicht verbunden): im SQL-Editor ausführen.
+- Migration 025 `checkliste_abbrechen`: nur offene Liste, nur `intern.tablet_fahrzeug()`, atomar per `DELETE … RETURNING`. Am 26.10. im SQL-Editor ausgeführt.
 - MPGler, Gegenzeichnen: Listen „Beim Team“ zeigen nur „Begonnen am …“, keine Zahlen, keine Reiter, kein Export/Druck. Vorher stand dort „Alles vollständig“, weil nicht abgehakte Positionen als vollständig zählten. Fahrzeug-Akte › Checklisten: Abweichungen „–“, solange offen.
-- Offen (Sicherheit): Die Einträge offener Listen sind per RLS für den MPGler weiter lesbar, nur die Oberfläche zeigt sie nicht. Für die Live-Version in der DB sperren.
+- Lesesperre in der DB kommt mit Migration 026.
 - Geprüft in Chromium mit Testdaten: Abbrechen → Startseite, Gegenzeichnen „Beim Team“ ohne Ergebnis, keine Fehler. RPC selbst nicht getestet (Migration fehlt).
 
 ## Ein Layout für Material und Überprüfungen (2026-10-26, bk-v59)
@@ -365,3 +356,12 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Überprüfungen: Tabelle (Status, KTW, Zeitraum, Abweichungen, Abgeschlossen, Team) mit Filter „Wartet auf dich / Beim Team / Gegengezeichnet / Alle“ und KTW. Inspektor: Angaben, Zahlen, Abweichungen, „Ganze Liste ansehen“ (großes Blatt), Drucken, Löschen, Zurück ans Team, Gegenzeichnen. Reiter Übersicht/Ganze Liste entfallen.
 - `.mseg`-Knöpfe brechen nicht mehr um.
 - Geprüft in Chromium mit Testdaten (1280×800): Auswahl, Filter, Suche, Blatt mit Esc schließen, „Beim Team“ ohne Ergebnis, keine Fehler. Nicht mit echtem Login.
+
+## Spam-Bremse, Lesesperre, Vorlage Gruppe/„Wo“ (2026-10-26, bk-v60, Migration 026)
+- Geräte-Tests (Tablet, Mac-Login, Push, Installieren, Live) laut Nutzer erledigt; `push-senden` deployt, Auth-Rate-Limit gesetzt; Demo-MPGler sieht KTW und Meldungen. Aus „Offen“ entfernt.
+- Spam-Bremse: `meldung_anlegen` nimmt je Konto (Tablet bzw. Person) höchstens 30 neue Meldungen in 10 Minuten an. Zähler `intern.melde_versuche` in der DB, mit Sperre gegen parallele Anfragen. Wiederholtes Senden derselben Meldung (Warteschlange) zählt nicht doppelt.
+- Lesesperre: Einträge einer offenen Überprüfung liest nur das Tablet des KTW, Personal erst nach dem Abschließen (RLS `checklisten_eintraege`).
+- Vorlage-Editor: Bereich „Bearbeiten“ fragt Name, Gruppe, Farbe; Position hat Feld „Wo“, Tabelle Spalte „Wo“. Farbe wird jetzt auch in der DB gegen die feste Liste geprüft.
+- PIN-Text: „Der MPGler legt sie … fest“.
+- Offen: 026 im SQL-Editor ausführen (Supabase-MCP nicht verbunden). Bis dahin schlägt Speichern im Vorlage-Editor fehl (neue Parameter). JS nur per Syntaxprüfung getestet, SQL nicht gegen die DB.
+
