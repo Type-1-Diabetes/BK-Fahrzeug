@@ -80,7 +80,8 @@ select.field { appearance: none; min-height: 36px; }
 .veh b { color: var(--label); font-size: 15px; }
 .content { flex: 1; overflow: auto; padding: 0 28px 28px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 .large { font-size: 32px; font-weight: 700; padding: 6px 0 12px; }
-.reiter-wahl { max-width: 480px; margin: 4px auto 8px; }
+.reiter-leiste { flex: none; padding: 4px max(28px, env(safe-area-inset-right)) 8px max(28px, env(safe-area-inset-left)); }
+.reiter-wahl { max-width: 480px; margin: 0 auto; }
 .reiter-wahl button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
 .reiter-wahl button svg { font-size: 22px; }
 @media (max-width: 900px) {

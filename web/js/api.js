@@ -205,6 +205,7 @@
     checklisteGegenzeichnen: id => rpc('checkliste_gegenzeichnen', { p_checkliste: id }),
     meldungLoeschen: id => rpc('meldung_loeschen', { p_id: id }),
     checklisteLoeschen: id => rpc('checkliste_loeschen', { p_id: id }),
+    checklisteAbbrechen: id => rpc('checkliste_abbrechen', { p_id: id }),
     checklisteZurueck: (id, grund) => rpc('checkliste_zurueck', { p_checkliste: id, p_grund: grund }),
 
     // Verlauf -----------------------------------------------------------

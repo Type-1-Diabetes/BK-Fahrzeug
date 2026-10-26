@@ -38,6 +38,7 @@
     if (BK.vorVerlassen && !(await BK.vorVerlassen())) return false;
     BK.vorVerlassen = null;
     if (aktiv && aktiv.def.stop) { try { aktiv.def.stop(); } catch { /* egal */ } }
+    umschalter(name);
     ziel.classList.add('wechselt');  // unsichtbar, bis das neue Modul steht (sonst blitzt es vor dem Einblenden auf)
     leeren(ziel);
     neuHoerer = null;
@@ -46,7 +47,6 @@
       ziel.innerHTML = html;  // nur eigene Moduldateien, keine Benutzereingaben
       aktiv = { name, def: module[name] };
       await module[name].start(ziel, { ...ctx, oeffnen: (n, x) => navigieren(n, x), extra });
-      umschalter(name, ziel);
       if (!ctx.ich.tablet_id) hochformat(ziel);
     } catch (e) {
       ziel.append(el('div.leer', el('p', 'Dieser Bereich lässt sich gerade nicht laden.'), el('p.foot', e.message)));
@@ -87,13 +87,16 @@
     } catch (e) { inhalt.append(el('div.leer', el('p', 'Das Formular lässt sich gerade nicht laden.'), el('p.foot', e.message))); }
   };
 
-  // Mehrere Module unter einem Reiter (z. B. Melden): Umschalter oben im Inhalt
-  function umschalter(name, ziel) {
+  // Mehrere Module unter einem Reiter (z. B. Melden): Umschalter in fester Leiste über dem Inhalt (Tablet),
+  // damit er beim Wechsel stehen bleibt und nur der Bereich darunter wechselt
+  function umschalter(name) {
+    const leiste = document.getElementById('reiter-leiste');
+    if (!leiste) return;
     const m = BK.MODULE.find(x => x.name === name);
-    if (!m || !m.tab || !ctx.ich.tablet_id) return;
-    const gruppe = erlaubteModule().filter(x => x.tab === m.tab);
-    if (gruppe.length < 2) return;
-    ziel.prepend(el('div.segc.reiter-wahl', { role: 'tablist', 'aria-label': m.tab }, gruppe.map(x =>
+    const gruppe = m && m.tab ? erlaubteModule().filter(x => x.tab === m.tab) : [];
+    leeren(leiste).hidden = gruppe.length < 2;
+    if (leiste.hidden) return;
+    leiste.append(el('div.segc.reiter-wahl', { role: 'tablist', 'aria-label': m.tab }, gruppe.map(x =>
       el('button', { type: 'button', role: 'tab', 'aria-selected': String(x.name === name), class: x.name === name ? 'on' : null,
         onclick: () => x.name !== name && navigieren(x.name) }, icon(x.icon), x.label))));
   }
@@ -246,7 +249,7 @@
         el('div.topnav-rechts', window.pwaIsStandalone() ? null : el('button.tb.tablet-ab', { type: 'button', title: 'Als App auf dem Home-Bildschirm installieren', onclick: installBlatt }, icon('download'), 'App installieren'),
         themeKnopf('tablet-ab.thema-knopf'),
         el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden'))),
-      streifen, inhalt);
+      streifen, el('div.reiter-leiste', { id: 'reiter-leiste', hidden: true }), inhalt);
     let warten = [];
     const meldungen = n => n === 1 ? '1 Meldung' : n + ' Meldungen';
     // Streifen: offline, wartet oder Fehler. Tippen öffnet den Verlauf (dort Erneut/Verwerfen).

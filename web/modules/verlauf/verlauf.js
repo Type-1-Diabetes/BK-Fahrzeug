@@ -24,6 +24,7 @@
     fahrzeug_ausgeblendet: () => ['KTW ausgeblendet', 'alert'],
     meldung_geloescht: d => [d.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', 'alert'],
     checkliste_geloescht: () => ['Checkliste gelöscht', 'list'],
+    checkliste_abgebrochen: () => ['Überprüfung abgebrochen', 'list'],
   };
   const FARBE = { wrench: 'f-rot', box: 'f-blau', list: 'f-navy', check: 'f-gruen', alert: 'f-rot', pen: 'f-orange', tablet: 'f-navy' };
 

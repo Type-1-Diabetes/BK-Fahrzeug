@@ -1,6 +1,5 @@
 /* Modul Checkliste (Tablet): Bereiche links, Positionen rechts, wie das MPG-Dokument */
 .content:has(> .ckl) { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
-.content:has(> .ckl) > .reiter-wahl { flex: none; width: calc(100% - 32px); margin: 4px auto 8px; }
 .ckl { flex: 1; display: flex; min-height: 0; min-width: 0; }
 .ckl-side { width: 300px; flex: none; border-right: .5px solid var(--sep); overflow: auto; padding: 4px 14px 14px; }
 .ckl-side h2 { font-size: 20px; padding: 4px 0 2px; }
@@ -68,6 +67,7 @@
 .ckl-titel span { display: block; font-size: 14px; color: var(--label2); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .ckl-zeitraum { padding: 0; }
 .ckl-zurueck { margin: 8px 0 0; font-size: 14px; }
+.ckl-abbrechen { color: var(--bad-ink); font-size: 14px; min-height: 36px; margin: -6px 0 6px; }
 /* Unterüberschrift der Gruppe in der Seitenliste */
 .ckl-gruppe { margin: 14px 0 4px; padding: 0 12px; font-size: 12px; font-weight: 600; color: var(--label2); text-transform: uppercase; letter-spacing: .03em; }
 /* Raster: Haken | Nr. | Artikel | Soll | Ist | Verfall | Wo */

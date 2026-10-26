@@ -86,6 +86,7 @@ BK.modul('checkliste', {
         offen.zurueck_grund ? el('p.red.ckl-zurueck', 'Zurück vom MPGler: ' + offen.zurueck_grund) : '',
         el('div.ckl-stand', el('span', `${n} von ${gesamt} geprüft`), el('span', 'seit ' + new Date(offen.begonnen_am).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }))),
         el('div.progress', balken(n / gesamt)),
+        el('button.lnk.ckl-abbrechen', { type: 'button', onclick: abbrechen }, 'Überprüfung abbrechen'),
         ...bereiche.flatMap((b, i) => {
           const abw = abweichungen(b);
           // Unterüberschrift wie auf dem Papier (Patientenraum, Notfallrucksack …), sobald die Gruppe wechselt
@@ -124,6 +125,17 @@ BK.modul('checkliste', {
           el('button.btn', { type: 'button', onclick: () => gehe(aktiv + 1) },
             aktiv + 1 < bereiche.length ? 'Weiter zu ' + bereiche[aktiv + 1].name : 'Weiter zum Abschluss', icon('chevR'))));
       rein();
+    }
+
+    // Team verwirft die angefangene Liste; danach kann es neu beginnen
+    async function abbrechen() {
+      if (!await confirmDialog('Überprüfung abbrechen?', 'Alles, was ihr bisher eingetragen habt, wird gelöscht. Ihr könnt danach neu beginnen.')) return;
+      try {
+        await api.checklisteAbbrechen(offen.id);
+        try { localStorage.removeItem(SPEICHER); } catch { /* egal */ }
+        showToast('Überprüfung abgebrochen');
+        ctx.oeffnen('checkliste');
+      } catch (e) { alertDialog('Nicht abgebrochen', e.offline ? 'Zum Abbrechen braucht das Tablet Netz.' : e.message); }
     }
 
     function gehe(i) { aktiv = i; offenePosition = null; seite(); main.querySelector('.content')?.scrollTo(0, 0); }

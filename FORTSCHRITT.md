@@ -340,3 +340,21 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Behoben: Reiterwechsel in Akte und Gegenzeichnen leerte die ganze Akte, bis die Daten geladen waren. Jetzt erst laden, dann tauschen.
 - Helfer `BK.einblenden(element, art)` in `dom.js`.
 - Gemessen Bild für Bild in Chromium mit Testdaten (Tablet 1180×820, Mac 1280×800): kein Aufblitzen, keine leeren Frames bei Akte und Checkliste, keine Fehler. Nicht auf echtem iPad/Safari.
+
+## Tablet: Umschalter bleibt stehen (2026-10-26, bk-v56)
+- Umschalter Mängelmeldung/Materialanforderung und Fahrzeug Überprüfung/Checkliste sitzt jetzt in einer festen Leiste über dem Inhalt (`#reiter-leiste`, `umschalter()` in `app.js`). Beim Wechsel bleibt er sichtbar und an derselben Stelle, nur der Bereich darunter gleitet.
+- Vorher sprang er um ein paar Pixel, weil die Checkliste ihn anders breit setzte (`checkliste.css`, Regel entfernt). Jetzt überall 480 px, mittig.
+- Geprüft in Chromium mit Testdaten (1180×820): Position vor/nach/zurück gleich, Umschalter in jedem Frame sichtbar, keine Fehler. Nicht auf echtem iPad.
+
+## Tablet: Checkliste sieht aus wie die Fahrzeug Überprüfung (2026-10-26, bk-v57)
+- `sollliste` neu aufgebaut wie `checkliste`: Bereiche links mit Gruppen, Zähler und Fortschritt, rechts farbiger Bereichskopf, Spalten wie MPG.doc, „Alle im Bereich vorhanden“, unten Zurück/Weiter. Stil kommt aus `checkliste.css` (`@import`).
+- Unterschiede: kein Beginnen, kein Abschließen/Senden, kein Abweichungs-Editor. Antippen hakt nur ab, Haken bleiben auf diesem Tablet. „Anzahl ist“ bleibt leer (wie das leere Papier).
+- Behalten: Suche (jetzt links über den Bereichen, Treffer rechts) und „Haken entfernen“.
+- Geprüft in Chromium mit Testdaten (quer 1180×820, hochkant 820×1180): gleiches Bild wie die Überprüfung, Suchfeld behält beim Tippen den Fokus, keine Fehler. Nicht auf echtem iPad.
+
+## Überprüfung abbrechen, Ergebnis erst nach Abschluss (2026-10-26, bk-v58, Migration 025)
+- Tablet: „Überprüfung abbrechen“ links unter dem Fortschritt (mit Rückfrage). Löscht die offene Liste des eigenen KTW, danach „Checkliste beginnen“. Braucht Netz. Verlauf: „Überprüfung abgebrochen“.
+- Migration 025 `checkliste_abbrechen`: nur offene Liste, nur `intern.tablet_fahrzeug()`, atomar per `DELETE … RETURNING`. **Noch nicht ausgeführt** (Supabase-MCP nicht verbunden): im SQL-Editor ausführen.
+- MPGler, Gegenzeichnen: Listen „Beim Team“ zeigen nur „Begonnen am …“, keine Zahlen, keine Reiter, kein Export/Druck. Vorher stand dort „Alles vollständig“, weil nicht abgehakte Positionen als vollständig zählten. Fahrzeug-Akte › Checklisten: Abweichungen „–“, solange offen.
+- Offen (Sicherheit): Die Einträge offener Listen sind per RLS für den MPGler weiter lesbar, nur die Oberfläche zeigt sie nicht. Für die Live-Version in der DB sperren.
+- Geprüft in Chromium mit Testdaten: Abbrechen → Startseite, Gegenzeichnen „Beim Team“ ohne Ergebnis, keine Fehler. RPC selbst nicht getestet (Migration fehlt).

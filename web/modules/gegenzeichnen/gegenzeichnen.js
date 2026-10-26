@@ -56,6 +56,14 @@ BK.modul('gegenzeichnen', {
       try { bereiche = await vorlage(c.vorlage_id); } catch { /* Abweichungen ohne Namen */ }
       if (c.id !== gewaehlt) return;
       leeren(akte);  // erst nach dem Laden, damit beim Reiterwechsel nichts aufblitzt
+      // Beim Team: Ergebnis erst nach dem Abschicken, vorher nur „angefangen“
+      if (!c.abgeschlossen_am) return akte.append(
+        el('div.hd', el('h2', `${c.fahrzeug.name} · Überprüfung Vollzähligkeit`)),
+        el('div.sub2', `${quartal(c.zeitraum)} · § 20 Abs. 2 HmbRDG`),
+        c.zurueck_grund ? el('div.sub2.red', 'Zurück ans Team: ' + c.zurueck_grund) : '',
+        el('div.gz-team', icon('clock'), el('div', el('b', 'Beim Team'),
+          el('span', `Begonnen ${BK.datum(c.begonnen_am)}. Das Ergebnis siehst du, sobald das Team abschließt.`))),
+        el('div.acts', mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); })));
       const pos = new Map(bereiche.flatMap(b => b.positionen.map(p => [p.id, { ...p, bereich: b }])));
       const gesamt = pos.size;
       const befund = (p, e) => [e.ist != null ? `Ist ${e.ist} / Soll ${p ? p.soll : '?'}` : null, e.verfall ? 'Verfall ' + BK.datum(e.verfall, false) : null].filter(Boolean).join(' · ') || 'Hinweis';
@@ -141,10 +149,12 @@ BK.modul('gegenzeichnen', {
       ];
     }
 
-    root.querySelector('[data-pdf]').onclick = () => { if (gewaehlt) window.print(); };
+    // Export und Druck erst, wenn das Team abgeschlossen hat
+    const fertigGewaehlt = () => alle.find(x => x.id === gewaehlt && x.abgeschlossen_am);
+    root.querySelector('[data-pdf]').onclick = () => { if (fertigGewaehlt()) window.print(); };
     root.querySelector('[data-csv]').onclick = async () => {
-      const c = alle.find(x => x.id === gewaehlt);
-      if (!c) return;
+      const c = fertigGewaehlt();
+      if (!c) return alertDialog('Noch nicht abgeschlossen', 'Die Liste ist noch beim Team.');
       const bereiche = await vorlage(c.vorlage_id).catch(() => []);
       const zeilen = bereiche.flatMap(b => b.positionen.map(p => {
         const e = c.eintraege.find(x => x.position_id === p.id) || {};

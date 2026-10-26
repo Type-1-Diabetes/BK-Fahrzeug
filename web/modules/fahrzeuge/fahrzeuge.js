@@ -126,7 +126,7 @@ BK.modul('fahrzeuge', {
         inhalt.append(tabelle(['Zeitraum', 'Begonnen', 'Abgeschlossen', 'Team', 'Abweichungen', 'Gegengezeichnet'],
           cs.map(c => el('tr', el('td', BK.fristen.zeitraumText(c.zeitraum)), el('td', BK.datum(c.begonnen_am)),
             el('td', c.abgeschlossen_am ? BK.datum(c.abgeschlossen_am) : '–'), el('td', [c.mitarbeiter1, c.mitarbeiter2].filter(Boolean).join(', ') || '–'),
-            el('td', String(c.eintraege.length)), el('td', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '–'))),
+            el('td', c.abgeschlossen_am ? String(c.eintraege.length) : '–'), el('td', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '–'))),
           'Noch keine Checkliste.'));
       } else if (reiter === 'geraete') {
         inhalt.append(tabelle(['Gerät', 'Seriennummer', 'Hersteller', 'Prüfung', 'Fällig'],
@@ -145,7 +145,7 @@ BK.modul('fahrzeuge', {
               checkliste_abgeschlossen: 'Checkliste abgeschlossen', gegengezeichnet: 'Checkliste gegengezeichnet', checkliste_zurueck: 'Checkliste zurück ans Team',
               tablet_gekoppelt: 'Tablet gekoppelt', tablet_entkoppelt: 'Tablet entkoppelt', tablet_angelegt: 'Tablet angelegt',
               tablet_neuer_code: 'Neuer Kopplungscode', tablet_bearbeitet: 'Tablet bearbeitet', tablet_gesperrt: 'Tablet gesperrt', tablet_entsperrt: 'Tablet entsperrt',
-              meldung_geloescht: e.details.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', checkliste_geloescht: 'Checkliste gelöscht' })[e.aktion] || BK.aktionText(e.aktion)),
+              meldung_geloescht: e.details.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', checkliste_geloescht: 'Checkliste gelöscht', checkliste_abgebrochen: 'Überprüfung abgebrochen' })[e.aktion] || BK.aktionText(e.aktion)),
             el('td', e.wer_name || '–'))), 'Noch nichts passiert.'));
         } catch (e) { inhalt.append(el('div.mleer', e.message)); }
       }

@@ -1,19 +1,4 @@
-/* Modul Checkliste (Soll-Liste) auf dem Tablet */
-.sl-kopf { display: flex; align-items: center; gap: 16px; }
-.sl-kopf .large { flex: 1; }
-.sl-stand { color: var(--label2); font-size: 15px; font-variant-numeric: tabular-nums; }
-.sl-suche { min-height: 48px; padding: 0 14px; border-radius: 10px; background: var(--bg2); margin-bottom: 4px; }
-.sl-gruppe { margin: 28px 16px 0; font-size: 15px; font-weight: 600; }
-.sl-bereich { display: flex; align-items: center; gap: 8px; }
-.sl-bereich .streifen { width: 4px; height: 16px; border-radius: 2px; background: var(--label3); }
-.sl-bereich .streifen.blau { background: var(--b-blau); } .sl-bereich .streifen.orange { background: var(--b-orange); } .sl-bereich .streifen.rot { background: var(--b-rot); }
-.sl-bereich .streifen.gruen { background: var(--b-gruen); } .sl-bereich .streifen.gelb { background: var(--b-gelb); }
-.sl-zeile { min-height: 60px; border-bottom: .5px solid var(--sep); }
-.sl-zeile:last-child { border-bottom: 0; }
-.sl-box { flex: none; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-size: 18px;
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--label) 28%, transparent); color: #fff; }
-.sl-zeile.an .sl-box { background: var(--ok); box-shadow: none; }
-.sl-zeile.an .t b { color: var(--label2); }
-.sl-wo { flex: none; font-size: 14px; color: var(--label2); }
-.sl-soll { flex: none; min-width: 44px; height: 32px; padding: 0 10px; border-radius: 16px; display: grid; place-items: center;
-  background: var(--fill); font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Modul Checkliste (Soll-Liste): sieht aus wie die Fahrzeug Überprüfung, nutzt deren Stil */
+@import url('../checkliste/checkliste.css');
+.sl-suche { display: block; min-height: 44px; padding: 0 12px; border-radius: 10px; background: var(--fill); margin: 0 0 10px; font-size: 16px; }
+.sl-stand-knopf { min-height: 0; font-size: 14px; }
