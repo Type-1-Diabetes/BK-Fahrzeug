@@ -55,7 +55,7 @@ Jede Funktion ist ein Modul (z. B. `mangel`, `material`, `checkliste`, `verlauf`
 2. Modul in `web/js/module-liste.js` eintragen (name, label, icon, fuer: `tablet`/`mpg`/`admin`, bereich bzw. schalter). Tablet-Module mit gleichem `tab` teilen sich einen Reiter (z. B. „Melden“) und bekommen oben einen Umschalter.
 3. Formulare als Beschreibung für `BK.formular.bauen()` (`web/js/formular.js`) anlegen, nicht hart codieren
 4. Datenzugriff als Funktionen in `web/js/api.js` ergänzen
-5. Tabellen/Rechte als neue Datei in `supabase/migrations/` (fortlaufend nummeriert, aktuell bis 019): RLS-Regeln und `GRANT`. Schreiben nur über Funktionen. Edge Functions liegen in `supabase/functions/<name>/`.
+5. Tabellen/Rechte als neue Datei in `supabase/migrations/` (fortlaufend nummeriert, aktuell bis 021): RLS-Regeln und `GRANT`. Schreiben nur über Funktionen. Edge Functions liegen in `supabase/functions/<name>/`.
 6. Offline-Fall bedenken: Schreibaktionen vom Tablet über `BK.warteschlange`
 7. Neue App-Dateien in `web/sw.js` (Liste `DATEIEN`) eintragen und `VERSION` erhöhen
 8. UI für Mac und iPad prüfen (Touch-Größen, Hoch- und Querformat)

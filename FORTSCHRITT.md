@@ -268,3 +268,12 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 ## App-Icon neu laden (2026-10-26, bk-v50)
 - Windows zeigte nach Neuinstallation noch das alte Icon (Browser-Cache). Icon-Pfade in `manifest.webmanifest` und `index.html` haben jetzt `?v=2`, damit der Browser sie neu holt.
 - Offen: auf Windows prüfen (App deinstallieren, Website-Daten löschen, neu installieren).
+
+## Demo-Login ohne Rolle (2026-10-26, Migration 020)
+- „Als Admin“/„Als MPGler“ landete auf „Tablet koppeln“: `ich()` gab `rolle: null`. Ursache: `intern.rolle()` in der Live-DB schloss anonyme Sitzungen aus (`is_anonymous`), weicht vom Repo (002) ab. Der Demo-Login ist anonym.
+- Migration 020 stellt den Stand aus 002 wieder her.
+- Offen: 020 im SQL Editor ausführen, dann Anmelden prüfen.
+
+## Kopplungscode 6 Ziffern (2026-10-26, Migration 021)
+- Mac zeigte 8 Ziffern, Koppelseite nimmt 6. Live-DB wich vom Repo (002) ab. Migration 021 stellt 6 Ziffern wieder her.
+- Offen: 021 im SQL Editor ausführen, neuen Code erzeugen und koppeln.
