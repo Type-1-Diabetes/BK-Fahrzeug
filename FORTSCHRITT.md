@@ -277,3 +277,7 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 ## Kopplungscode 6 Ziffern (2026-10-26, Migration 021)
 - Mac zeigte 8 Ziffern, Koppelseite nimmt 6. Live-DB wich vom Repo (002) ab. Migration 021 stellt 6 Ziffern wieder her.
 - Offen: 021 im SQL Editor ausführen, neuen Code erzeugen und koppeln.
+
+## Text entfernt (2026-10-26, bk-v51)
+- Tablet-Übersicht: „Erledigtes bleibt 7 Tage in der Liste.“ entfernt.
+- Windows-Icon: Verknüpfung zeigte eckiges Icon mit weißem Rand (wie `icon-maskable-512`). Test: Maskable-Eintrag aus dem Manifest genommen. Offen: unter Windows neu installieren; ist es dann `icon-512`, Maskable mit passender Datei zurück (Android).
