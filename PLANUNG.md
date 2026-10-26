@@ -340,7 +340,8 @@ Alles Konfigurieren bauen wir erst, wenn die App auf einem eigenen Webserver lä
 - Feste Bedeutung der Statuscodes (401 abgemeldet, 403 keine Rechte, 419 CSRF abgelaufen, 429 zu viele Anfragen)
 
 **Was in der Demo anders ist und auf dem Webserver ersetzt wird**
-- Demo-Login per Knopf (jeder kann Admin werden, Migration 011) → echte Anmeldung mit Passwort und Zwei-Faktor
+- Anmeldung über Supabase Auth (E-Mail + Passwort, Demo-Knöpfe seit Migration 022 entfernt) → eigene Anmeldung mit Sitzungs-Cookie und Zwei-Faktor
+- Koppeln: Grenze nur pro Gerät, Supabase begrenzt anonyme Sitzungen pro IP → Fehlversuche pro IP **und** pro Gerät in der DB zählen, IP nur vom eigenen Proxy übernehmen (nicht aus fremdem `X-Forwarded-For`)
 - Tablet = KTW (KTW entsteht über „Neues Tablet“) → KTW frei anlegen, Tablet nur zuordnen
 - Feste Wachen und Benutzer → Wachen, KTW und Benutzer vollständig frei anlegen
 - Geräte nur ansehen → Geräte vollständig frei anlegen und konfigurieren
@@ -352,6 +353,16 @@ Alles Konfigurieren bauen wir erst, wenn die App auf einem eigenen Webserver lä
 - Backend: eigener Server (Node.js), eigene Datenbank, nicht Supabase (siehe Abschnitt 7)
 - Nur `web/js/api.js` austauschen, die Oberfläche bleibt
 - Testdaten durch echte Daten ersetzen, vorher Abstimmung mit dem Datenschutzbeauftragten
+
+**Sicherheits-Pflichten für die Live-Version (vor dem ersten echten Datensatz)**
+- Keine Demo-Abkürzungen: kein Login ohne Passwort, keine Funktion, die Rollen an sich selbst vergibt. Rollen vergibt nur ein Admin, geprüft in der DB.
+- Tablet-Sitzungen bekommen nie eine Rolle. Tablet-Zugang nur über Kopplung, Entzug wirkt sofort.
+- Kopplungs- und Einmal-Codes: mindestens 8 Ziffern, begrenzte Gültigkeit, atomar verbrauchen, Fehlversuche pro IP und Gerät zählen. Keine globale Grenze, die alle sperrt.
+- Login: Sperre nach Fehlversuchen (pro Konto und IP), Zwei-Faktor für Admins, Passwortregeln, Sitzung als `HttpOnly`/`Secure`/`SameSite`-Cookie, Abmelden macht die Sitzung serverseitig ungültig.
+- Webserver: HTTPS mit HSTS, CSP als Header (wie heute im Meta-Tag) plus `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `.env`/`.sql`/`.md`/Logs nicht im Web-Root.
+- Repo privat oder ohne Server-Konfiguration. Secrets nur in Umgebungsvariablen des Servers.
+- Fotos nur über geprüfte Anfragen ausliefern (Besitz prüfen), nicht als öffentliche Dateien.
+- Vor dem Start: Sicherheits-Check nach CLAUDE.md und Abstimmung Datenschutz.
 
 ## Quellen der Recherche (Oktober 2026)
 

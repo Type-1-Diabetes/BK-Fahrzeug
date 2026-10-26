@@ -12,7 +12,7 @@ BK.modul('tablets', {
     // Code zeigen und prüfen, bis das Tablet gekoppelt ist
     function codeZeigen(titel, code, tabletId) {
       root.querySelector('[data-titel]').textContent = titel;
-      root.querySelector('[data-wert]').textContent = code.slice(0, 3) + ' ' + code.slice(3);
+      root.querySelector('[data-wert]').textContent = code.slice(0, 4) + ' ' + code.slice(4);
       root.querySelector('[data-link]').textContent = link;
       root.querySelector('[data-kopieren]').onclick = () => copyText(code);
       root.querySelector('[data-link-kopieren]').onclick = () => copyText(link);

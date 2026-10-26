@@ -27,7 +27,9 @@
     if (status === 401) return 'Bitte neu anmelden.';
     if (status === 403 || (d && d.code === '42501')) return m && !/permission denied/i.test(m) ? m : 'Dafür fehlt die Berechtigung.';
     if (status === 429) return 'Zu viele Anfragen. Bitte kurz warten.';
-    return m || 'Unbekannter Fehler.';
+    // Nur eigene Meldungen aus unseren Funktionen zeigen, keine technischen DB-Texte
+    if (d && /^(P0001|P0002|22023|23505|42501|28000)$/.test(d.code || '') && m && !/duplicate key|violates|constraint/i.test(m)) return m;
+    return 'Hat nicht geklappt. Bitte erneut versuchen.';
   }
 
   async function roh(pfad, opts = {}) {
@@ -113,11 +115,6 @@
     async anmelden(email, passwort) {
       setzeSitzung(await roh('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email, password: passwort }) }));
     },
-    // Demo: anonyme Sitzung, dann Rolle wählen (Migration 011)
-    async demoAnmelden(rolle) {
-      if (!sitzung) setzeSitzung(await roh('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ data: {} }) }));
-      await rpc('demo_anmelden', { p_rolle: rolle });
-    },
     async abmelden() {
       try { await mitLogin('/auth/v1/logout', { method: 'POST' }); } catch { /* egal */ }
       setzeSitzung(null);
@@ -127,7 +124,12 @@
     async tabletVorbereiten() {
       if (!sitzung) setzeSitzung(await roh('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ data: {} }) }));
     },
-    tabletKoppeln: code => rpc('tablet_koppeln', { p_code: code }),
+    // Falscher Code kommt als { fehler } zurück (Migration 023), damit der Fehlversuch gezählt bleibt
+    async tabletKoppeln(code) {
+      const r = await rpc('tablet_koppeln', { p_code: code });
+      if (r && r.fehler) throw new ApiFehler(r.fehler, 400);
+      return r;
+    },
     tabletPing: () => rpc('tablet_ping'),
     // Entkoppeln mit PIN: null = erledigt, sonst Grund als Text
     tabletEntkoppeln: pin => rpc('tablet_entkoppeln', { p_pin: pin }),

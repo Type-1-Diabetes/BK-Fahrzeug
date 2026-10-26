@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8080", "--directory", "web", "--bind", "127.0.0.1"],
       "port": 8080
+    },
+    {
+      "name": "mockup",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8081", "--directory", "mockup", "--bind", "127.0.0.1"],
+      "port": 8081
     }
   ]
 }

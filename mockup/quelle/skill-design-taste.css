@@ -1,0 +1,48 @@
+/* Skill design-taste-frontend (App-Regeln, Stil „Achromatic ledger“):
+   Farbe nur auf Daten (Status, Ampel), nicht auf Rahmen und Symbolen. Zahlen als Schrift, keine Kacheln. */
+
+/* Abschnitts-Titel: normale Schreibweise statt kleiner gesperrter Großbuchstaben */
+.sect { text-transform: none; letter-spacing: 0; font-size: 15px; font-weight: 600; color: var(--label); margin: 28px 0 10px; padding: 0 4px; }
+
+/* Kacheln: Symbol ohne bunten Kasten, Titel trägt die Aussage */
+.tile { gap: 14px; }
+.tile .ic { width: auto; height: auto; background: none !important; color: var(--label); font-size: 34px; border-radius: 0; justify-content: start; }
+.tile h3 { font-size: 22px; letter-spacing: -.015em; }
+@media (hover: hover) { .tile:hover { box-shadow: none; transform: none; background: color-mix(in srgb, var(--bg2) 92%, var(--label)); } }
+
+/* Listen: Status-Farbe bleibt, aber als Symbol in Farbe statt farbiger Kasten */
+.row .ico { background: none !important; width: 24px; height: 24px; font-size: 20px; }
+.row .ico.f-rot { color: var(--bad-ink); } .row .ico.f-orange { color: var(--warn-ink); }
+.row .ico.f-gruen { color: var(--ok-ink); } .row .ico.f-blau { color: var(--brand); } .row .ico.f-navy { color: var(--navy2); }
+
+/* „Was ist zu tun“: ruhig, ohne getönten Kreis */
+.tun-ic { background: none !important; }
+
+/* Tabellen: Linien und Ausrichtung statt Zebrastreifen */
+table.tab tbody tr:nth-child(even) td { background: none; }
+table.tab tbody td { border-bottom: .5px solid var(--sep); }
+table.tab td.num, table.tab th.num { font-variant-numeric: tabular-nums; }
+
+/* Kennzahlen als Schrift, nicht als graue Kästchen */
+.kpi { background: none; padding: 0; border-radius: 0; }
+.kpi b { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+/* Seitenleiste: aktiver Eintrag neutral grau, Zahlen in Tinte; nur „rot“ bleibt Signal */
+.si.on { font-weight: 600; }
+.si .n { color: var(--label); }
+
+/* Bewegung: Teile einer Ansicht steigen nacheinander auf (Überschrift, Text, Liste) */
+.dt-ein { animation: dt-ein .4s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+@keyframes dt-ein { from { opacity: 0; transform: translateY(16px); } }
+
+/* Rückmeldung an jedem Bedienelement */
+.btn, .pbtn, .tile, .vr, .si { transition: background-color .12s ease-out, color .12s ease-out, transform .12s ease-out, filter .12s ease-out; }
+.btn:active, .pbtn:active { transform: translateY(1px); }
+:focus-visible { outline: 2px solid var(--navy2); outline-offset: 2px; }
+
+/* Ampel: der Wechsel ist das eine Signal – Farbe blendet, Text rückt kurz nach */
+.status h2 { transition: color .3s; }
+.status.aufleuchten h2 { animation: dt-ampel .5s cubic-bezier(.16,1,.3,1); }
+@keyframes dt-ampel { from { opacity: 0; transform: translateX(-8px); } }
+
+@media (prefers-reduced-motion: reduce) { .dt-ein, .status.aufleuchten h2 { animation: none; } }

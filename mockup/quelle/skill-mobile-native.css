@@ -1,0 +1,50 @@
+/* Skill mobile-native: fühlt sich auf iPad/Handy wie eine installierte App an */
+
+/* Grundlage: kein grauer Tipp-Blitz, keine Schrift-Aufblähung, Seite zieht nicht nach (Pull-to-Refresh) */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
+.content, .vfile, .insp, .tablewrap, .vlist, .mside, .blatt-overlay { overscroll-behavior: contain; }
+
+/* Bedienelemente: kein 300-ms-Warten, kein Markieren beim langen Drücken. Inhalte bleiben markierbar. */
+button, a, [role="button"], [role="tab"], .tile, .vr, .si, .segc button, .ftabs button {
+  touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+
+/* iOS zoomt in Felder unter 16 px */
+@media (pointer: coarse) { input, textarea, select, .tf, .field, .search, .code-feld { font-size: max(16px, 1em); } }
+
+/* Hover nur mit Maus: auf Touch bleibt sonst der Hover-Zustand nach dem Tippen hängen */
+@media (hover: none) {
+  .tb:hover { background: none; }
+  .tb:active { background: var(--fill); }
+}
+
+/* Ränder bei Notch / Home-Balken (iPad quer, Handy) */
+.topnav { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+.content { padding-left: max(28px, env(safe-area-inset-left)); padding-right: max(28px, env(safe-area-inset-right)); }
+.toasts { bottom: max(16px, env(safe-area-inset-bottom)); }
+
+/* Druck-Feedback auf allen Touch-Zielen (sofort, 100 ms) */
+button.row:active, .vr:active, .si:active { transition-duration: .06s; }
+.btn:active, .tun .btn:active { transform: scale(.97); transition: transform .1s ease-out, filter .1s; }
+.segc button:active:not(.on) { background: var(--fill2); }
+
+/* Reiterwechsel: Inhalt kommt aus der Richtung des Reiters (links/rechts) – man weiß, wohin man ging */
+.von-rechts { animation: mn-rechts .26s cubic-bezier(.2,.8,.2,1) both; }
+.von-links { animation: mn-links .26s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes mn-rechts { from { opacity: 0; transform: translateX(24px); } }
+@keyframes mn-links { from { opacity: 0; transform: translateX(-24px); } }
+
+/* Listenzeilen tauchen gestaffelt auf, damit klar ist, dass sie gerade geladen wurden */
+.list > .row.neu { animation: mn-zeile .28s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 35ms); }
+@keyframes mn-zeile { from { opacity: 0; transform: translateY(6px); } }
+
+/* Hochkant: Reiter zeigen Symbol UND kurzen Namen statt nur Symbol (verständlicher) */
+@media (max-width: 900px) {
+  .ftabs button { font-size: 11px; flex-direction: column; gap: 1px; min-height: 52px; padding: 4px 14px; line-height: 1; }
+  .ftabs button svg { font-size: 22px; }
+}
+
+/* Netz-Streifen und Toasts über dem Home-Balken, nicht darunter */
+.netz-streifen { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+
+@media (prefers-reduced-motion: reduce) { .von-rechts, .von-links, .list > .row.neu { animation: none; } }

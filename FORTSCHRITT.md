@@ -31,7 +31,7 @@ Stand: 24.10.2026 (bk-v48). Oben die Übersicht, unten das Tagebuch der Änderun
 | Demo auf Anfang und Checkliste nach Papierliste MPG.doc (25 Bereiche, 186 Positionen, SN XXXX), Migration 008 | Server | fertig | ja, Zahlen in Supabase geprüft |
 | Tablet entkoppeln mit PIN: am Tablet (Fahrzeugname oben rechts antippen) und am Mac (Tablets › Entkoppeln); Admin legt PIN fest (Tablets › PIN festlegen); Tablet merkt Entkoppeln vom Mac selbst; Migration 009 | beide | fertig | Ablauf mit Testdaten, 009 in Supabase geprüft |
 | Hover und Druck-Rückmeldung für alle klickbaren Elemente (Kacheln, Checklisten-Zeilen, Bereiche, Tab-Leiste, Fotos, Stepper, Tabellenzeilen) | beide | fertig | Mac mit Testdaten |
-| Demo-Login per Knopf „Als MPGler“ / „Als Admin“ (Migration 011) | Mac | fertig | ja |
+| Anmelden mit E-Mail und Passwort (Demo-Login aus 011 entfernt, Migration 022) | Mac | fertig | Formular ja, Login nur durch dich |
 | Fristen und Vorlage-Editor (Admin › Checklisten) | Mac | fertig | Ansicht ja |
 | Tablet = KTW: „Neues Tablet“ legt den KTW mit an, Bearbeiten, Kennzeichen, KTW ausblenden, Entkoppeln behält KTW (Migrationen 014–019) | Mac | fertig | Migrationen geprüft, Blatt nicht mit Login |
 | Löschen von Meldungen und Checklisten mit Rückfrage (Migration 012) | Mac | fertig | Ansicht ja |
@@ -264,3 +264,30 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Homescreen-/Desktop-Icon aus der neuen Vorlage (rundes Logo auf weißer, abgerundeter Fläche): `icon-192`, `icon-512` (mit transparenten Ecken), `apple-touch-icon` (weiß, iOS rundet selbst), `icon-maskable-512` (Logo in der Sicherheitszone, weißer Rand), `favicon-16/32`.
 - `logo.png` in der App (Seitenleiste, Kopf, Druck) unverändert.
 - Offen: auf iPad, Android, Mac und Windows prüfen. Bereits installierte Apps übernehmen das neue Icon oft erst nach Neuinstallation (iOS immer).
+
+## Sicherheit: Login und Koppeln (2026-10-26, bk-v50)
+
+- Demo-Login „Als MPGler / Als Admin“ entfernt. Vorher konnte jeder ohne Passwort Admin werden. Jetzt nur noch E-Mail und Passwort. Profile anonymer Demo-Sitzungen gelöscht (Migration 022).
+- Anonyme Sitzungen (Tablets) bekommen in der Datenbank nie eine Rolle (`intern.rolle()` prüft `is_anonymous`). So kommt man auch vom Tablet nicht in den MPGler-Bereich.
+- Kopplungscode hat 8 statt 6 Ziffern. Die gemeinsame Grenze „50 Versuche in 10 Min.“ ist weg, weil ein Fremder damit das Koppeln für alle sperren konnte. Es bleibt: 5 Versuche pro Stunde je Gerät, Code wird atomar verbraucht.
+- Offen: im Supabase-Dashboard (Auth › Rate Limits) die Grenze für anonyme Anmeldungen pro IP niedrig halten (z. B. 30/Std.). Auf dem eigenen Webserver Fehlversuche pro IP zählen (siehe PLANUNG.md, Umzug).
+- Abweichung zum Mockup: 8 statt 6 Code-Felder.
+
+## Sicherheit: Push-Hosts, Fehlversuche, Fehlertexte (2026-10-26, bk-v51)
+
+- Push nur an Google, Apple, Mozilla, Microsoft (Constraint + Filter in `push-senden`, Migration 023). Vorher konnte ein Angemeldeter den Server beliebige URLs anfragen lassen.
+- Koppeln: Ein falscher Code rollte bisher den Fehlversuch mit zurück, die Grenze griff nie. Jetzt kommt `{ fehler }` zurück und der Versuch bleibt gezählt. Parallele Versuche (Koppeln, PIN) laufen nacheinander (`pg_advisory_xact_lock`).
+- `api.js` zeigt nur noch eigene Meldungen, keine technischen DB-Texte.
+- CLAUDE.md: Abschnitt „Bekannte Fehlerbilder“ aus dem Schrietz-Audit.
+- Offen: Edge Function `push-senden` neu deployen.
+
+
+## 26.10.2026 – Mockup 1:1 und Skill-Varianten
+- `mockup/ui-1zu1.html`: die echte App als eine Datei (CSS, JS, Module aus `web/`), nur `api.js` durch Testdaten ersetzt (`mockup/quelle/testdaten-api.js`). Ansicht unten rechts: Tablet, MPGler, Admin. Neu bauen: `node mockup/quelle/bauen.mjs`.
+- Drei Kopien mit je einer Skill-Schicht (`mockup/quelle/skill-<name>.css/.js`), bauen mit `node mockup/quelle/bauen.mjs mockup/ui-<name>.html <name>`:
+  - `ui-apple-design.html`: Umschalter (Reiter, Segmente) mit gleitendem Knopf per Feder, Druck-Feedback beim Aufsetzen, Inhalte blenden gestaffelt ein, Blatt mit Unschärfe, Mac weicht beim Blatt zurück.
+  - `ui-mobile-native.html`: kein Tipp-Blitz, kein Pull-to-Refresh, 16-px-Felder auf Touch, Hover nur mit Maus, sichere Ränder; Reiterwechsel kommt aus der Richtung des Reiters; hochkant Reiter mit Namen unter dem Symbol; Statusleiste folgt Hell/Dunkel.
+  - `ui-design-taste.html`: Farbe nur auf Status, Symbole ohne bunte Kästen, Abschnitts-Titel in normaler Schreibweise, Tabellen ohne Zebrastreifen, Kennzahlen als Schrift; Teile einer Ansicht steigen gestaffelt auf.
+- Geprüft im Browser (Tablet quer/hochkant, MPGler): keine Konsolenfehler. Nicht auf echtem iPad getestet. Nur Vergleich, nichts davon ist in `web/` übernommen.
+- Übernommen in `web/` (aus `ui-mobile-native`, bk-v52): kein Tipp-Blitz, kein Pull-to-Refresh, Bedienelemente ohne Doppeltipp-Warten und ohne Markieren; alle Hover-Effekte nur mit Maus (`@media (hover: hover)`); Abstand zu Notch und Home-Balken (Kopfzeile, Inhalt, Netz-Streifen); Tablet hochkant: Reiternamen unter den Symbolen; Reiterwechsel kommt aus der Richtung des Reiters, Zeilen beim Öffnen gestaffelt; Statusleiste folgt Hell/Dunkel. 16-px-Felder auf Touch gab es schon. Getestet im Mockup (Tablet hochkant), nicht auf echtem iPad.
+- Migrationen umnummeriert: Sicherheit jetzt 022, Push-Hosts 023 (auf main lagen schon 020_rolle_demo und 021_code_6_stellen; 022 hebt beide wieder auf: kein Demo-Login, 8-stellige Codes). 022/023 müssen in Supabase noch ausgeführt werden, falls nicht schon unter altem Namen geschehen.

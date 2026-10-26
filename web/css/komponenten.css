@@ -80,7 +80,9 @@ select.field { appearance: none; min-height: 36px; }
 .reiter-wahl button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
 .reiter-wahl button svg { font-size: 22px; }
 @media (max-width: 900px) {
-  .brandmini span:last-child, .ftabs button { font-size: 0; }
+  .brandmini span:last-child { font-size: 0; }
+  /* Hochkant: Name klein unter dem Symbol, damit klar ist, was jeder Reiter ist */
+  .ftabs button { font-size: 11px; flex-direction: column; gap: 1px; min-height: 52px; padding: 4px 14px; line-height: 1; }
   .ftabs button svg { font-size: 22px; }
 }
 
@@ -106,7 +108,7 @@ select.field { appearance: none; min-height: 36px; }
 .who .av { background: var(--bg2); }
 .who b { display: block; color: var(--label); }
 .tb { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 6px; color: var(--label2); font-size: 15px; }
-.tb:hover { background: var(--fill); }
+@media (hover: hover) { .tb:hover { background: var(--fill); } }
 .mmain { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: auto; }
 .tool { height: 52px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: .5px solid var(--sep); }
 .tool h1 { font-size: 15px; }
@@ -128,7 +130,8 @@ table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 .login-kopf h1 { font-size: 28px; }
 .login-kopf p { margin: 0; color: var(--label2); font-size: 15px; }
 .login-karte { background: var(--bg2); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
-.login-karte form, .login-demo { display: flex; flex-direction: column; gap: 14px; }
+.login-karte form { display: flex; flex-direction: column; gap: 14px; }
+.login-karte .tf { height: 44px; border-radius: 10px; padding: 0 12px; font-size: 17px; background: var(--bg); }
 .login-karte .list { background: var(--bg); }
 .login-karte .btn { width: 100%; }
 .login-karte .ffehler { padding: 0; text-align: center; }
@@ -136,10 +139,10 @@ table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 .login-hinweis { margin: 0; color: var(--label2); font-size: 13px; text-align: center; }
 .login-link { align-self: center; min-height: 44px; padding: 0 12px; color: var(--tint); font-size: 15px; }
 .install-schritte { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.4; }
-.code { display: flex; justify-content: center; gap: 8px; }
+.code { display: flex; justify-content: center; gap: 6px; }
 .code i { width: 12px; align-self: center; height: 2px; background: var(--label3); }
 .code-feld {
-  width: 48px; height: 60px; border-radius: 12px; border: 2px solid transparent; background: var(--bg);
+  width: 40px; height: 56px; border-radius: 10px; border: 2px solid transparent; background: var(--bg);
   text-align: center; font: 600 28px var(--font); color: var(--label); font-variant-numeric: tabular-nums; caret-color: var(--tint);
 }
 .code-feld:focus { outline: none; border-color: var(--navy2); }
@@ -230,7 +233,7 @@ textarea.tf { height: auto; min-height: 48px; padding: 5px 7px; resize: vertical
   content: ""; width: 9px; height: 5px; margin-top: -2px; border: solid #fff; border-width: 0 0 2px 2px;
   transform: rotate(-45deg) scale(.4); opacity: 0; transition: transform .14s cubic-bezier(.2,.8,.2,1), opacity .1s;
 }
-.cb:hover input:not(:checked), input.cbx:hover:not(:checked) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy2) 70%, transparent); background: color-mix(in srgb, var(--navy2) 6%, var(--bg2)); }
+@media (hover: hover) { .cb:hover input:not(:checked), input.cbx:hover:not(:checked) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy2) 70%, transparent); background: color-mix(in srgb, var(--navy2) 6%, var(--bg2)); } }
 .cb input:checked, input.cbx:checked { background: var(--navy2); box-shadow: none; }
 .cb input:checked::after, input.cbx:checked::after { opacity: 1; transform: rotate(-45deg) scale(1); }
 .cb input:focus-visible, input.cbx:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 1px; }
@@ -244,7 +247,7 @@ textarea.tf { height: auto; min-height: 48px; padding: 5px 7px; resize: vertical
   display: inline-grid; place-items: center; transition: background-color .12s ease-out, box-shadow .12s ease-out;
 }
 .rb input::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; transform: scale(.3); opacity: 0; transition: transform .14s cubic-bezier(.2,.8,.2,1), opacity .1s; }
-.rb:hover input:not(:checked) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy2) 70%, transparent); background: color-mix(in srgb, var(--navy2) 6%, var(--bg2)); }
+@media (hover: hover) { .rb:hover input:not(:checked) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy2) 70%, transparent); background: color-mix(in srgb, var(--navy2) 6%, var(--bg2)); } }
 .rb input:checked { background: var(--navy2); box-shadow: none; }
 .rb input:checked::after { opacity: 1; transform: scale(1); }
 .rb input:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 1px; }
@@ -335,11 +338,11 @@ select.tf, select.search {
   background-repeat: no-repeat; background-position: right 7px center; background-size: 12px;
 }
 select.tf { height: 26px; border-radius: 6px; box-shadow: 0 0 0 .5px var(--sep), 0 .5px 1px rgba(0,0,0,.1); }
-select.tf:hover { box-shadow: 0 0 0 .5px color-mix(in srgb, var(--label) 35%, transparent), 0 .5px 1px rgba(0,0,0,.12); }
+@media (hover: hover) { select.tf:hover { box-shadow: 0 0 0 .5px color-mix(in srgb, var(--label) 35%, transparent), 0 .5px 1px rgba(0,0,0,.12); } }
 .tf:focus, select.tf:focus { outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 45%, transparent); }
 input[type="date"].tf { padding-right: 4px; }
 input[type="date"].tf::-webkit-calendar-picker-indicator { opacity: .55; }
-input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+@media (hover: hover) { input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; } }
 
 /* Hover: alles Anklickbare zeigt Rückmeldung (Maus). Touch bekommt nur :active. */
 .pbtn, .si, .vr, .mseg button, .tabs button, .sl-nav-item, table.tab tbody tr[data-id], table.tab tbody tr[data-klick], .tb, .lnk, .login-link, ._ad-footer button, .btn, .segc button, .fz-zurueck, .blatt-zu {
@@ -375,7 +378,7 @@ input[type="date"].tf::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .blatt-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.28); display: grid; place-items: start center; padding: 40px 16px; overflow: auto; animation: blatt-ein .18s ease-out; }
 .blatt { position: relative; width: min(860px, 100%); background: var(--bg); border-radius: 14px; box-shadow: var(--schatten-fenster); padding: 18px 26px 26px; font-size: 17px; animation: blatt-hoch .22s cubic-bezier(.2,.8,.2,1); }
 .blatt-zu { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--label2); background: var(--fill); font-size: 16px; z-index: 1; }
-.blatt-zu:hover { background: var(--fill2); color: var(--label); }
+@media (hover: hover) { .blatt-zu:hover { background: var(--fill2); color: var(--label); } }
 .blatt .mangel-kopf, .blatt .mat-kopf { padding-right: 40px; }
 @keyframes blatt-ein { from { background: rgba(0,0,0,0); } }
 @keyframes blatt-hoch { from { transform: translateY(12px); opacity: 0; } }
@@ -615,3 +618,24 @@ button.veh:active { background: var(--fill); }
     background: var(--bg2); border-left: .5px solid var(--sep); box-shadow: -10px 0 40px rgba(0,0,0,.18); padding-top: max(16px, env(safe-area-inset-top)); }
 }
 @media (prefers-reduced-motion: reduce) { .huelle-mac .mside { transition: none; } }
+
+/* Touch wie eine installierte App --------------------------------------- */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
+.content, .vfile, .insp, .tablewrap, .vlist, .mside, .blatt-overlay { overscroll-behavior: contain; }
+/* Kein Warten auf Doppeltipp, kein Markieren beim langen Drücken (Inhalte bleiben markierbar) */
+button, a, [role="button"], [role="tab"], .tile, .vr, .si { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* Abstand zu Notch und Home-Balken */
+.topnav { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+.content { padding-left: max(28px, env(safe-area-inset-left)); padding-right: max(28px, env(safe-area-inset-right)); }
+.netz-streifen { padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+.btn:active { transform: scale(.97); transition: transform .1s ease-out, filter .1s; }
+.segc button:active:not(.on), .tb:active { background: var(--fill2); }
+/* Reiterwechsel: Inhalt kommt aus der Richtung des Reiters; Zeilen beim Öffnen gestaffelt */
+.von-rechts { animation: von-rechts .26s cubic-bezier(.2,.8,.2,1) both; }
+.von-links { animation: von-links .26s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes von-rechts { from { opacity: 0; transform: translateX(24px); } }
+@keyframes von-links { from { opacity: 0; transform: translateX(-24px); } }
+.geoeffnet .list > .row { animation: zeile-ein .28s cubic-bezier(.2,.8,.2,1) both; }
+.geoeffnet .list > .row:nth-child(2) { animation-delay: 35ms; } .geoeffnet .list > .row:nth-child(3) { animation-delay: 70ms; }
+.geoeffnet .list > .row:nth-child(4) { animation-delay: 105ms; } .geoeffnet .list > .row:nth-child(n+5) { animation-delay: 140ms; }
+@keyframes zeile-ein { from { opacity: 0; transform: translateY(6px); } }

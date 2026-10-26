@@ -155,6 +155,13 @@
   }
 
   // Knopf Hell/Dunkel (Login und Tablet), gilt nur auf diesem Gerät
+  // Farbe der Statusleiste passend zu Hell/Dunkel
+  function statusleiste() {
+    const m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.content = document.documentElement.dataset.theme === 'dark' ? '#000000' : '#f2f2f7';
+  }
+  statusleiste();
+
   function themeKnopf(klasse) {
     const b = el('button.tb.' + klasse, { type: 'button' });
     const zeigen = () => {
@@ -166,6 +173,7 @@
       const dunkel = document.documentElement.dataset.theme !== 'dark';
       if (dunkel) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme;
       try { dunkel ? localStorage.setItem('bk_theme', 'dark') : localStorage.removeItem('bk_theme'); } catch { /* privat */ }
+      statusleiste();
       zeigen();
     };
     zeigen();
@@ -250,7 +258,17 @@
     window.addEventListener('online', streifenZeigen);
     window.addEventListener('offline', streifenZeigen);
     BK.warteschlange.beiAenderung(l => { warten = l; streifenZeigen(); });
-    navigieren = (name, extra) => oeffnen(name, inhalt, extra);
+    // Inhalt kommt aus der Richtung des Reiters; Zeilen nur beim Öffnen gestaffelt, nicht bei Live-Aktualisierung
+    let geoeffnetTimer = null;
+    navigieren = async (name, extra) => {
+      const alt = aktiv ? liste.findIndex(m => m.name === aktiv.name) : -1, neu = liste.findIndex(m => m.name === name);
+      inhalt.classList.remove('von-rechts', 'von-links', 'geoeffnet');
+      if (await oeffnen(name, inhalt, extra) === false) return;
+      void inhalt.offsetWidth;
+      inhalt.classList.add('geoeffnet', ...(alt < 0 || alt === neu ? [] : [neu > alt ? 'von-rechts' : 'von-links']));
+      clearTimeout(geoeffnetTimer);
+      geoeffnetTimer = setTimeout(() => inhalt.classList.remove('geoeffnet'), 800);
+    };
     navigieren(liste[0].name);
     vorladen(liste);
     letzterPing = 0;
@@ -367,48 +385,51 @@
     inhalt.fokus.focus();
   }
 
-  // Demo: Rolle per Knopf statt E-Mail und Passwort
+  // Anmeldung mit E-Mail und Passwort (Konten legt der Admin an)
   function anmeldeFormular(fehler) {
-    const knoepfe = [['mpg', 'Als MPGler'], ['admin', 'Als Admin']].map(([rolle, text]) => el('button.btn', { type: 'button', onclick: async e => {
+    const mail = el('input.tf', { type: 'email', autocomplete: 'username', required: true, placeholder: 'E-Mail', 'aria-label': 'E-Mail' });
+    const pw = el('input.tf', { type: 'password', autocomplete: 'current-password', required: true, placeholder: 'Passwort', 'aria-label': 'Passwort' });
+    const knopf = el('button.btn', { type: 'submit' }, 'Anmelden');
+    const form = el('form', { onsubmit: async e => {
+      e.preventDefault();
       fehler.textContent = '';
-      knoepfe.forEach(k => { k.disabled = true; });
-      try { await api.demoAnmelden(rolle); await starten(); }
-      catch (err) { fehler.textContent = err.offline ? 'Keine Verbindung. Zum Anmelden braucht das Gerät Internet.' : err.message; }
-      knoepfe.forEach(k => { k.disabled = false; });
-    } }, text));
-    const form = el('div.login-demo', el('p.login-text', 'Demo: Wähle, wie du die App sehen willst.'), ...knoepfe);
-    return { form, fokus: knoepfe[0] };
+      knopf.disabled = true;
+      try { await api.anmelden(mail.value.trim(), pw.value); await starten(); }
+      catch (err) { fehler.textContent = err.offline ? 'Keine Verbindung. Zum Anmelden braucht das Gerät Internet.' : 'E-Mail oder Passwort stimmt nicht.'; pw.value = ''; }
+      knopf.disabled = false;
+    } }, mail, pw, knopf);
+    return { form, fokus: mail };
   }
 
-  // 6 Felder wie im Mockup. Tippen springt weiter, Einfügen verteilt den ganzen Code.
+  // 8 Felder (Mockup: 6). Tippen springt weiter, Einfügen verteilt den ganzen Code.
   function koppelFormular(fehler) {
-    const felder = Array.from({ length: 6 }, (_, i) => el('input.code-feld', {
-      inputmode: 'numeric', autocomplete: i === 0 ? 'one-time-code' : 'off', pattern: '[0-9]*', 'aria-label': `Ziffer ${i + 1} von 6` }));
+    const felder = Array.from({ length: 8 }, (_, i) => el('input.code-feld', {
+      inputmode: 'numeric', autocomplete: i === 0 ? 'one-time-code' : 'off', pattern: '[0-9]*', 'aria-label': `Ziffer ${i + 1} von 8` }));
     const knopf = el('button.btn', { type: 'submit', disabled: true }, 'Koppeln');
     const code = () => felder.map(f => f.value).join('');
-    const pruefen = () => { knopf.disabled = code().length !== 6; };
+    const pruefen = () => { knopf.disabled = code().length !== 8; };
     felder.forEach((f, i) => {
       f.addEventListener('input', () => {
         const ziffern = f.value.replace(/\D/g, '');
         if (ziffern.length > 1) {  // Einfügen, Autofill oder schnelles Tippen
-          ziffern.slice(0, 6 - i).split('').forEach((z, j) => { felder[i + j].value = z; });
-          felder[Math.min(i + ziffern.length, 5)].focus();
+          ziffern.slice(0, 8 - i).split('').forEach((z, j) => { felder[i + j].value = z; });
+          felder[Math.min(i + ziffern.length, 7)].focus();
         } else {
           f.value = ziffern;
-          if (ziffern && i < 5) felder[i + 1].focus();
+          if (ziffern && i < 7) felder[i + 1].focus();
         }
         pruefen();
-        if (code().length === 6) form.requestSubmit();
+        if (code().length === 8) form.requestSubmit();
       });
       f.addEventListener('keydown', e => {
         if (e.key === 'Backspace' && !f.value && i > 0) { felder[i - 1].value = ''; felder[i - 1].focus(); pruefen(); e.preventDefault(); }
         if (e.key === 'ArrowLeft' && i > 0) felder[i - 1].focus();
-        if (e.key === 'ArrowRight' && i < 5) felder[i + 1].focus();
+        if (e.key === 'ArrowRight' && i < 7) felder[i + 1].focus();
       });
     });
     const form = el('form', { onsubmit: async e => {
       e.preventDefault();
-      if (knopf.disabled && code().length !== 6) return;
+      if (knopf.disabled && code().length !== 8) return;
       fehler.textContent = '';
       knopf.disabled = true;
       try {
@@ -423,7 +444,7 @@
       pruefen();
     } },
       el('p.login-text', 'Gib den Code aus der Verwaltung ein. Danach zeigt dieses Tablet nur noch seinen KTW.'),
-      el('div.code', felder.slice(0, 3), el('i', { 'aria-hidden': 'true' }), felder.slice(3)),
+      el('div.code', felder.slice(0, 4), el('i', { 'aria-hidden': 'true' }), felder.slice(4)),
       knopf,
       el('p.login-hinweis', 'Der Code gilt 24 Stunden und nur einmal.'));
     return { form, fokus: felder[0] };

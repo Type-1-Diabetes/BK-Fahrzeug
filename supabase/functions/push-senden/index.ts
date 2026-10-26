@@ -9,6 +9,9 @@ const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SE
 const fehlend = ['VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'PUSH_GEHEIMNIS'].filter(n => !Deno.env.get(n));
 if (!fehlend.length) webpush.setVapidDetails('mailto:demo@bk-demo.invalid', Deno.env.get('VAPID_PUBLIC_KEY')!, Deno.env.get('VAPID_PRIVATE_KEY')!);
 
+// Nur bekannte Push-Dienste anfragen (gleiche Liste wie Migration 023)
+const PUSH_HOST = /^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9-]+\.push\.apple\.com|[a-z0-9-]+\.notify\.windows\.com)\//;
+
 type Nachricht = { schluessel: string; title: string; body: string; tag: string };
 
 // Aus einem Verlaufseintrag die Nachricht bauen. null = dafür gibt es keine Benachrichtigung.
@@ -73,7 +76,7 @@ Deno.serve(async req => {
   const { data: abos } = await db.from('push_abos').select('id, endpoint, p256dh, auth').in('user_id', ziele);
   const payload = JSON.stringify({ title: n.title, body: n.body, tag: n.tag, url: './' });
   let gesendet = 0;
-  await Promise.all((abos || []).map(async a => {
+  await Promise.all((abos || []).filter(a => PUSH_HOST.test(a.endpoint)).map(async a => {
     try {
       await webpush.sendNotification({ endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } }, payload, { TTL: 60 * 60 * 24 });
       gesendet++;
