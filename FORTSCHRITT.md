@@ -265,6 +265,23 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - `logo.png` in der App (Seitenleiste, Kopf, Druck) unverändert.
 - Offen: auf iPad, Android, Mac und Windows prüfen. Bereits installierte Apps übernehmen das neue Icon oft erst nach Neuinstallation (iOS immer).
 
+## App-Icon neu laden (2026-10-26, bk-v50)
+- Windows zeigte nach Neuinstallation noch das alte Icon (Browser-Cache). Icon-Pfade in `manifest.webmanifest` und `index.html` haben jetzt `?v=2`, damit der Browser sie neu holt.
+- Offen: auf Windows prüfen (App deinstallieren, Website-Daten löschen, neu installieren).
+
+## Demo-Login ohne Rolle (2026-10-26, Migration 020)
+- „Als Admin“/„Als MPGler“ landete auf „Tablet koppeln“: `ich()` gab `rolle: null`. Ursache: `intern.rolle()` in der Live-DB schloss anonyme Sitzungen aus (`is_anonymous`), weicht vom Repo (002) ab. Der Demo-Login ist anonym.
+- Migration 020 stellt den Stand aus 002 wieder her.
+- Offen: 020 im SQL Editor ausführen, dann Anmelden prüfen.
+
+## Kopplungscode 6 Ziffern (2026-10-26, Migration 021)
+- Mac zeigte 8 Ziffern, Koppelseite nimmt 6. Live-DB wich vom Repo (002) ab. Migration 021 stellt 6 Ziffern wieder her.
+- Offen: 021 im SQL Editor ausführen, neuen Code erzeugen und koppeln.
+
+## Text entfernt (2026-10-26, bk-v51)
+- Tablet-Übersicht: „Erledigtes bleibt 7 Tage in der Liste.“ entfernt.
+- Windows-Icon: Verknüpfung zeigte eckiges Icon mit weißem Rand (wie `icon-maskable-512`). Test: Maskable-Eintrag aus dem Manifest genommen. Offen: unter Windows neu installieren; ist es dann `icon-512`, Maskable mit passender Datei zurück (Android).
+
 ## Sicherheit: Login und Koppeln (2026-10-26, bk-v50)
 
 - Demo-Login „Als MPGler / Als Admin“ entfernt. Vorher konnte jeder ohne Passwort Admin werden. Jetzt nur noch E-Mail und Passwort. Profile anonymer Demo-Sitzungen gelöscht (Migration 022).
