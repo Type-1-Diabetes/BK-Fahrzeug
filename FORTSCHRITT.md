@@ -264,3 +264,7 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Homescreen-/Desktop-Icon aus der neuen Vorlage (rundes Logo auf weißer, abgerundeter Fläche): `icon-192`, `icon-512` (mit transparenten Ecken), `apple-touch-icon` (weiß, iOS rundet selbst), `icon-maskable-512` (Logo in der Sicherheitszone, weißer Rand), `favicon-16/32`.
 - `logo.png` in der App (Seitenleiste, Kopf, Druck) unverändert.
 - Offen: auf iPad, Android, Mac und Windows prüfen. Bereits installierte Apps übernehmen das neue Icon oft erst nach Neuinstallation (iOS immer).
+
+## App-Icon neu laden (2026-10-26, bk-v50)
+- Windows zeigte nach Neuinstallation noch das alte Icon (Browser-Cache). Icon-Pfade in `manifest.webmanifest` und `index.html` haben jetzt `?v=2`, damit der Browser sie neu holt.
+- Offen: auf Windows prüfen (App deinstallieren, Website-Daten löschen, neu installieren).
