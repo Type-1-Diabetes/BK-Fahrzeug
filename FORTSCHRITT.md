@@ -67,9 +67,6 @@ Stand: 24.10.2026 (bk-v48). Oben die Übersicht, unten das Tagebuch der Änderun
 
 ## Offen
 
-**Ausführen**
-- Migration 026 im SQL-Editor (Spam-Bremse, Lesesperre offene Überprüfungen, Vorlage Gruppe/„Wo“, PIN-Text).
-
 **Verschoben auf den eigenen Webserver (PLANUNG 12)**
 - Erinnerung „Fahrzeug Überprüfung überfällig“ per Push.
 - Wachen, KTW, Geräte und Benutzer vollständig frei anlegen (Login mit E-Mail/Passwort, Rolle MPGler/Admin, erster Admin per Terminal).
@@ -363,5 +360,18 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Lesesperre: Einträge einer offenen Überprüfung liest nur das Tablet des KTW, Personal erst nach dem Abschließen (RLS `checklisten_eintraege`).
 - Vorlage-Editor: Bereich „Bearbeiten“ fragt Name, Gruppe, Farbe; Position hat Feld „Wo“, Tabelle Spalte „Wo“. Farbe wird jetzt auch in der DB gegen die feste Liste geprüft.
 - PIN-Text: „Der MPGler legt sie … fest“.
-- Offen: 026 im SQL-Editor ausführen (Supabase-MCP nicht verbunden). Bis dahin schlägt Speichern im Vorlage-Editor fehl (neue Parameter). JS nur per Syntaxprüfung getestet, SQL nicht gegen die DB.
+- 026 am 26.10. im SQL-Editor ausgeführt.
 
+
+## Modulwechsel ohne leeres Bild (2026-10-26, bk-v61)
+- Ursache: Beim Wechsel (Seitenleiste Mac, Reiter Tablet) war der Bereich leer, solange die Daten luden (Vorrat greift erst nach 250 ms), und die Module zeigten erst ein leeres Gerüst, dann ploppten die Zeilen nach.
+- Jetzt: Die alte Ansicht bleibt als Standbild stehen (`altesBild()` in `app.js`), bis das neue Modul samt Daten fertig ist; dann blenden beide über (150 ms). Module warten in `start()` auf ihre Daten (`await laden()` in Mängel, Material, Überprüfungen, Fahrzeuge, Fristen, Tablets, Vorlage, Einstellungen).
+- „Weniger Bewegung“: kein Standbild, wie bisher.
+- Gemessen mit Testdaten und 300 ms Ladezeit pro Abfrage (Mac 1280×800, Tablet 1180×820): kein leeres Bild mehr, keine Reste, keine Fehler. Nicht mit echtem Netz.
+- Offen: Bei sehr langsamem Netz steht das alte Bild entsprechend lange; dann ggf. Ladeanzeige ergänzen.
+
+## Filter „Alle“, Ablaufdatum nur Monat/Jahr (2026-10-26, bk-v62)
+- Mängel, Material, Überprüfungen starten mit Filter „Alle“.
+- „Verfall“ heißt überall „Ablaufdatum“ (Tablet, Soll-Liste, Überprüfungen, Papierliste/Druck, Vorlage, CSV).
+- Ablaufdatum in der Fahrzeug Überprüfung: zwei eigene Auswahlen Monat und Jahr (vorher `type=month`, das Safari am Mac und Firefox nicht können). Gespeichert als 1. des Monats, angezeigt als MM/JJJJ.
+- Geprüft in Chromium mit Testdaten (Tablet 1180×820, Mac 1280×800): Auswahl, Übernehmen, Anzeige, Filter. Keine Fehler.

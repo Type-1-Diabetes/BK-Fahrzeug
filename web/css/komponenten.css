@@ -648,6 +648,10 @@ button, a, [role="button"], [role="tab"], .tile, .vr, .si { touch-action: manipu
 @keyframes von-rechts { from { opacity: 0; transform: translateX(24px); } }
 @keyframes von-links { from { opacity: 0; transform: translateX(-24px); } }
 .wechselt { opacity: 0; }
+/* Standbild der alten Ansicht beim Modulwechsel (app.js altesBild) */
+.alt-bild { position: fixed; z-index: 40; margin: 0; pointer-events: none; transition: opacity .15s cubic-bezier(.25,1,.5,1); }
+.alt-bild.weg { opacity: 0; }
+.alt-bild, .alt-bild * { animation: none !important; }
 .von-oben { animation: von-oben .2s cubic-bezier(.25,1,.5,1) both; }
 .von-unten { animation: von-unten .2s cubic-bezier(.25,1,.5,1) both; }
 .ein { animation: ein .18s cubic-bezier(.25,1,.5,1) both; }

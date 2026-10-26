@@ -27,7 +27,7 @@ BK.modul('sollliste', {
     const alle = bereiche.flatMap(b => b.positionen.map(p => ({ p, b })));
     const gesamt = alle.length;
     const fertig = b => b.positionen.every(p => haken.has(p.id));
-    const fristText = p => BK.lfd(p).frist || { verfall: 'Verfall', stk: 'STK', mtk: 'MTK' }[p.pruefart] || '';
+    const fristText = p => BK.lfd(p).frist || { verfall: 'Ablaufdatum', stk: 'STK', mtk: 'MTK' }[p.pruefart] || '';
 
     let aktiv = 0, bereichVorher = null, balkenVorher = null;
     // Suchfeld bleibt stehen (Fokus), nur Kopf und Bereiche werden neu gezeichnet
@@ -76,7 +76,7 @@ BK.modul('sollliste', {
       const vorher = bereichVorher;
       bereichVorher = q ? null : aktiv;
       const spalten = el('div.ck-spalten', el('span', 'Vorh.'), el('span', 'Artikel, SN und Hersteller'),
-        el('span.zahl', 'Anzahl soll'), el('span.zahl', 'Anzahl ist'), el('span.ck-frist', 'Verfallsdatum, STK/MTK'), el('span.ck-wo', 'Wo'));
+        el('span.zahl', 'Anzahl soll'), el('span.zahl', 'Anzahl ist'), el('span.ck-frist', 'Ablaufdatum, STK/MTK'), el('span.ck-wo', 'Wo'));
 
       if (q) {
         const treffer = alle.filter(x => x.p.artikel.toLowerCase().includes(q));

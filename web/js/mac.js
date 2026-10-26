@@ -73,14 +73,14 @@
     },
   };
 
-  // Ganze Checkliste wie MPG.doc: Gruppe als Überschrift, Material-Spalte farbig, dann Artikel, Soll, Ist, Verfall, Wo, Bemerkung
+  // Ganze Checkliste wie MPG.doc: Gruppe als Überschrift, Material-Spalte farbig, dann Artikel, Soll, Ist, Ablaufdatum, Wo, Bemerkung
   BK.papierliste = (bereiche, eintraege) => {
     const { el } = BK;
     const abw = new Map((eintraege || []).map(e => [e.position_id, e]));
-    const frist = { verfall: 'Verfall', stk: 'STK', mtk: 'MTK' };
+    const frist = { verfall: 'Ablaufdatum', stk: 'STK', mtk: 'MTK' };
     return el('table.tab.pliste',
       el('thead', el('tr', el('th', 'Material/ Ausstattung'), el('th', 'Artikel, wenn vorhanden SN und Hersteller'),
-        el('th.num', 'Anzahl soll'), el('th.num', 'Anzahl ist'), el('th', 'Verfallsdatum, STK/ MTK'), el('th', 'Wo'), el('th', 'Bemerkung'))),
+        el('th.num', 'Anzahl soll'), el('th.num', 'Anzahl ist'), el('th', 'Ablaufdatum, STK/ MTK'), el('th', 'Wo'), el('th', 'Bemerkung'))),
       ...bereiche.map((b, i) => el('tbody',
         b.gruppe && b.gruppe !== (bereiche[i - 1] || {}).gruppe ? el('tr.pl-gruppe', el('td', { colspan: 7 }, b.gruppe)) : null,
         ...b.positionen.map((p, j) => {

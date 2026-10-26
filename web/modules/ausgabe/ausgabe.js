@@ -8,7 +8,7 @@ BK.modul('ausgabe', {
     const ktw = root.querySelector('[data-ktw]');
     const suche = root.querySelector('[data-suche]');
     root.querySelector('[data-export]').append(icon('export'), 'Export');
-    let status = 'offen', alle = [], gewaehlt = null, geaendert = false;
+    let status = 'alle', alle = [], gewaehlt = null, geaendert = false;
     const weiter = async () => !geaendert || await confirmDialog('Änderungen verwerfen?', 'Du hast erhaltene Mengen geändert und noch nicht ausgegeben.');
     BK.vorVerlassen = weiter;
 
@@ -130,6 +130,6 @@ BK.modul('ausgabe', {
     };
 
     BK.beiNeu(() => { if (!geaendert) laden(); });
-    laden();
+    await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
   },
 });

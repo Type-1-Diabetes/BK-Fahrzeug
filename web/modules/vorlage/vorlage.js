@@ -2,7 +2,7 @@
 // Positionen, die schon in einer Checkliste stehen, blendet die Datenbank beim Löschen nur aus.
 (function () {
   const FARBEN = [['', 'Ohne Farbe'], ['blau', 'Blau (Sauerstoff)'], ['orange', 'Orange (Hygiene)'], ['rot', 'Rot (Wundversorgung)'], ['gruen', 'Grün (Diagnostik)'], ['gelb', 'Gelb (Immobilisation)']];
-  const PRUEF = { keine: 'Keine', verfall: 'Verfallsdatum', stk: 'STK', mtk: 'MTK' };
+  const PRUEF = { keine: 'Keine', verfall: 'Ablaufdatum', stk: 'STK', mtk: 'MTK' };
 
   BK.modul('vorlage', {
     async start(root) {
@@ -177,7 +177,7 @@
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); insp.querySelector('[data-sichern]')?.click(); }
       });
       BK.beiNeu(() => { if (!ungesichert) laden(); });
-      laden();
+      await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
     },
   });
 })();

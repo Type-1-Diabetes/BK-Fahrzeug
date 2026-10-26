@@ -90,6 +90,6 @@ BK.modul('einstellungen', {
       el('span.l', 'Name'), el('div', ctx.ich.name || '–'),
       el('span.l', 'Rolle'), el('div', 'MPGler'),
       el('span.l', 'App'), el('div', 'Version ' + (BK_CONFIG.version || '–')));
-    laden();
+    await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
   },
 });

@@ -157,6 +157,6 @@ BK.modul('fahrzeuge', {
     }
 
     BK.beiNeu(() => laden());
-    laden();
+    await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
   },
 });

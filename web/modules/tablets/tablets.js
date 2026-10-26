@@ -192,7 +192,7 @@ BK.modul('tablets', {
     };
 
     BK.beiNeu(() => { if (overlay.hidden) laden(); });
-    laden();
+    await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
   },
   stop() { clearInterval(warten); },
 });

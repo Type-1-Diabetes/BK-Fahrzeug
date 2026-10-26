@@ -106,7 +106,7 @@ BK.modul('checkliste', {
       const alleDa = b.positionen.every(istGeprueft);
       // Spalten wie MPG.doc, Kopf bleibt beim Scrollen stehen
       const zeilen = el('div.list.ck-liste', el('div.ck-spalten', el('span', 'Vorh.'), el('span', 'Artikel, SN und Hersteller'),
-        el('span.zahl', 'Anzahl soll'), el('span.zahl', 'Anzahl ist'), el('span.ck-frist', 'Verfallsdatum, STK/MTK'), el('span.ck-wo', 'Wo')));
+        el('span.zahl', 'Anzahl soll'), el('span.zahl', 'Anzahl ist'), el('span.ck-frist', 'Ablaufdatum, STK/MTK'), el('span.ck-wo', 'Wo')));
       for (const p of b.positionen) zeilen.append(zeile(p, b));
       leeren(main).append(
         el('div.content',
@@ -141,8 +141,8 @@ BK.modul('checkliste', {
     function gehe(i) { aktiv = i; offenePosition = null; seite(); main.querySelector('.content')?.scrollTo(0, 0); }
 
     const monat = d => new Date(d).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' });
-    // Spalte „Verfallsdatum, STK/MTK“: eingetragenes Datum, sonst die Prüffrist aus der Liste
-    const fristText = (p, e) => e && e.verfall ? monat(e.verfall) : BK.lfd(p).frist || { verfall: 'Verfall', stk: 'STK', mtk: 'MTK' }[p.pruefart] || '';
+    // Spalte „Ablaufdatum, STK/MTK“: eingetragenes Datum, sonst die Prüffrist aus der Liste
+    const fristText = (p, e) => e && e.verfall ? monat(e.verfall) : BK.lfd(p).frist || { verfall: 'Ablaufdatum', stk: 'STK', mtk: 'MTK' }[p.pruefart] || '';
 
     function zeile(p, b) {
       const e = eintraege[p.id];
@@ -170,12 +170,20 @@ BK.modul('checkliste', {
     function editor(p, e) {
       let ist = e && e.ist != null ? e.ist : p.soll;
       const q = el('span.q', String(ist));
-      const verfall = el('input.field', { type: 'month', value: e && e.verfall ? e.verfall.slice(0, 7) : '', 'aria-label': 'Verfallsdatum' });
+      // Ablaufdatum nur Monat und Jahr (eigene Auswahl, type=month fehlt in Safari am Mac und in Firefox)
+      const [jA, mA] = e && e.verfall ? e.verfall.split('-').map(Number) : [];
+      const jahrJetzt = new Date().getFullYear();
+      const monatWahl = el('select.field', { 'aria-label': 'Monat' }, el('option', { value: '' }, 'Monat'),
+        ...['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+          .map((t, i) => el('option', { value: String(i + 1).padStart(2, '0'), selected: mA === i + 1 }, t)));
+      const jahrWahl = el('select.field', { 'aria-label': 'Jahr' }, el('option', { value: '' }, 'Jahr'),
+        ...Array.from({ length: 13 }, (_, i) => jahrJetzt - 2 + i).map(j => el('option', { value: String(j), selected: jA === j }, String(j))));
+      const verfallWert = () => monatWahl.value && jahrWahl.value ? `${jahrWahl.value}-${monatWahl.value}-01` : null;
       const bem = el('input.field', { maxlength: 300, placeholder: 'z. B. defekt, Fülldruck unter 100 bar', value: (e && e.bemerkung) || '', 'aria-label': 'Bemerkung' });
       const speichern = async (entfernen, durchstreichen = false) => {
         const neu = entfernen ? null : durchstreichen
           ? { position_id: p.id, ist: null, verfall: null, bemerkung: bem.value.trim() || null, durchgestrichen: true }
-          : { position_id: p.id, ist: ist === p.soll ? null : ist, verfall: verfall.value ? verfall.value + '-01' : null, bemerkung: bem.value.trim() || null };
+          : { position_id: p.id, ist: ist === p.soll ? null : ist, verfall: verfallWert(), bemerkung: bem.value.trim() || null };
         if (neu && !neu.durchgestrichen && neu.ist == null && !neu.verfall && !neu.bemerkung) return speichern(true);
         if (neu) eintraege[p.id] = neu; else { delete eintraege[p.id]; ok.add(p.id); sichern(); }
         lokalSetzen(p.id, neu);
@@ -189,8 +197,8 @@ BK.modul('checkliste', {
         el('div', el('div.stepper',
           el('button', { type: 'button', 'aria-label': 'weniger', onclick: () => { if (ist > 0) q.textContent = --ist; } }, icon('minus')), q,
           el('button', { type: 'button', 'aria-label': 'mehr', onclick: () => { if (ist < 999) q.textContent = ++ist; } }, icon('plus')))),
-        p.pruefart !== 'keine' ? el('span', p.pruefart === 'verfall' ? 'Verfall' : 'Prüfung bis') : null,
-        p.pruefart !== 'keine' ? verfall : null,
+        p.pruefart !== 'keine' ? el('span', p.pruefart === 'verfall' ? 'Ablaufdatum' : 'Prüfung bis') : null,
+        p.pruefart !== 'keine' ? el('div.ck-monat', monatWahl, jahrWahl) : null,
         el('span', 'Bemerkung'), bem,
         el('div.acts',
           e ? el('button.btn.sec', { type: 'button', onclick: () => speichern(true) }, 'Doch vollständig') : null,

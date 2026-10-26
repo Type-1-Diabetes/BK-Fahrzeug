@@ -128,3 +128,5 @@
 /* Durchgestrichen wie auf Papier: bekannt, nicht vorhanden */
 .ck-wrap.durch .ck-text b, .ck-wrap.durch .ck-text .zahl { text-decoration: line-through; text-decoration-thickness: 1.5px; color: var(--label2); }
 .box.durch { background: var(--fill2); color: var(--label2); }
+/* Ablaufdatum: Monat und Jahr nebeneinander */
+.ck-monat { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 8px; }

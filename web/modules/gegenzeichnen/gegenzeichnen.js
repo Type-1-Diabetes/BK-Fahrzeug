@@ -10,7 +10,7 @@ BK.modul('gegenzeichnen', {
     const vorlagen = {};  // vorlage_id → Bereiche
     let listen = [];  // Vorlagen mit „Liste Feuerwehr“
     api.vorlagen().then(v => { listen = v; }).catch(() => {});
-    let alle = [], gewaehlt = null, status = 'wartet';
+    let alle = [], gewaehlt = null, status = 'alle';
     const quartal = BK.fristen.zeitraumText;
     const STAND = c => c.gegengezeichnet_am ? 'fertig' : c.abgeschlossen_am ? 'wartet' : 'team';
     const PILL = { wartet: ['Wartet auf dich', 'in_bearbeitung'], team: ['Beim Team', 'warte'], fertig: ['Gegengezeichnet', 'erledigt'] };
@@ -38,7 +38,7 @@ BK.modul('gegenzeichnen', {
         const fz = new Map(alle.map(c => [c.fahrzeug_id, c.fahrzeug.name]));
         ktw.append(...[...fz].sort((a, b) => a[1].localeCompare(b[1])).map(([id, name]) => el('option', { value: id }, name)));
       }
-      zeichnen();
+      await zeichnen();
     }
 
     function zeichnen() {
@@ -55,7 +55,7 @@ BK.modul('gegenzeichnen', {
           el('td', c.abgeschlossen_am ? mac.kurz(c.abgeschlossen_am) : 'begonnen ' + mac.kurz(c.begonnen_am)),
           el('td', [c.mitarbeiter1, c.mitarbeiter2].filter(Boolean).join(', ') || '–')));
       }
-      inspektor();
+      return inspektor();
     }
 
     function waehlen(id) {
@@ -105,7 +105,7 @@ BK.modul('gegenzeichnen', {
         el('div.acts', mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); })));
       const pos = new Map(bereiche.flatMap(b => b.positionen.map(p => [p.id, { ...p, bereich: b }])));
       const gesamt = pos.size;
-      const befund = (p, e) => [e.ist != null ? `Ist ${e.ist} / Soll ${p ? p.soll : '?'}` : null, e.verfall ? 'Verfall ' + BK.datum(e.verfall, false) : null].filter(Boolean).join(' · ') || 'Hinweis';
+      const befund = (p, e) => [e.ist != null ? `Ist ${e.ist} / Soll ${p ? p.soll : '?'}` : null, e.verfall ? 'Ablaufdatum ' + new Date(e.verfall).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' }) : null].filter(Boolean).join(' · ') || 'Hinweis';
       const warten = !c.gegengezeichnet_am;
 
       insp.append(
@@ -173,7 +173,7 @@ BK.modul('gegenzeichnen', {
           el('div.kpi', el('span', 'Geprüft'), el('b', `${gesamt} Positionen`)),
           el('div.kpi', el('span', 'Vollständig'), el('b.gruen-t', String(gesamt - e.length))),
           el('div.kpi', el('span', 'Fehlt'), el('b', { class: fehlt ? 'warnt' : null }, String(fehlt))),
-          el('div.kpi', el('span', 'Verfall / Prüffrist'), el('b', { class: verfall ? 'warnt' : null }, String(verfall)))),
+          el('div.kpi', el('span', 'Ablaufdatum / Prüffrist'), el('b', { class: verfall ? 'warnt' : null }, String(verfall)))),
         e.length ? kasten : el('div.gz-alles', icon('check'), 'Alles vollständig. Nichts fehlt, nichts läuft ab.'),
       ];
     }
@@ -188,13 +188,13 @@ BK.modul('gegenzeichnen', {
       const zeilen = bereiche.flatMap(b => b.positionen.map(p => {
         const e = c.eintraege.find(x => x.position_id === p.id) || {};
         return { KTW: c.fahrzeug.name, Zeitraum: quartal(c.zeitraum), Bereich: b.name, Nr: p.nr, Artikel: p.artikel, Soll: p.soll,
-          Ist: e.ist ?? p.soll, Verfall: e.verfall || '', Bemerkung: e.bemerkung || '', 'Mitarbeiter 1': c.mitarbeiter1 || '', 'Mitarbeiter 2': c.mitarbeiter2 || '',
+          Ist: e.ist ?? p.soll, Ablaufdatum: e.verfall ? e.verfall.slice(0, 7) : '', Bemerkung: e.bemerkung || '', 'Mitarbeiter 1': c.mitarbeiter1 || '', 'Mitarbeiter 2': c.mitarbeiter2 || '',
           Begonnen: BK.datum(c.begonnen_am), Abgeschlossen: c.abgeschlossen_am ? BK.datum(c.abgeschlossen_am) : '', Gegengezeichnet: c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am) : '' };
       }));
       if (!exportCSV(`checkliste-${c.fahrzeug.name.replace(/\W+/g, '-')}-${c.zeitraum}.csv`, zeilen)) alertDialog('Nichts zu exportieren', 'Die Vorlage lässt sich nicht laden.');
     };
 
     BK.beiNeu(() => laden());
-    laden();
+    await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
   },
 });

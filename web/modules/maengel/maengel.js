@@ -46,7 +46,7 @@
       const ktw = root.querySelector('[data-ktw]');
       const suche = root.querySelector('[data-suche]');
       root.querySelector('[data-export]').append(icon('export'), 'Export');
-      let status = 'offen', alle = [], fahrzeuge = [], gewaehlt = null, ungesichert = false, speichernAktuell = null;
+      let status = 'alle', alle = [], fahrzeuge = [], gewaehlt = null, ungesichert = false, speichernAktuell = null;
       // Vor dem Wechseln oder Schließen: speichern, verwerfen oder bleiben
       const weiter = async () => {
         if (!ungesichert) return true;
@@ -269,7 +269,7 @@
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); insp.querySelector('[data-sichern]')?.click(); }
       });
       BK.beiNeu(() => { if (!ungesichert) laden(true); });
-      laden();
+      await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
     },
   });
 })();

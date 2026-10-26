@@ -52,6 +52,6 @@ BK.modul('fristen', {
       leeren(boxWachen).append(...wachen.map(w => zeile(w.name, fristen.find(f => f.wache_id === w.id && !f.fahrzeug_id), w, standard)));
     }
 
-    laden();
+    await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)
   },
 });

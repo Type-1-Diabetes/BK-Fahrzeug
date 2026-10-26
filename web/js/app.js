@@ -39,6 +39,7 @@
     BK.vorVerlassen = null;
     if (aktiv && aktiv.def.stop) { try { aktiv.def.stop(); } catch { /* egal */ } }
     umschalter(name);
+    const bild = altesBild(ziel);
     ziel.classList.add('wechselt');  // unsichtbar, bis das neue Modul steht (sonst blitzt es vor dem Einblenden auf)
     leeren(ziel);
     neuHoerer = null;
@@ -53,6 +54,26 @@
     }
     document.querySelectorAll('[data-modul]').forEach(b => b.classList.toggle('on', b.dataset.modul.split(',').includes(name)));
     ziel.classList.remove('wechselt');
+    if (bild) { bild.classList.add('weg'); setTimeout(() => bild.remove(), 150); }
+  }
+
+  // Standbild der alten Ansicht über dem Bereich, bis die neue geladen ist; danach blenden beide über.
+  // Sonst bleibt der Bereich leer, solange die Daten laden (bis 250 ms und mehr).
+  function altesBild(ziel) {
+    if (document.querySelector('.alt-bild') || !ziel.firstChild || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    const r = ziel.getBoundingClientRect();
+    const bild = ziel.cloneNode(true);
+    bild.removeAttribute('id');
+    bild.classList.add('alt-bild');
+    bild.setAttribute('aria-hidden', 'true');
+    bild.inert = true;
+    bild.style.cssText = `top:${r.top}px;left:${r.left}px;width:${r.width}px;height:${r.height}px`;
+    bild.classList.remove('wechselt', 'geoeffnet', 'ein', 'von-rechts', 'von-links', 'von-oben', 'von-unten');
+    ziel.after(bild);  // gleiche Eltern, damit die Hüllen-Regeln (.huelle-mac …) weiter greifen
+    // Scroll-Stand übernehmen, sonst springt das Standbild nach oben
+    const alt = [ziel, ...ziel.querySelectorAll('*')], neu = [bild, ...bild.querySelectorAll('*')];
+    alt.forEach((e, i) => { if (e.scrollTop && neu[i]) neu[i].scrollTop = e.scrollTop; });
+    return bild;
   }
 
   // Mac: Tablet-Formular (Mängelmeldung, Materialanforderung) als Blatt für ein bestimmtes Fahrzeug
