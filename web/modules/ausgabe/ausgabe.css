@@ -14,3 +14,8 @@
 .aus-tab td:first-child { white-space: normal; }
 @media (max-width: 1100px) { .aus-tab .kreuz { width: 44px; } }
 .aus-tab td.kreuz { font-size: 20px; line-height: 1; }
+/* Im Inspektor: Größe und Grund klein unter dem Artikel */
+.insp .aus-tab td:first-child { white-space: normal; }
+.aus-zusatz { display: block; font-size: 12px; color: var(--label2); margin-top: 2px; }
+.insp .aus-hinweis { text-align: left; }
+.insp .aus-sig { gap: 16px; }

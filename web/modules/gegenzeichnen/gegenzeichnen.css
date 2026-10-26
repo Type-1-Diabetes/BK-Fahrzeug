@@ -1,7 +1,4 @@
 /* Modul Gegenzeichnen (Mac) */
-.gz-voll { display: none; }
-.gz-voll.zeigen { display: block; }
-.gz-aus { display: none; }
 .gz-befunde { margin-top: 16px; border: .5px solid var(--sep); border-radius: 10px; overflow: hidden; }
 .gz-bereich { padding: 7px 12px; font-weight: 600; font-size: 13px; border-left: 4px solid var(--label3); background: var(--fill); }
 .gz-bereich.blau { border-color: var(--b-blau); background: color-mix(in srgb, var(--b-blau) 14%, var(--bg2)); }
@@ -14,12 +11,13 @@
 .gz-befund div span { display: block; color: var(--label2); font-size: 13px; margin-top: 2px; }
 .gz-nr { color: var(--label2); font-variant-numeric: tabular-nums; }
 .gz-alles { display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 14px; border-radius: 10px; background: color-mix(in srgb, var(--ok) 10%, var(--bg2)); color: var(--ok-ink); font-weight: 500; }
-@media print {
-  .gz-voll { display: block; margin-top: 16px; }
-  .gz-aus { display: block; }
-  .tabs { display: none; }
-  .vfile .foot { color: #444; }
-}
 .gz-team { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 14px 16px; border-radius: 10px; background: var(--fill); color: var(--label2); }
 .gz-team b { display: block; color: var(--label); }
 .gz-team span { font-size: 14px; }
+/* Im Inspektor: Zahlen zu zweit, Knopf für die ganze Liste */
+.insp .kpis { grid-template-columns: 1fr 1fr; margin-top: 14px; }
+.gz-ganz { width: 100%; justify-content: center; margin-top: 14px; }
+.gz-blatt h2 { font-size: 20px; padding-right: 40px; margin-bottom: 12px; }
+.blatt.gz-blatt { width: min(1100px, 100%); }
+.gz-blatt .pliste { width: 100%; table-layout: auto; }
+.gz-blatt .pliste th { white-space: normal; }

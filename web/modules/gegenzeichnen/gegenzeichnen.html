@@ -1,10 +1,22 @@
 <div class="tool">
-  <div><h1>Checklisten gegenzeichnen</h1><div class="sub" data-sub></div></div>
+  <div><h1>Fahrzeug Überprüfungen</h1><div class="sub" data-sub></div></div>
   <span class="sp"></span>
+  <div class="mseg" role="tablist" aria-label="Status" data-status>
+    <button type="button" data-v="alle">Alle</button>
+    <button type="button" data-v="wartet" class="on">Wartet auf dich</button>
+    <button type="button" data-v="team">Beim Team</button>
+    <button type="button" data-v="fertig">Gegengezeichnet</button>
+  </div>
+  <select class="tf auto" aria-label="KTW" data-ktw><option value="">Alle KTW</option></select>
   <button type="button" class="tb" data-csv title="Als Tabelle (CSV) herunterladen"></button>
   <button type="button" class="tb" data-pdf title="Drucken oder als PDF speichern"></button>
 </div>
 <div class="mbody">
-  <div class="vlist" data-liste></div>
-  <div class="vfile" data-akte></div>
+  <div class="tablewrap">
+    <table class="tab">
+      <thead><tr><th>Status</th><th>KTW</th><th>Zeitraum</th><th>Abweichungen</th><th>Abgeschlossen</th><th>Team</th></tr></thead>
+      <tbody data-liste></tbody>
+    </table>
+  </div>
+  <aside class="insp" data-insp></aside>
 </div>

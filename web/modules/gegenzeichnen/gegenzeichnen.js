@@ -1,89 +1,121 @@
-// Modul Gegenzeichnen (Mac): Team schließt ab, MPGler zeichnet gegen. Abweichungen stehen oben.
+// Modul Überprüfungen (Mac): Tabelle und Inspektor wie bei den Mängeln. Team schließt ab, MPGler zeichnet gegen.
 BK.modul('gegenzeichnen', {
   async start(root) {
     const { el, icon, api, leeren, mac } = BK;
-    const liste = root.querySelector('[data-liste]');
-    const akte = root.querySelector('[data-akte]');
+    const tbody = root.querySelector('[data-liste]');
+    const insp = root.querySelector('[data-insp]');
+    const ktw = root.querySelector('[data-ktw]');
     root.querySelector('[data-csv]').append(icon('export'), 'Tabelle');
     root.querySelector('[data-pdf]').append(icon('export'), 'PDF');
     const vorlagen = {};  // vorlage_id → Bereiche
     let listen = [];  // Vorlagen mit „Liste Feuerwehr“
     api.vorlagen().then(v => { listen = v; }).catch(() => {});
-    let alle = [], gewaehlt = null, ganz = false;
+    let alle = [], gewaehlt = null, status = 'wartet';
     const quartal = BK.fristen.zeitraumText;
+    const STAND = c => c.gegengezeichnet_am ? 'fertig' : c.abgeschlossen_am ? 'wartet' : 'team';
+    const PILL = { wartet: ['Wartet auf dich', 'in_bearbeitung'], team: ['Beim Team', 'warte'], fertig: ['Gegengezeichnet', 'erledigt'] };
 
     async function vorlage(id) {
       if (!vorlagen[id]) vorlagen[id] = await api.vorlage(id, { alle: true });
       return vorlagen[id];
     }
 
+    root.querySelectorAll('[data-status] button').forEach(b => b.onclick = () => {
+      status = b.dataset.v;
+      root.querySelectorAll('[data-status] button').forEach(x => x.classList.toggle('on', x === b));
+      gewaehlt = null; zeichnen();
+    });
+    ktw.onchange = () => { gewaehlt = null; zeichnen(); };
+    mac.tastatur(tbody, id => waehlen(id));
+    const gefiltert = () => alle.filter(c => (status === 'alle' || STAND(c) === status) && (!ktw.value || c.fahrzeug_id === ktw.value));
+
     async function laden() {
       try { alle = await api.checklisten(); }
-      catch (e) { leeren(liste).append(el('div.mleer', 'Liste lässt sich nicht laden: ' + e.message)); return; }
-      const n = alle.filter(c => c.abgeschlossen_am && !c.gegengezeichnet_am).length;
+      catch (e) { leeren(tbody).append(el('tr', el('td', { colspan: 6 }, 'Liste lässt sich nicht laden: ' + e.message))); return; }
+      const n = alle.filter(c => STAND(c) === 'wartet').length;
       root.querySelector('[data-sub]').textContent = n === 0 ? 'Nichts wartet auf dich' : n === 1 ? '1 wartet auf dich' : `${n} warten auf dich`;
+      if (ktw.options.length === 1) {
+        const fz = new Map(alle.map(c => [c.fahrzeug_id, c.fahrzeug.name]));
+        ktw.append(...[...fz].sort((a, b) => a[1].localeCompare(b[1])).map(([id, name]) => el('option', { value: id }, name)));
+      }
       zeichnen();
     }
 
     function zeichnen() {
-      const gruppen = [
-        ['Wartet auf Gegenzeichnung', alle.filter(c => c.abgeschlossen_am && !c.gegengezeichnet_am), 'orange'],
-        ['Beim Team', alle.filter(c => !c.abgeschlossen_am), 'blau'],
-        ['Gegengezeichnet', alle.filter(c => c.gegengezeichnet_am).slice(0, 30), 'gruen'],
-      ];
-      if (!alle.some(c => c.id === gewaehlt)) gewaehlt = (gruppen.find(g => g[1].length) || [null, []])[1][0]?.id || null;
-      leeren(liste);
-      for (const [titel, l, farbe] of gruppen) {
-        if (!l.length) continue;
-        liste.append(el('div.vgrp', titel));
-        for (const c of l) liste.append(el('button', { type: 'button', class: 'vr' + (c.id === gewaehlt ? ' on' : ''), onclick: () => { gewaehlt = c.id; zeichnen(); } },
-          el('i', { class: farbe }),
-          el('div', el('b', `${c.fahrzeug.name} · ${quartal(c.zeitraum)}`),
-            el('span', c.abgeschlossen_am
-              ? `${mac.kurz(c.abgeschlossen_am)} · ${c.eintraege.length ? c.eintraege.length + ' Abweichungen' : 'keine Abweichung'}`
-              : 'begonnen ' + mac.kurz(c.begonnen_am) + (c.zurueck_grund ? ' · zurückgegeben' : '')))));
+      const l = gefiltert();
+      if (!l.some(c => c.id === gewaehlt)) gewaehlt = l[0] ? l[0].id : null;
+      leeren(tbody);
+      if (!l.length) tbody.append(el('tr', el('td.mleer', { colspan: 6 }, status === 'wartet' ? 'Nichts wartet auf dich.' : 'Nichts in dieser Liste.')));
+      for (const c of l) {
+        const [text, art] = PILL[STAND(c)];
+        // Abweichungen erst nach dem Abschließen zeigen
+        tbody.append(el('tr', { dataset: { id: c.id }, class: c.id === gewaehlt ? 'sel' : null, onclick: () => waehlen(c.id) },
+          el('td', el('span', { class: 'pill mp ' + art }, text)), el('td', c.fahrzeug.name), el('td', quartal(c.zeitraum)),
+          el('td', c.abgeschlossen_am ? (c.eintraege.length ? String(c.eintraege.length) : 'keine') : '–'),
+          el('td', c.abgeschlossen_am ? mac.kurz(c.abgeschlossen_am) : 'begonnen ' + mac.kurz(c.begonnen_am)),
+          el('td', [c.mitarbeiter1, c.mitarbeiter2].filter(Boolean).join(', ') || '–')));
       }
-      if (!alle.length) liste.append(el('div.mleer', 'Noch keine Checkliste.'));
-      datei();
+      inspektor();
     }
 
-    let ganzVorher = null;
-    async function datei() {
-      akte.classList.add('hat-druck');
+    function waehlen(id) {
+      if (id === gewaehlt) return;
+      gewaehlt = id;
+      tbody.querySelectorAll('tr[data-id]').forEach(tr => tr.classList.toggle('sel', tr.dataset.id === id));
+      inspektor();
+    }
+
+    function schliessen() {
+      gewaehlt = null;
+      tbody.querySelectorAll('tr.sel').forEach(tr => tr.classList.remove('sel'));
+      inspektor();
+    }
+    mac.escZu(root, insp, schliessen);
+
+    // Ganze Liste wie die Papierliste als großes Blatt
+    function ganzeListe(c, bereiche) {
+      const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, icon('x'));
+      const overlay = el('div.blatt-overlay', el('div.blatt.gz-blatt', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Ganze Liste' }, zu,
+        el('h2', `${c.fahrzeug.name} · ${quartal(c.zeitraum)}`), BK.papierliste(bereiche, c.eintraege)));
+      const weg = () => { document.removeEventListener('keydown', esc); overlay.classList.add('weg'); setTimeout(() => overlay.remove(), 150); };
+      const esc = e => { if (e.key === 'Escape') { e.stopPropagation(); weg(); } };
+      zu.onclick = weg;
+      overlay.addEventListener('mousedown', e => { if (e.target === overlay) weg(); });
+      document.addEventListener('keydown', esc, true);
+      document.body.append(overlay);
+      zu.focus();
+    }
+
+    async function inspektor() {
       const c = alle.find(x => x.id === gewaehlt);
-      if (!c) return leeren(akte).append(el('div.mleer', 'Checkliste links auswählen.'));
+      insp.classList.toggle('zu', !c);
+      insp.classList.add('hat-druck');
+      if (!c) return leeren(insp);
       let bereiche = [];
       try { bereiche = await vorlage(c.vorlage_id); } catch { /* Abweichungen ohne Namen */ }
       if (c.id !== gewaehlt) return;
-      leeren(akte);  // erst nach dem Laden, damit beim Reiterwechsel nichts aufblitzt
+      leeren(insp).append(mac.zuKnopf(schliessen),
+        el('h2', `${c.fahrzeug.name} · ${quartal(c.zeitraum)}`),
+        el('div.m', 'Überprüfung Vollzähligkeit · § 20 Abs. 2 HmbRDG'));
       // Beim Team: Ergebnis erst nach dem Abschicken, vorher nur „angefangen“
-      if (!c.abgeschlossen_am) return akte.append(
-        el('div.hd', el('h2', `${c.fahrzeug.name} · Überprüfung Vollzähligkeit`)),
-        el('div.sub2', `${quartal(c.zeitraum)} · § 20 Abs. 2 HmbRDG`),
-        c.zurueck_grund ? el('div.sub2.red', 'Zurück ans Team: ' + c.zurueck_grund) : '',
+      if (!c.abgeschlossen_am) return insp.append(
+        c.zurueck_grund ? el('div.m.red', 'Zurück ans Team: ' + c.zurueck_grund) : '',
         el('div.gz-team', icon('clock'), el('div', el('b', 'Beim Team'),
           el('span', `Begonnen ${BK.datum(c.begonnen_am)}. Das Ergebnis siehst du, sobald das Team abschließt.`))),
         el('div.acts', mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); })));
       const pos = new Map(bereiche.flatMap(b => b.positionen.map(p => [p.id, { ...p, bereich: b }])));
       const gesamt = pos.size;
       const befund = (p, e) => [e.ist != null ? `Ist ${e.ist} / Soll ${p ? p.soll : '?'}` : null, e.verfall ? 'Verfall ' + BK.datum(e.verfall, false) : null].filter(Boolean).join(' · ') || 'Hinweis';
-      const dauer = c.abgeschlossen_am ? `${BK.datum(c.begonnen_am)} bis ${new Date(c.abgeschlossen_am).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}` : 'seit ' + BK.datum(c.begonnen_am);
-      const warten = c.abgeschlossen_am && !c.gegengezeichnet_am;
+      const warten = !c.gegengezeichnet_am;
 
-      akte.append(
-        el('div.hd', el('h2', `${c.fahrzeug.name} · Überprüfung Vollzähligkeit`)),
-        el('div.sub2', `${quartal(c.zeitraum)} · Vorlage KTW Standard · § 20 Abs. 2 HmbRDG`),
-        el('div.sig',
-          el('div', el('span', 'Geprüft'), el('b', dauer)),
-          el('div', el('span', 'Mitarbeiter 1'), el('b', c.mitarbeiter1 || '–')),
-          el('div', el('span', 'Mitarbeiter 2'), el('b', c.mitarbeiter2 || '–'))),
-        c.gegengezeichnet_am ? el('div.sub2', 'Gegengezeichnet am ' + BK.datum(c.gegengezeichnet_am)) : '',
-        c.zurueck_grund && !c.abgeschlossen_am ? el('div.sub2.red', 'Zurück ans Team: ' + c.zurueck_grund) : '',
-        el('div.tabs', { role: 'tablist', 'aria-label': 'Ansicht' }, [['kurz', 'Übersicht'], ['ganz', `Ganze Liste (${gesamt || '?'})`]].map(([k, t]) =>
-          el('button', { type: 'button', role: 'tab', class: (k === 'ganz') === ganz ? 'on' : null, 'aria-selected': String((k === 'ganz') === ganz), onclick: () => { ganz = k === 'ganz'; datei(); } }, t))),
-        el('div.gz-kurz' + (ganz ? '.gz-aus' : ''), uebersicht(c, pos, gesamt, befund)),
-        // Ganze Liste wie die Papierliste: am Bildschirm über den Reiter, im Druck immer
-        el('div.gz-voll' + (ganz ? '.zeigen' : ''), BK.papierliste(bereiche, c.eintraege)),
+      insp.append(
+        el('div.kv',
+          el('span.l', 'Geprüft'), el('div', `${BK.datum(c.begonnen_am)} bis ${new Date(c.abgeschlossen_am).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`),
+          el('span.l', 'Mitarbeiter 1'), el('div', c.mitarbeiter1 || '–'),
+          el('span.l', 'Mitarbeiter 2'), el('div', c.mitarbeiter2 || '–'),
+          el('span.l', 'Gegengezeichnet'), el('div', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am) : '–')),
+        ...uebersicht(c, pos, gesamt, befund),
+        el('button.pbtn.gz-ganz', { type: 'button', onclick: () => ganzeListe(c, bereiche) }, icon('list'), `Ganze Liste ansehen (${gesamt || '?'})`),
         BK.druckblatt({ bereich: 'MPG', titel: 'Liste Überprüfung KTW, medizinisches Material', dok: 'MPG.doc', version: '14.04.2025' },
           el('p', 'Überprüfung der Fahrzeuge Blauer Kreis GmbH angelehnt an die Liste der Feuerwehr Hamburg auf Vollzähligkeit Med. Produkte und zusätzlichen Material. Grundlage der Liste ist § 20 Abs. 2 HmbRDG Überprüfung von Krankenkraftwagen.'),
           el('div.dr-felder',
@@ -101,7 +133,9 @@ BK.modul('gegenzeichnen', {
           el('div.dr-legende', el('span', 'Legende:'), el('span'),
             ...[['blau', 'Sauerstoff'], ['orange', 'Hygiene'], ['rot', 'Wundversorgung'], ['gruen', 'Diagnostik'], ['gelb', 'Immobilisation']]
               .flatMap(([f, t]) => [el('i', { class: f }), el('span', t)]))),
-        el('div.acts', mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); }),
+        el('div.acts',
+          el('button.pbtn', { type: 'button', title: 'Drucken oder als PDF speichern (⌘P / Strg+P)', onclick: () => window.print() }, 'Drucken'),
+          mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); }),
         ...(warten ? [
           el('button.pbtn', { type: 'button', onclick: async () => {
             const grund = await promptDialog('Zurück ans Team?', 'Das Team sieht den Grund auf dem Tablet und kann die Checkliste ändern.', { placeholder: 'z. B. Bereich Sauerstoff bitte nochmal prüfen', confirmLabel: 'Zurückgeben' });
@@ -112,11 +146,6 @@ BK.modul('gegenzeichnen', {
             if (!await confirmDialog('Gegenzeichnen?', `${c.fahrzeug.name}, ${quartal(c.zeitraum)}. Dein Name und die Uhrzeit werden gespeichert.`)) return;
             try { await api.checklisteGegenzeichnen(c.id); showToast(`${c.fahrzeug.name} gegengezeichnet`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
           } }, 'Gegenzeichnen')] : [])));
-      // Reiter Übersicht / Ganze Liste: Inhalt kommt aus der Richtung des Reiters
-      const vorher = ganzVorher;
-      ganzVorher = gewaehlt + ganz;
-      if (vorher && vorher.startsWith(gewaehlt) && vorher !== ganzVorher)
-        BK.einblenden(akte.querySelector(ganz ? '.gz-voll' : '.gz-kurz'), ganz ? 'von-rechts' : 'von-links');
     }
 
     // Kurz: Zahlen oben, darunter nur, was nicht stimmt, nach Bereich

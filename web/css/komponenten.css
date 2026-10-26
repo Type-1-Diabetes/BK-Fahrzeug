@@ -186,7 +186,7 @@ table.tab tbody tr { cursor: default; }
 table.tab td.num, table.tab th.num { text-align: right; }
 table.tab tbody tr.sel .pill { background: rgba(255,255,255,.22); color: #fff; }
 .mseg { display: inline-flex; background: var(--fill); border-radius: 7px; padding: 2px; }
-.mseg button { min-height: 22px; padding: 0 10px; border-radius: 5px; font-size: 12px; }
+.mseg button { min-height: 22px; padding: 0 10px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
 .mseg button.on::before { box-shadow: 0 .5px 2px rgba(0,0,0,.2); }
 .search { width: 200px; height: 28px; padding: 0 8px; border-radius: 7px; border: 0; background: var(--fill); font: inherit; color: var(--label); }
 .search::placeholder { color: var(--label2); }

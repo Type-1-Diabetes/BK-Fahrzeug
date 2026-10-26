@@ -358,3 +358,10 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - MPGler, Gegenzeichnen: Listen „Beim Team“ zeigen nur „Begonnen am …“, keine Zahlen, keine Reiter, kein Export/Druck. Vorher stand dort „Alles vollständig“, weil nicht abgehakte Positionen als vollständig zählten. Fahrzeug-Akte › Checklisten: Abweichungen „–“, solange offen.
 - Offen (Sicherheit): Die Einträge offener Listen sind per RLS für den MPGler weiter lesbar, nur die Oberfläche zeigt sie nicht. Für die Live-Version in der DB sperren.
 - Geprüft in Chromium mit Testdaten: Abbrechen → Startseite, Gegenzeichnen „Beim Team“ ohne Ergebnis, keine Fehler. RPC selbst nicht getestet (Migration fehlt).
+
+## Ein Layout für Material und Überprüfungen (2026-10-26, bk-v59)
+- Seitenleiste: „Gegenzeichnen“ heißt jetzt „Überprüfungen“ (Seite „Fahrzeug Überprüfungen“). Der Knopf „Gegenzeichnen“ bleibt.
+- Materialanforderungen: Tabelle + Inspektor wie Mängel (Status, KTW-Filter, Suche, ↑/↓, Esc). Im Inspektor Artikel mit Größe/Grund, Angef., Erhalten; Druck wie bisher im Papierlayout.
+- Überprüfungen: Tabelle (Status, KTW, Zeitraum, Abweichungen, Abgeschlossen, Team) mit Filter „Wartet auf dich / Beim Team / Gegengezeichnet / Alle“ und KTW. Inspektor: Angaben, Zahlen, Abweichungen, „Ganze Liste ansehen“ (großes Blatt), Drucken, Löschen, Zurück ans Team, Gegenzeichnen. Reiter Übersicht/Ganze Liste entfallen.
+- `.mseg`-Knöpfe brechen nicht mehr um.
+- Geprüft in Chromium mit Testdaten (1280×800): Auswahl, Filter, Suche, Blatt mit Esc schließen, „Beim Team“ ohne Ergebnis, keine Fehler. Nicht mit echtem Login.
