@@ -184,7 +184,7 @@
   async function tabletMenue() {
     const fz = ctx.fahrzeug;
     if (!await confirmDialog(`Tablet ${fz.name} abmelden?`, 'Das Tablet wird vom KTW getrennt und zeigt wieder Anmelden und Koppeln. Danach braucht es einen neuen Code. Dafür ist die PIN nötig.')) return;
-    const pin = await promptDialog('PIN eingeben', 'Die PIN hat der Admin.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Abmelden' });
+    const pin = await promptDialog('PIN eingeben', 'Die PIN hat der MPGler.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Abmelden' });
     if (pin == null) return;
     try {
       const fehler = await api.tabletEntkoppeln(pin.trim());
@@ -204,7 +204,7 @@
         el('div', { id: 'pwaGuide', hidden: teilt }, el('ol.install-schritte', { id: 'pwaGuideList' })),
         el('p.login-hinweis', teilt
           ? 'Die App bleibt mit diesem KTW gekoppelt.'
-          : 'Danach die App über das neue Symbol öffnen. Dort einmal einen neuen Code vom Admin eingeben (Tablets › Code). Dieses Browser-Fenster kannst du dann schließen.'))));
+          : 'Danach die App über das neue Symbol öffnen. Dort einmal einen neuen Code vom MPGler eingeben (Tablets › Code). Dieses Browser-Fenster kannst du dann schließen.'))));
     const schliessen = () => { overlay.remove(); document.removeEventListener('keydown', esc); };
     const esc = e => { if (e.key === 'Escape') schliessen(); };
     zu.onclick = schliessen;
@@ -288,7 +288,7 @@
     const kuerzel = (ctx.ich.name || '?').split(/[\s.]+/).filter(Boolean).map(t => t[0]).join('').slice(0, 2).toUpperCase();
     nav.append(el('div.who',
       el('span.av', { 'aria-hidden': 'true' }, kuerzel),
-      el('div', el('b', ctx.ich.name), el('span', ctx.ich.rolle === 'admin' ? 'Admin' : 'MPGler')),
+      el('div', el('b', ctx.ich.name), el('span', 'MPGler')),
       el('button.tb', { type: 'button', 'aria-label': 'Abmelden', title: 'Abmelden', onclick: abmelden }, icon('logout'))));
     app.className = 'huelle-mac';
     nav.addEventListener('click', e => { if (e.target.closest('.si')) app.classList.remove('seite-offen'); });
@@ -385,20 +385,18 @@
     inhalt.fokus.focus();
   }
 
-  // Anmeldung mit E-Mail und Passwort (Konten legt der Admin an)
+  // Demo: Anmelden per Knopf als MPGler (Migration 024), ohne Konto
   function anmeldeFormular(fehler) {
-    const mail = el('input.tf', { type: 'email', autocomplete: 'username', required: true, placeholder: 'E-Mail', 'aria-label': 'E-Mail' });
-    const pw = el('input.tf', { type: 'password', autocomplete: 'current-password', required: true, placeholder: 'Passwort', 'aria-label': 'Passwort' });
-    const knopf = el('button.btn', { type: 'submit' }, 'Anmelden');
+    const knopf = el('button.btn', { type: 'submit' }, 'Als MPGler anmelden');
     const form = el('form', { onsubmit: async e => {
       e.preventDefault();
       fehler.textContent = '';
       knopf.disabled = true;
-      try { await api.anmelden(mail.value.trim(), pw.value); await starten(); }
-      catch (err) { fehler.textContent = err.offline ? 'Keine Verbindung. Zum Anmelden braucht das Gerät Internet.' : 'E-Mail oder Passwort stimmt nicht.'; pw.value = ''; }
+      try { await api.demoAnmelden(); await starten(); }
+      catch (err) { fehler.textContent = err.offline ? 'Keine Verbindung. Zum Anmelden braucht das Gerät Internet.' : err.message; }
       knopf.disabled = false;
-    } }, mail, pw, knopf);
-    return { form, fokus: mail };
+    } }, el('p.login-text', 'Demo mit Testdaten. Du siehst und bearbeitest alles.'), knopf);
+    return { form, fokus: knopf };
   }
 
   // 8 Felder (Mockup: 6). Tippen springt weiter, Einfügen verteilt den ganzen Code.

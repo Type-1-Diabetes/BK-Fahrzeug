@@ -307,4 +307,10 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
   - `ui-design-taste.html`: Farbe nur auf Status, Symbole ohne bunte Kästen, Abschnitts-Titel in normaler Schreibweise, Tabellen ohne Zebrastreifen, Kennzahlen als Schrift; Teile einer Ansicht steigen gestaffelt auf.
 - Geprüft im Browser (Tablet quer/hochkant, MPGler): keine Konsolenfehler. Nicht auf echtem iPad getestet. Nur Vergleich, nichts davon ist in `web/` übernommen.
 - Übernommen in `web/` (aus `ui-mobile-native`, bk-v52): kein Tipp-Blitz, kein Pull-to-Refresh, Bedienelemente ohne Doppeltipp-Warten und ohne Markieren; alle Hover-Effekte nur mit Maus (`@media (hover: hover)`); Abstand zu Notch und Home-Balken (Kopfzeile, Inhalt, Netz-Streifen); Tablet hochkant: Reiternamen unter den Symbolen; Reiterwechsel kommt aus der Richtung des Reiters, Zeilen beim Öffnen gestaffelt; Statusleiste folgt Hell/Dunkel. 16-px-Felder auf Touch gab es schon. Getestet im Mockup (Tablet hochkant), nicht auf echtem iPad.
-- Migrationen umnummeriert: Sicherheit jetzt 022, Push-Hosts 023 (auf main lagen schon 020_rolle_demo und 021_code_6_stellen; 022 hebt beide wieder auf: kein Demo-Login, 8-stellige Codes). 022/023 müssen in Supabase noch ausgeführt werden, falls nicht schon unter altem Namen geschehen.
+- Migrationen umnummeriert: Sicherheit jetzt 022, Push-Hosts 023 (auf main lagen schon 020_rolle_demo und 021_code_6_stellen; 022 hebt beide wieder auf: kein Demo-Login, 8-stellige Codes). 022 und 023 am 26.10. im SQL-Editor ausgeführt (Push-Constraint gab es schon). `push-senden` neu deployt (Verify JWT aus, Prüfung per PUSH_GEHEIMNIS). Offen: Push einmal testen.
+
+## Demo: Anmelden per Knopf, nur MPGler (2026-10-26, bk-v53, Migration 024)
+- Anmeldeseite: statt E-Mail/Passwort ein Knopf „Als MPGler anmelden“ (anonyme Sitzung + `demo_anmelden()`).
+- Nur noch eine Rolle: MPGler sieht und darf alles (`intern.ist_admin()` gilt für jede Rolle, alle Mac-Module für `mpg`, vorhandene Admins → MPGler). Texte „Admin“ in der App durch „MPGler“ ersetzt.
+- Risiko bewusst in Kauf genommen: Jeder mit dem Link kann alle Testdaten ändern und löschen. Nur für die Demo; für die Live-Version zurückbauen.
+- 024 am 26.10. ausgeführt. Offen: Ein DB-Text in `pin_pruefen` nennt noch „den Admin“.

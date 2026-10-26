@@ -20,7 +20,7 @@ BK.modul('fahrzeuge', {
         ampelVorher = Object.fromEntries(fahrzeuge.map(f => [f.id, f.ampel]));
         fahrzeuge.sort((a, b) => a.wache.name.localeCompare(b.wache.name, 'de') || a.name.localeCompare(b.name, 'de', { numeric: true }));
       } catch (e) { leeren(liste).append(el('div.mleer', 'Liste lässt sich nicht laden: ' + e.message)); return; }
-      if (ctx.ich.rolle === 'admin') tablets = await api.tablets().catch(() => []);
+      tablets = await api.tablets().catch(() => []);
       const wachen = [...new Map(fahrzeuge.map(f => [f.wache.id, f.wache.name])).entries()];
       const seg = root.querySelector('[data-wachen]');
       leeren(seg).append(...[['', 'Alle Wachen'], ...wachen].map(([id, name]) =>
@@ -127,7 +127,7 @@ BK.modul('fahrzeuge', {
           geraete.map(g => el('tr', el('td', g.name), el('td', g.seriennummer || '–'), el('td', g.hersteller || '–'), el('td', (g.pruefart || '–').toUpperCase()),
             el('td', { class: g.pruefung_bis && new Date(g.pruefung_bis) < jetzt ? 'red' : null }, g.pruefung_bis ? BK.datum(g.pruefung_bis, false) : '–'))),
           'Keine Geräte eingetragen.'),
-          el('div.foot', { style: 'padding:8px 0 0' }, 'Geräte pflegt später der Admin auf dem eigenen Webserver.'));
+          el('div.foot', { style: 'padding:8px 0 0' }, 'Geräte pflegt später der MPGler auf dem eigenen Webserver.'));
       } else {
         try {
           const v = await api.verlauf({ fahrzeugId: f.id, limit: 100 });

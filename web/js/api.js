@@ -115,6 +115,11 @@
     async anmelden(email, passwort) {
       setzeSitzung(await roh('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email, password: passwort }) }));
     },
+    // Demo (Migration 024): anonyme Sitzung wird MPGler
+    async demoAnmelden() {
+      if (!sitzung) setzeSitzung(await roh('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ data: {} }) }));
+      await rpc('demo_anmelden');
+    },
     async abmelden() {
       try { await mitLogin('/auth/v1/logout', { method: 'POST' }); } catch { /* egal */ }
       setzeSitzung(null);

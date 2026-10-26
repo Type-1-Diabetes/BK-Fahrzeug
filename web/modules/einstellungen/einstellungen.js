@@ -90,7 +90,7 @@ BK.modul('einstellungen', {
 
     leeren(root.querySelector('[data-konto]')).append(
       el('span.l', 'Name'), el('div', ctx.ich.name || '–'),
-      el('span.l', 'Rolle'), el('div', ctx.ich.rolle === 'admin' ? 'Admin' : 'MPGler'),
+      el('span.l', 'Rolle'), el('div', 'MPGler'),
       el('span.l', 'App'), el('div', 'Version ' + (BK_CONFIG.version || '–')));
     laden();
   },
