@@ -1,6 +1,6 @@
 # Fortschritt Demo
 
-Stand: 24.10.2026 (bk-v48). Oben die Übersicht, unten das Tagebuch der Änderungen. Abgleich jeweils mit `mockup/ui-mockup.html` und `PLANUNG.md` (Abschnitt 2a, 10a).
+Stand: 24.10.2026 (bk-v48). Oben die Übersicht, unten das Tagebuch der Änderungen. Abgleich jeweils mit `PLANUNG.md` (Abschnitt 2a, 10a).
 
 ## Fertig
 
@@ -314,3 +314,20 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Nur noch eine Rolle: MPGler sieht und darf alles (`intern.ist_admin()` gilt für jede Rolle, alle Mac-Module für `mpg`, vorhandene Admins → MPGler). Texte „Admin“ in der App durch „MPGler“ ersetzt.
 - Risiko bewusst in Kauf genommen: Jeder mit dem Link kann alle Testdaten ändern und löschen. Nur für die Demo; für die Live-Version zurückbauen.
 - 024 am 26.10. ausgeführt. Offen: Ein DB-Text in `pin_pruefen` nennt noch „den Admin“.
+
+## Nach dem Installieren direkt weiter (2026-10-26, bk-v54)
+- Chrome/Edge schieben den Tab nach der Installation ins App-Fenster, ohne neu zu laden. Bisher blieb dort „Erst die App installieren“ stehen. Jetzt wechselt die Seite beim Umschalten auf `display-mode: standalone` selbst zur Anmeldung (`installPflicht()` in `app.js`).
+- Safari betrifft das nicht: Die Web-App lädt beim Start neu.
+- Text nach `appinstalled`: „Installiert. Öffnet sich die App nicht von selbst, starte sie über das neue Symbol.“
+- Nicht mit echter Installation getestet (nur Syntax).
+
+## Mockups entfernt (2026-10-26)
+- Ordner `mockup/` komplett gelöscht (`ui-mockup.html`, `ui-1zu1.html`, die drei Skill-Varianten, `quelle/`). Vorlage ist jetzt die App selbst. Vorschau „mockup“ aus `.claude/launch.json` entfernt. Ältere Einträge hier nennen das Mockup noch.
+
+## Animationen (2026-10-26, bk-v54, Skill ui-animation)
+- Umschalter (`.segc`, `.mseg`): Markierung gleitet zum neuen Knopf (220 ms, `dom.js`, Markierung jetzt als `::before`). Nur bei Klick/Tippen, nicht per Tastatur.
+- Inspektor (Mängel, Vorlage): kommt von rechts (250 ms), geht schneller (150 ms), per `@starting-style`.
+- Blatt (Formular am Mac, „App installieren“ am Tablet): blendet beim Schließen aus (150 ms) statt hart zu verschwinden.
+- Checkliste: Fortschrittsbalken wächst vom letzten Stand aus, mit `scaleX` statt `width` (vorher lief keine Animation, weil der Balken neu gezeichnet wird).
+- Hell/Dunkel: beim Wechsel keine Farbübergänge (`BK.themeSetzen` in `dom.js`, genutzt von Theme-Knopf und Einstellungen).
+- „Weniger Bewegung“ schaltet alles ab. Getestet in Chromium (Umschalter auf der Anmeldeseite, Inspektor und Blatt mit Test-Elementen, Theme-Wechsel), keine Konsolenfehler. Nicht mit Login und nicht auf echtem iPad/Safari getestet.

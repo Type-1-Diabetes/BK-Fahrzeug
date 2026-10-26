@@ -3,6 +3,33 @@
   window.BK = window.BK || {};
   // Hell ist Standard. Dunkel nur auf Wunsch (Einstellungen, Login, Tablet), gilt pro Gerät.
   try { if (localStorage.getItem('bk_theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch { /* privat */ }
+  // Hell/Dunkel umschalten, ohne dass jede Farbe einzeln überblendet
+  window.BK.themeSetzen = dunkel => {
+    const h = document.documentElement;
+    h.dataset.themeWechsel = '';
+    if (dunkel) h.dataset.theme = 'dark'; else delete h.dataset.theme;
+    try { dunkel ? localStorage.setItem('bk_theme', 'dark') : localStorage.removeItem('bk_theme'); } catch { /* privat */ }
+    requestAnimationFrame(() => requestAnimationFrame(() => delete h.dataset.themeWechsel));
+  };
+  // Umschalter (.segc, .mseg): Markierung gleitet vom alten zum neuen Knopf. Nur bei Klick/Tippen, nicht per Tastatur.
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.segc button, .mseg button');
+    const alt = b && !b.classList.contains('on') && e.detail && b.parentElement.querySelector(':scope > .on');
+    if (!alt || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const von = alt.getBoundingClientRect(), name = b.parentElement.getAttribute('aria-label');
+    requestAnimationFrame(() => {  // nach dem Neuzeichnen: gleichnamige Gruppe, die am nächsten am alten Platz liegt
+      const abstand = g => Math.abs(g.getBoundingClientRect().top - von.top);
+      const gruppe = [...document.querySelectorAll('.segc, .mseg')].filter(g => g.getAttribute('aria-label') === name)
+        .sort((a, c) => abstand(a) - abstand(c))[0];
+      const neu = gruppe && gruppe.querySelector(':scope > .on');
+      if (!neu) return;
+      const nach = neu.getBoundingClientRect();
+      try {
+        neu.animate({ transform: [`translateX(${von.left - nach.left}px) scaleX(${von.width / nach.width})`, 'none'] },
+          { duration: 220, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', pseudoElement: '::before' });
+      } catch { /* alter Browser: springt wie bisher */ }
+    });
+  }, true);
   // Unbekannte Verlaufsaktion lesbar machen: tablet_angelegt → Tablet angelegt
   window.BK.aktionText = a => { const t = String(a || '').replace(/_/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
   // el('div.row', {onclick}, 'Text', kindElement)

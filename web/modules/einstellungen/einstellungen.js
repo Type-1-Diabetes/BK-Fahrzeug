@@ -81,9 +81,7 @@ BK.modul('einstellungen', {
       b.classList.toggle('on', an); b.setAttribute('aria-checked', String(an));
     });
     themeKnoepfe.forEach(b => b.onclick = () => {
-      if (b.dataset.v === 'dark') document.documentElement.dataset.theme = 'dark';
-      else delete document.documentElement.dataset.theme;
-      try { b.dataset.v === 'dark' ? localStorage.setItem('bk_theme', 'dark') : localStorage.removeItem('bk_theme'); } catch { /* privat */ }
+      BK.themeSetzen(b.dataset.v === 'dark');
       themeZeigen();
     });
     themeZeigen();

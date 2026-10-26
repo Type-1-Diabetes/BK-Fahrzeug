@@ -68,6 +68,15 @@ BK.modul('checkliste', {
       const c = main.querySelector('.content'); if (c) c.scrollTop = pos[1];
     }
 
+    // Fortschritt: Balken wächst vom letzten Stand aus (scaleX statt width, ruckelt nicht)
+    let balkenVorher = null;
+    function balken(q) {
+      const i = el('i', { style: `transform:scaleX(${q})` });
+      if (balkenVorher != null && balkenVorher !== q && !matchMedia('(prefers-reduced-motion: reduce)').matches)
+        i.animate({ transform: [`scaleX(${balkenVorher})`, `scaleX(${q})`] }, { duration: 300, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' });
+      balkenVorher = q;
+      return i;
+    }
     function zeichnen() {
       // Linke Spalte
       const n = bereiche.reduce((s, b) => s + b.positionen.filter(istGeprueft).length, 0);
@@ -76,7 +85,7 @@ BK.modul('checkliste', {
         el('div.foot.ckl-zeitraum', zeitraumText(offen.zeitraum)),
         offen.zurueck_grund ? el('p.red.ckl-zurueck', 'Zurück vom MPGler: ' + offen.zurueck_grund) : '',
         el('div.ckl-stand', el('span', `${n} von ${gesamt} geprüft`), el('span', 'seit ' + new Date(offen.begonnen_am).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }))),
-        el('div.progress', el('i', { style: `width:${Math.round(n / gesamt * 100)}%` })),
+        el('div.progress', balken(n / gesamt)),
         ...bereiche.flatMap((b, i) => {
           const abw = abweichungen(b);
           // Unterüberschrift wie auf dem Papier (Patientenraum, Notfallrucksack …), sobald die Gruppe wechselt

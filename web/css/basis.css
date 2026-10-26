@@ -38,6 +38,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 h1, h2, h3 { margin: 0; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* Beim Wechsel Hell/Dunkel keine Übergänge (BK.themeSetzen) */
+[data-theme-wechsel] *, [data-theme-wechsel] *::before { transition: none !important; }
 
 .logo-platzhalter {
   display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;

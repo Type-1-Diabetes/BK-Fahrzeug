@@ -54,6 +54,12 @@
   }
 
   // Mac: Tablet-Formular (Mängelmeldung, Materialanforderung) als Blatt für ein bestimmtes Fahrzeug
+  // Blatt kurz ausblenden, dann entfernen
+  const blattWeg = overlay => {
+    overlay.classList.add('weg');
+    setTimeout(() => overlay.remove(), 150);
+  };
+
   BK.blatt = async (name, fahrzeug, fertig) => {
     const inhalt = el('div.blatt-inhalt');
     const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, icon('x'));
@@ -63,7 +69,7 @@
     const schliessen = async gesendet => {
       if (!gesendet && BK.vorVerlassen && !(await BK.vorVerlassen())) return;
       BK.vorVerlassen = vorher;
-      overlay.remove(); document.removeEventListener('keydown', esc);
+      blattWeg(overlay); document.removeEventListener('keydown', esc);
       if (module[name].stop) try { module[name].stop(); } catch { /* egal */ }
       if (gesendet && fertig) fertig();
     };
@@ -170,9 +176,7 @@
       b.title = dunkel ? 'Helle Darstellung' : 'Dunkle Darstellung';
     };
     b.onclick = () => {
-      const dunkel = document.documentElement.dataset.theme !== 'dark';
-      if (dunkel) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme;
-      try { dunkel ? localStorage.setItem('bk_theme', 'dark') : localStorage.removeItem('bk_theme'); } catch { /* privat */ }
+      BK.themeSetzen(document.documentElement.dataset.theme !== 'dark');
       statusleiste();
       zeigen();
     };
@@ -205,7 +209,7 @@
         el('p.login-hinweis', teilt
           ? 'Die App bleibt mit diesem KTW gekoppelt.'
           : 'Danach die App über das neue Symbol öffnen. Dort einmal einen neuen Code vom MPGler eingeben (Tablets › Code). Dieses Browser-Fenster kannst du dann schließen.'))));
-    const schliessen = () => { overlay.remove(); document.removeEventListener('keydown', esc); };
+    const schliessen = () => { blattWeg(overlay); document.removeEventListener('keydown', esc); };
     const esc = e => { if (e.key === 'Escape') schliessen(); };
     zu.onclick = schliessen;
     overlay.addEventListener('mousedown', e => { if (e.target === overlay) schliessen(); });
@@ -459,6 +463,13 @@
         el('div', { id: 'pwaGuide', hidden: 'BeforeInstallPromptEvent' in window }, el('ol.install-schritte', { id: 'pwaGuideList' })))));
     window.pwaRenderSettings();
     if (!('BeforeInstallPromptEvent' in window)) knopf.hidden = true;
+    // Chrome/Edge schieben den Tab nach der Installation ins App-Fenster, ohne neu zu laden
+    const appModus = matchMedia('(display-mode: standalone)');
+    appModus.addEventListener('change', function weiter() {
+      if (!appModus.matches) return;
+      appModus.removeEventListener('change', weiter);
+      startSeite();
+    });
   }
 
   const koppelSeite = hinweis => startSeite(hinweis, 'koppeln');

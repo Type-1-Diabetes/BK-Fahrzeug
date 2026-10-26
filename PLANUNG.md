@@ -219,7 +219,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - Das iPad wird mit dem Finger bedient: große Schaltflächen, im Querformat und Hochformat nutzbar.
 - Die App soll sich wie eine echte Apple-App anfühlen: schnell, ruhig, vertraute Bedienung.
 - **Hell ist fester Standard**, auch wenn Mac oder iPad dunkel eingestellt sind. Dunkel gibt es nur auf Wunsch per Knopf (Anmeldeseite, Tablet-Kopfzeile, Mac › Einstellungen › Konto › Darstellung). Gilt nur auf diesem Gerät.
-- Verbindliche Vorlage für die Oberfläche ist `mockup/ui-mockup.html`. Was davon abweicht, steht in `FORTSCHRITT.md`.
+- Vorlage für die Oberfläche ist die App selbst (`web/`). Das Mockup wurde am 26.10.2026 entfernt.
 - **Schrift:** Wir nutzen die Systemschrift. Sie ist immer da und sieht offline gleich aus. Soll später doch die Website-Schrift Source Sans rein, legen wir die Schriftdateien in `web/` ab und speichern sie per Service Worker auf dem Gerät. Dann funktioniert auch das ohne Netz. Nicht über Google Fonts laden.
 - Skills für die Umsetzung:
   - `/impeccable:impeccable` für UI, UX, Design und Layout

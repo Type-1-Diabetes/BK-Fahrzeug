@@ -6,7 +6,7 @@
 .ckl-side h2 { font-size: 20px; padding: 4px 0 2px; }
 .ckl-stand { display: flex; justify-content: space-between; font-size: 14px; color: var(--label2); margin-top: 10px; }
 .progress { height: 5px; border-radius: 3px; background: var(--fill); overflow: hidden; margin: 6px 0 12px; }
-.progress i { display: block; height: 100%; background: var(--navy2); transition: width .3s cubic-bezier(.2, .8, .2, 1); }
+.progress i { display: block; height: 100%; background: var(--navy2); transform-origin: left center; }
 .area { position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 12px 8px 20px; border-radius: 10px; font-size: 16px; width: 100%; text-align: left; }
 .area::before { content: ""; position: absolute; left: 7px; top: 12px; bottom: 12px; width: 4px; border-radius: 2px; background: var(--label3); }
 .area.blau::before { background: var(--b-blau); } .area.orange::before { background: var(--b-orange); } .area.rot::before { background: var(--b-rot); }

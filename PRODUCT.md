@@ -37,7 +37,7 @@ Baut die bekannten Papierformulare des Blauen Kreises 1:1 in Reihenfolge und Beg
 Orientierung an www.blauer-kreis.de: Navy (Kopf/Fuß), Rot (Wortmarke „Krankenbeförderung“), Logo-Blau, rundes BK-Logo. Schrift: Systemschrift (Source Sans der Website nur später, lokal eingebunden). iPad im Fahrzeug fast immer quer, MPGler-iPad auch hochkant. Standard ist der helle Modus.
 
 ## Evidence on Hand
-Papierformulare (beschrieben in `PLANUNG.md`). Rundes Firmenlogo und Banner in `web/icons/` (Logo, App-Icons, Favicon). UI-Vorlage `mockup/ui-mockup.html`.
+Papierformulare (beschrieben in `PLANUNG.md`). Rundes Firmenlogo und Banner in `web/icons/` (Logo, App-Icons, Favicon). UI-Vorlage ist die App selbst (`web/`).
 
 ## Product Principles
 - Wie auf Papier: gleiche Reihenfolge, gleiche Begriffe.

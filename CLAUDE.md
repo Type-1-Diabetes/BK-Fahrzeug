@@ -9,8 +9,8 @@ Repo: https://github.com/Type-1-Diabetes/BK-Fahrzeug (Branch `main`, dieser Ordn
 - Vorhandene Systeme und Scripts nutzen. Grundfunktionen und Designs nicht entfernen, außer ich sage es.
 - Keine Backups von Dateien oder Ordnern anlegen.
 - Nur im Repo-Ordner arbeiten (dieser Ordner = lokaler Klon). Keine anderen Projektordner öffnen oder ändern (auch nicht die Website Schrietz). Was von dort gebraucht wurde, ist schon übernommen (`PLANUNG.md` Abschnitt 11).
-- Stand der Arbeit steht in `FORTSCHRITT.md`: vor der Arbeit lesen, nach jeder Änderung nachtragen (fertig, getestet, offen, Abweichungen zum Mockup).
-- UI-Vorlage ist `mockup/ui-mockup.html`. Neue Ansichten damit abgleichen.
+- Stand der Arbeit steht in `FORTSCHRITT.md`: vor der Arbeit lesen, nach jeder Änderung nachtragen (fertig, getestet, offen).
+- UI-Vorlage ist die App selbst (`web/`), das Mockup ist entfernt. Neue Ansichten an die vorhandenen angleichen.
 
 ## Arbeitsweise
 Nach https://github.com/multica-ai/andrej-karpathy-skills (CLAUDE.md). Bei kleinen, eindeutigen Aufgaben mit Augenmaß anwenden.

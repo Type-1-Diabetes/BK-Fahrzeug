@@ -94,7 +94,7 @@
         if (iosHint) iosHint.hidden = !(platform === 'ios' && !drin);
 
         if (drin || _installed) {
-            status.textContent = drin ? 'Läuft gerade als App.' : 'Installiert. Öffne die App über das neue Icon.';
+            status.textContent = drin ? 'Läuft gerade als App.' : 'Installiert. Öffnet sich die App nicht von selbst, starte sie über das neue Symbol.';
             btn.hidden = true;
             const box = document.getElementById('pwaGuide');
             if (box) box.hidden = true;
