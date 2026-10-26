@@ -69,7 +69,7 @@ BK.modul('checkliste', {
     }
 
     // Fortschritt: Balken wächst vom letzten Stand aus (scaleX statt width, ruckelt nicht)
-    let balkenVorher = null;
+    let balkenVorher = null, bereichVorher = null;
     function balken(q) {
       const i = el('i', { style: `transform:scaleX(${q})` });
       if (balkenVorher != null && balkenVorher !== q && !matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -95,7 +95,11 @@ BK.modul('checkliste', {
         }),
         el('button', { type: 'button', class: 'area' + (aktiv === bereiche.length ? ' on' : ''), onclick: () => { aktiv = bereiche.length; seite(); } }, 'Abschließen', el('span', icon('chevR'))));
 
-      if (aktiv === bereiche.length) return abschluss();
+      // Neuer Bereich kommt von unten (weiter) oder oben (zurück), nicht beim Abhaken
+      const vorher = bereichVorher;
+      bereichVorher = aktiv;
+      const rein = () => vorher != null && vorher !== aktiv && BK.einblenden(main.firstElementChild, aktiv > vorher ? 'von-unten' : 'von-oben');
+      if (aktiv === bereiche.length) { abschluss(); return rein(); }
       const b = bereiche[aktiv];
       const fehlend = b.positionen.filter(p => eintraege[p.id] && eintraege[p.id].ist != null && eintraege[p.id].ist < p.soll);
       const alleDa = b.positionen.every(istGeprueft);
@@ -119,6 +123,7 @@ BK.modul('checkliste', {
           el('span.sp'),
           el('button.btn', { type: 'button', onclick: () => gehe(aktiv + 1) },
             aktiv + 1 < bereiche.length ? 'Weiter zu ' + bereiche[aktiv + 1].name : 'Weiter zum Abschluss', icon('chevR'))));
+      rein();
     }
 
     function gehe(i) { aktiv = i; offenePosition = null; seite(); main.querySelector('.content')?.scrollTo(0, 0); }

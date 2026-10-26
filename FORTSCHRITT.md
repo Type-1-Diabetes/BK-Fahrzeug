@@ -331,3 +331,12 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Checkliste: Fortschrittsbalken wächst vom letzten Stand aus, mit `scaleX` statt `width` (vorher lief keine Animation, weil der Balken neu gezeichnet wird).
 - Hell/Dunkel: beim Wechsel keine Farbübergänge (`BK.themeSetzen` in `dom.js`, genutzt von Theme-Knopf und Einstellungen).
 - „Weniger Bewegung“ schaltet alles ab. Getestet in Chromium (Umschalter auf der Anmeldeseite, Inspektor und Blatt mit Test-Elementen, Theme-Wechsel), keine Konsolenfehler. Nicht mit Login und nicht auf echtem iPad/Safari getestet.
+
+## Wechsel zwischen Bereichen und Reitern (2026-10-26, bk-v55, Skill ui-animation)
+- Tablet, Checkliste: neuer Bereich kommt von unten (weiter) bzw. oben (zurück), 200 ms. Abhaken bewegt nichts.
+- MPGler, Seitenleiste: neues Modul blendet ein und rückt 6 px hoch (180 ms). Beim Start nicht.
+- MPGler, Fahrzeug-Akte und Gegenzeichnen: Reiterinhalt kommt aus der Richtung des Reiters (`von-rechts`/`von-links`).
+- Behoben: Beim Modulwechsel (Tablet-Reiter, schon vorher) stand der neue Inhalt kurz voll da und blendete dann erst ein (Aufblitzen). Jetzt bleibt der Bereich unsichtbar, bis das Modul fertig ist (`.wechselt` in `oeffnen()`).
+- Behoben: Reiterwechsel in Akte und Gegenzeichnen leerte die ganze Akte, bis die Daten geladen waren. Jetzt erst laden, dann tauschen.
+- Helfer `BK.einblenden(element, art)` in `dom.js`.
+- Gemessen Bild für Bild in Chromium mit Testdaten (Tablet 1180×820, Mac 1280×800): kein Aufblitzen, keine leeren Frames bei Akte und Checkliste, keine Fehler. Nicht auf echtem iPad/Safari.

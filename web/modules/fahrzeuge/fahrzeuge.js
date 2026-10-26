@@ -71,10 +71,18 @@ BK.modul('fahrzeuge', {
       if (!l.length) liste.append(el('div.mleer', 'Kein KTW gefunden.'));
     }
 
+    const REITER = ['meldungen', 'checklisten', 'geraete', 'verlauf'];
+    let reiterVorher = null;
     async function datei() {
-      leeren(akte);
       const f = fahrzeuge.find(x => x.id === gewaehlt);
-      if (!f) return;
+      if (!f) return leeren(akte);
+      // Erst laden, dann leeren: sonst blitzt beim Reiterwechsel eine leere Akte auf
+      let geraete = [];
+      try { geraete = await api.geraete(f.id); } catch { /* egal */ }
+      let verlauf = null;
+      if (reiter === 'verlauf') try { verlauf = await api.verlauf({ fahrzeugId: f.id, limit: 100 }); } catch (e) { verlauf = e; }
+      if (f.id !== gewaehlt) return;
+      leeren(akte);
       const tab = tablets.filter(t => t.fahrzeug_id === f.id && t.zuletzt_online).sort((a, b) => b.zuletzt_online.localeCompare(a.zuletzt_online))[0];
       const mg = offeneVon(f, 'mangel'), mt = offeneVon(f, 'material');
       const [ck, ckText] = checkStand(f);
@@ -99,8 +107,6 @@ BK.modul('fahrzeuge', {
           el('button', { type: 'button', role: 'tab', 'aria-selected': String(reiter === k), class: reiter === k ? 'on' : null, onclick: () => { reiter = k; datei(); } }, t))),
         inhalt);
 
-      let geraete = [];
-      try { geraete = await api.geraete(f.id); } catch { /* egal */ }
       const naechste = geraete.filter(g => g.pruefung_bis).sort((a, b) => a.pruefung_bis.localeCompare(b.pruefung_bis))[0];
       const stk = akte.querySelector('[data-stk]');
       if (stk) stk.textContent = naechste ? `${naechste.name} · ${new Date(naechste.pruefung_bis).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' })}` : '–';
@@ -130,7 +136,8 @@ BK.modul('fahrzeuge', {
           el('div.foot', { style: 'padding:8px 0 0' }, 'Geräte pflegt später der MPGler auf dem eigenen Webserver.'));
       } else {
         try {
-          const v = await api.verlauf({ fahrzeugId: f.id, limit: 100 });
+          if (verlauf instanceof Error) throw verlauf;
+          const v = verlauf;
           inhalt.append(tabelle(['Wann', 'Was', 'Wer'], v.map(e => el('tr', el('td', BK.datum(e.am)),
             el('td', ({ gemeldet: 'Meldung', status: 'Status: ' + (mac.STATUS[e.details.nach] || ''), bearbeitet: 'Meldung bearbeitet',
               ampel: e.details.ampel === 'einsatzbereit' ? 'Einsatzbereit gesetzt' : 'Nicht einsatzbereit: ' + (e.details.grund || ''),
@@ -142,6 +149,11 @@ BK.modul('fahrzeuge', {
             el('td', e.wer_name || '–'))), 'Noch nichts passiert.'));
         } catch (e) { inhalt.append(el('div.mleer', e.message)); }
       }
+      // Inhalt kommt aus der Richtung des Reiters
+      const vorher = reiterVorher;
+      reiterVorher = gewaehlt + reiter;
+      if (vorher && vorher.startsWith(gewaehlt) && vorher !== reiterVorher)
+        BK.einblenden(inhalt, REITER.indexOf(reiter) > REITER.indexOf(vorher.slice(gewaehlt.length)) ? 'von-rechts' : 'von-links');
     }
 
     BK.beiNeu(() => laden());

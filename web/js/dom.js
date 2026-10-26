@@ -11,6 +11,13 @@
     try { dunkel ? localStorage.setItem('bk_theme', 'dark') : localStorage.removeItem('bk_theme'); } catch { /* privat */ }
     requestAnimationFrame(() => requestAnimationFrame(() => delete h.dataset.themeWechsel));
   };
+  // Neuen Inhalt einblenden (art: von-rechts, von-links, von-oben, von-unten, ein). Klasse neu setzen startet die Animation.
+  window.BK.einblenden = (e, art) => {
+    if (!e) return;
+    e.classList.remove('von-rechts', 'von-links', 'von-oben', 'von-unten', 'ein');
+    void e.offsetWidth;
+    e.classList.add(art);
+  };
   // Umschalter (.segc, .mseg): Markierung gleitet vom alten zum neuen Knopf. Nur bei Klick/Tippen, nicht per Tastatur.
   document.addEventListener('click', e => {
     const b = e.target.closest('.segc button, .mseg button');

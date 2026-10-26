@@ -47,14 +47,15 @@ BK.modul('gegenzeichnen', {
       datei();
     }
 
+    let ganzVorher = null;
     async function datei() {
-      leeren(akte);
       akte.classList.add('hat-druck');
       const c = alle.find(x => x.id === gewaehlt);
-      if (!c) return akte.append(el('div.mleer', 'Checkliste links auswählen.'));
+      if (!c) return leeren(akte).append(el('div.mleer', 'Checkliste links auswählen.'));
       let bereiche = [];
       try { bereiche = await vorlage(c.vorlage_id); } catch { /* Abweichungen ohne Namen */ }
       if (c.id !== gewaehlt) return;
+      leeren(akte);  // erst nach dem Laden, damit beim Reiterwechsel nichts aufblitzt
       const pos = new Map(bereiche.flatMap(b => b.positionen.map(p => [p.id, { ...p, bereich: b }])));
       const gesamt = pos.size;
       const befund = (p, e) => [e.ist != null ? `Ist ${e.ist} / Soll ${p ? p.soll : '?'}` : null, e.verfall ? 'Verfall ' + BK.datum(e.verfall, false) : null].filter(Boolean).join(' · ') || 'Hinweis';
@@ -103,6 +104,11 @@ BK.modul('gegenzeichnen', {
             if (!await confirmDialog('Gegenzeichnen?', `${c.fahrzeug.name}, ${quartal(c.zeitraum)}. Dein Name und die Uhrzeit werden gespeichert.`)) return;
             try { await api.checklisteGegenzeichnen(c.id); showToast(`${c.fahrzeug.name} gegengezeichnet`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
           } }, 'Gegenzeichnen')] : [])));
+      // Reiter Übersicht / Ganze Liste: Inhalt kommt aus der Richtung des Reiters
+      const vorher = ganzVorher;
+      ganzVorher = gewaehlt + ganz;
+      if (vorher && vorher.startsWith(gewaehlt) && vorher !== ganzVorher)
+        BK.einblenden(akte.querySelector(ganz ? '.gz-voll' : '.gz-kurz'), ganz ? 'von-rechts' : 'von-links');
     }
 
     // Kurz: Zahlen oben, darunter nur, was nicht stimmt, nach Bereich

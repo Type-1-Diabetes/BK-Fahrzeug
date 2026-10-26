@@ -38,6 +38,7 @@
     if (BK.vorVerlassen && !(await BK.vorVerlassen())) return false;
     BK.vorVerlassen = null;
     if (aktiv && aktiv.def.stop) { try { aktiv.def.stop(); } catch { /* egal */ } }
+    ziel.classList.add('wechselt');  // unsichtbar, bis das neue Modul steht (sonst blitzt es vor dem Einblenden auf)
     leeren(ziel);
     neuHoerer = null;
     try {
@@ -51,6 +52,7 @@
       ziel.append(el('div.leer', el('p', 'Dieser Bereich lässt sich gerade nicht laden.'), el('p.foot', e.message)));
     }
     document.querySelectorAll('[data-modul]').forEach(b => b.classList.toggle('on', b.dataset.modul.split(',').includes(name)));
+    ziel.classList.remove('wechselt');
   }
 
   // Mac: Tablet-Formular (Mängelmeldung, Materialanforderung) als Blatt für ein bestimmtes Fahrzeug
@@ -300,7 +302,13 @@
     leeren(app).append(nav, abdeckung, inhalt);
     document.removeEventListener('keydown', macTasten);
     document.addEventListener('keydown', macTasten);
-    navigieren = async (name, extra) => { if (await oeffnen(name, inhalt, extra) === false) return; zaehlen(); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ } };
+    let ersterStart = true;  // beim Start nicht animieren, nur beim Wechseln
+    navigieren = async (name, extra) => {
+      if (await oeffnen(name, inhalt, extra) === false) return;
+      if (!ersterStart) BK.einblenden(inhalt, 'ein');
+      ersterStart = false;
+      zaehlen(); try { localStorage.setItem('bk_modul', name); } catch { /* privat */ }
+    };
     const letztes = localStorage.getItem('bk_modul');
     navigieren(liste.some(m => m.name === letztes) ? letztes : liste[0].name);
     vorladen(liste);
