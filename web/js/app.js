@@ -210,6 +210,26 @@
     return b;
   }
 
+  // Vollbild an/aus (Mac, Windows, iPad). Ohne Unterstützung kein Knopf.
+  function vollbildKnopf(klasse, mitText) {
+    const d = document, w = d.documentElement;
+    const an = w.requestFullscreen || w.webkitRequestFullscreen;
+    if (!an) return null;
+    const istAn = () => d.fullscreenElement || d.webkitFullscreenElement;
+    const b = el('button.tb' + (klasse ? '.' + klasse : ''), { type: 'button' });
+    const zeigen = () => {
+      const v = istAn();
+      leeren(b).append(icon(v ? 'vollbildAus' : 'vollbild'), mitText ? (v ? 'Fenster' : 'Vollbild') : '');
+      b.title = v ? 'Vollbild beenden' : 'Vollbild';
+      b.setAttribute('aria-label', b.title);
+    };
+    b.onclick = () => istAn() ? (d.exitFullscreen || d.webkitExitFullscreen).call(d) : an.call(w);
+    d.addEventListener('fullscreenchange', zeigen);
+    d.addEventListener('webkitfullscreenchange', zeigen);
+    zeigen();
+    return b;
+  }
+
   // Tablet-Menü: Infos zum Gerät und Entkoppeln (nur mit PIN)
   async function tabletMenue() {
     const fz = ctx.fahrzeug;
@@ -268,6 +288,7 @@
         el('nav.ftabs', { 'aria-label': 'Bereiche' }, reiter(liste).map(r =>
           el('button', { type: 'button', dataset: { modul: r.module.join(',') }, onclick: () => navigieren(r.module[0]) }, icon(r.icon), r.label))),
         el('div.topnav-rechts', window.pwaIsStandalone() ? null : el('button.tb.tablet-ab', { type: 'button', title: 'Als App auf dem Home-Bildschirm installieren', onclick: installBlatt }, icon('download'), 'App installieren'),
+        vollbildKnopf('tablet-ab', true),
         themeKnopf('tablet-ab.thema-knopf'),
         el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden'))),
       streifen, el('div.reiter-leiste', { id: 'reiter-leiste', hidden: true }), inhalt);
@@ -319,6 +340,7 @@
     nav.append(el('div.who',
       el('span.av', { 'aria-hidden': 'true' }, kuerzel),
       el('div', el('b', ctx.ich.name), el('span', 'MPGler')),
+      vollbildKnopf(),
       el('button.tb', { type: 'button', 'aria-label': 'Abmelden', title: 'Abmelden', onclick: abmelden }, icon('logout'))));
     app.className = 'huelle-mac';
     nav.addEventListener('click', e => { if (e.target.closest('.si')) app.classList.remove('seite-offen'); });

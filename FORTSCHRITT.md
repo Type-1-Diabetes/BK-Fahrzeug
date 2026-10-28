@@ -375,3 +375,8 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - „Verfall“ heißt überall „Ablaufdatum“ (Tablet, Soll-Liste, Überprüfungen, Papierliste/Druck, Vorlage, CSV).
 - Ablaufdatum in der Fahrzeug Überprüfung: zwei eigene Auswahlen Monat und Jahr (vorher `type=month`, das Safari am Mac und Firefox nicht können). Gespeichert als 1. des Monats, angezeigt als MM/JJJJ.
 - Geprüft in Chromium mit Testdaten (Tablet 1180×820, Mac 1280×800): Auswahl, Übernehmen, Anzeige, Filter. Keine Fehler.
+
+## Vollbild-Knopf (2026-10-28, bk-v63)
+- Tablet: Knopf „Vollbild“/„Fenster“ oben rechts neben Hell/Dunkel. Mac/Windows: Symbol-Knopf unten in der Seitenleiste neben Abmelden.
+- Nutzt die Fullscreen-API (auch `webkit…` für Safari/iPad). Kann das Gerät kein Vollbild (z. B. iPhone), erscheint kein Knopf.
+- Nur Syntax geprüft, nicht im Browser. Offen: auf Mac, Windows und iPad testen.
