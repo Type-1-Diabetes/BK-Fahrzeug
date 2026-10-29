@@ -398,8 +398,11 @@ input[type="date"].tf::-webkit-calendar-picker-indicator { opacity: .55; }
 .blatt-overlay.weg { background: rgba(0,0,0,0); transition: background-color .15s ease-out; pointer-events: none; }
 .blatt-overlay.weg .blatt { opacity: 0; transform: translateY(8px); transition: opacity .15s ease-out, transform .15s ease-out; }
 /* Großes Blatt für Arbeiten mit eigenem Aufbau (Fahrzeug Überprüfung am Mac/iPad) */
-.blatt-overlay:has(> .blatt-gross) { padding: 24px; place-items: stretch center; overflow: hidden; }
-.blatt.blatt-gross { width: min(1280px, 100%); height: calc(100dvh - 48px); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.blatt-overlay:has(> .blatt-gross) { padding: 16px; place-items: stretch; overflow: hidden;
+  background: rgba(0,0,0,.18); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); }
+.blatt.blatt-gross { width: 100%; height: calc(100dvh - 32px); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+/* Schließen-Knopf links neben der Scrollleiste des Inhalts, nicht darauf */
+.blatt.blatt-gross > .blatt-zu { top: 14px; right: 26px; }
 .blatt.blatt-gross > .blatt-inhalt { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 @media (max-width: 700px) { .blatt-overlay:has(> .blatt-gross) { padding: 0; } .blatt.blatt-gross { height: 100dvh; border-radius: 0; padding-top: env(safe-area-inset-top); } }
 
