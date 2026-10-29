@@ -63,11 +63,56 @@
       });
     },
 
+    // Drag & Drop am Griff (Maus und Finger): Zeilen in liste live umsortieren.
+    // ziel(x, y) → { el, id } liefert ein Ablageziel außerhalb (z. B. anderer Bereich), sonst null.
+    // fertig({ ids }) bei neuer Reihenfolge, fertig({ id, ziel }) beim Ablegen auf ein Ziel.
+    sortierbar(liste, { zeilen, griff, ziel, fertig }) {
+      liste.addEventListener('pointerdown', e => {
+        const g = e.target.closest(griff), zeile = g && g.closest(zeilen);
+        if (!zeile || e.button > 0) return;
+        e.preventDefault();
+        const vorher = [...liste.querySelectorAll(zeilen)].map(z => z.dataset.id);
+        const scroller = liste.closest('.tablewrap, .vlist') || liste;
+        let gezogen = false, treffer = null, y0 = e.clientY, timer = null, letzteY = e.clientY;
+        const bewegen = ev => {
+          letzteY = ev.clientY;
+          if (!gezogen && Math.abs(ev.clientY - y0) < 4) return;
+          if (!gezogen) { gezogen = true; zeile.classList.add('zieht'); document.body.classList.add('am-ziehen'); }
+          const t = ziel && ziel(ev.clientX, ev.clientY);
+          if ((t && t.el) !== (treffer && treffer.el)) { treffer && treffer.el.classList.remove('ablage'); treffer = t; treffer && treffer.el.classList.add('ablage'); }
+          if (treffer) return;
+          // Zeile an die Stelle unter dem Finger schieben
+          const andere = [...liste.querySelectorAll(zeilen)].filter(z => z !== zeile);
+          const nach = andere.find(z => { const r = z.getBoundingClientRect(); return ev.clientY < r.top + r.height / 2; });
+          if (nach ? zeile.nextElementSibling !== nach : zeile !== andere[andere.length - 1]?.nextElementSibling) {
+            if (nach) nach.before(zeile); else (andere[andere.length - 1] || zeile).after(zeile);
+          }
+        };
+        // Am Rand automatisch scrollen
+        const rollen = () => {
+          const r = scroller.getBoundingClientRect();
+          if (gezogen) scroller.scrollTop += letzteY < r.top + 40 ? -12 : letzteY > r.bottom - 40 ? 12 : 0;
+          timer = requestAnimationFrame(rollen);
+        };
+        timer = requestAnimationFrame(rollen);
+        const ende = () => {
+          cancelAnimationFrame(timer);
+          window.removeEventListener('pointermove', bewegen); window.removeEventListener('pointerup', ende); window.removeEventListener('pointercancel', ende);
+          zeile.classList.remove('zieht'); document.body.classList.remove('am-ziehen');
+          if (treffer) { treffer.el.classList.remove('ablage'); return fertig({ id: zeile.dataset.id, ziel: treffer.id }); }
+          const neu = [...liste.querySelectorAll(zeilen)].map(z => z.dataset.id);
+          if (gezogen && neu.join() !== vorher.join()) fertig({ ids: neu });
+        };
+        // Am Fenster lauschen: die Zeile wandert im DOM, dabei geht die Pointer-Bindung am Griff verloren
+        window.addEventListener('pointermove', bewegen); window.addEventListener('pointerup', ende); window.addEventListener('pointercancel', ende);
+      });
+    },
+
     // Klick auf Zeile wählt aus, Pfeiltasten wandern (wie Finder-Listen)
     tastatur(tbody, waehlen) {
       tbody.tabIndex = 0;
       tbody.addEventListener('keydown', e => {
-        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        if ((e.key !== 'ArrowDown' && e.key !== 'ArrowUp') || e.altKey) return;
         const zeilen = [...tbody.querySelectorAll('tr[data-id]')];
         const i = zeilen.findIndex(z => z.classList.contains('sel'));
         const neu = zeilen[Math.max(0, Math.min(zeilen.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)))];

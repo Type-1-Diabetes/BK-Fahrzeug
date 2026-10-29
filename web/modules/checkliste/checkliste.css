@@ -155,3 +155,7 @@
 .blatt.blatt-gross .ckl-side { padding-top: 14px; }
 .blatt.blatt-gross .ckl-kopf { margin-right: 44px; }
 .blatt.blatt-gross .ckl-side h2 { padding-right: 8px; }
+/* Zusammengefasste Taschen (Hygiene Taschen): Abschnitt je Tasche in der Tabelle */
+.ck-abschnitt { position: relative; display: flex; align-items: baseline; gap: 10px; padding: 14px 16px 6px 18px; font-size: 13px; font-weight: 600; color: var(--label); background: var(--bg2); border-top: .5px solid var(--sep); }
+.ck-abschnitt span { font-weight: 400; color: var(--label2); font-variant-numeric: tabular-nums; }
+.ck-liste .ck-spalten + .ck-abschnitt { border-top: 0; }

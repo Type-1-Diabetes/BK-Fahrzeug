@@ -30,6 +30,8 @@ BK.modul('sollliste', {
     const fristText = p => BK.lfd(p).frist || { verfall: 'Ablaufdatum', stk: 'STK', mtk: 'MTK' }[p.pruefart] || '';
 
     let aktiv = 0, bereichVorher = null, balkenVorher = null;
+    // Seiten = Bereiche, Taschen 1 … n zusammen auf einer Seite (Abschnitte in der Tabelle)
+    const seiten = BK.bereichSeiten(bereiche);
     // Suchfeld bleibt stehen (Fokus), nur Kopf und Bereiche werden neu gezeichnet
     const suche = el('input.field.sl-suche', { type: 'search', placeholder: 'Artikel suchen', autocomplete: 'off', 'aria-label': 'Artikel suchen', oninput: () => seite() });
     const sideKopf = el('div'), sideListe = el('div');
@@ -66,8 +68,8 @@ BK.modul('sollliste', {
             haken.clear(); merken(); seite();
           } }, 'Haken entfernen') : null),
         el('div.progress', balken(n / gesamt)));
-      leeren(sideListe).append(...bereiche.flatMap((b, i) => {
-        const kopf = b.gruppe && b.gruppe !== (bereiche[i - 1] || {}).gruppe ? el('div.ckl-gruppe', b.gruppe) : null;
+      leeren(sideListe).append(...seiten.flatMap((b, i) => {
+        const kopf = b.gruppe && b.gruppe !== (seiten[i - 1] || {}).gruppe ? el('div.ckl-gruppe', b.gruppe) : null;
         return [kopf, el('button', { type: 'button', class: `area ${b.farbe || ''} ${i === aktiv && !q ? 'on' : ''}`, onclick: () => gehe(i) },
           b.name, el('span', fertig(b) ? icon('check') : `${b.positionen.filter(p => haken.has(p.id)).length}/${b.positionen.length}`))].filter(Boolean);
       }));
@@ -86,21 +88,23 @@ BK.modul('sollliste', {
         return;
       }
 
-      const b = bereiche[aktiv];
+      const b = seiten[aktiv];
       const alleDa = fertig(b);
       leeren(main).append(
         el('div.content',
           el('div', { class: 'ckl-kopf ' + (b.farbe || '') }, el('span', { class: 'streifen ' + (b.farbe || '') }),
-            el('div.ckl-titel', el('h2', b.name), el('span', [b.gruppe, `Bereich ${aktiv + 1} von ${bereiche.length}`].filter(Boolean).join(' · ')))),
-          el('div.list.ck-liste', spalten, b.positionen.map(p => zeile(p, b))),
+            el('div.ckl-titel', el('h2', b.name), el('span', [b.gruppe, `Bereich ${aktiv + 1} von ${seiten.length}`].filter(Boolean).join(' · ')))),
+          el('div.list.ck-liste', spalten, b.teile.flatMap(t => [
+            b.teile.length > 1 ? el('div.ck-abschnitt', t.titel, el('span', `${t.b.positionen.filter(p => haken.has(p.id)).length}/${t.b.positionen.length}`)) : null,
+            ...t.b.positionen.map(p => zeile(p, t.b))])),
           el('div.ckl-alle', el('button.btn.sec', { type: 'button', onclick: () => {
             b.positionen.forEach(p => alleDa ? haken.delete(p.id) : haken.add(p.id)); merken(); seite();
           } }, icon('check'), alleDa ? 'Haken im Bereich entfernen' : 'Alle im Bereich vorhanden')),
           el('div.foot', 'Hake ab, was du gefunden hast. Die Haken siehst nur du auf diesem Tablet.')),
         el('div.bottombar',
-          aktiv > 0 ? el('button.btn.sec', { type: 'button', onclick: () => gehe(aktiv - 1) }, icon('chevL'), bereiche[aktiv - 1].name) : null,
+          aktiv > 0 ? el('button.btn.sec', { type: 'button', onclick: () => gehe(aktiv - 1) }, icon('chevL'), seiten[aktiv - 1].name) : null,
           el('span.sp'),
-          aktiv + 1 < bereiche.length ? el('button.btn', { type: 'button', onclick: () => gehe(aktiv + 1) }, 'Weiter zu ' + bereiche[aktiv + 1].name, icon('chevR')) : null));
+          aktiv + 1 < seiten.length ? el('button.btn', { type: 'button', onclick: () => gehe(aktiv + 1) }, 'Weiter zu ' + seiten[aktiv + 1].name, icon('chevR')) : null));
       if (vorher != null && vorher !== aktiv) BK.einblenden(main.firstElementChild, aktiv > vorher ? 'von-unten' : 'von-oben');
     }
 

@@ -63,6 +63,26 @@
   window.BK.datum = (d, zeit = true) => d ? new Date(d).toLocaleString('de-DE', zeit
     ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
     : { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
+  // Checkliste: aufeinanderfolgende Bereiche wie „Hygiene Tasche 1 … 4“ (gleiche Gruppe) werden eine Seite „Hygiene Taschen“.
+  // Eine Seite sieht aus wie ein Bereich (name, farbe, gruppe, positionen) und hat dazu teile: [{ titel, b }] für die Abschnitte.
+  window.BK.bereichSeiten = bereiche => {
+    const aus = [];
+    const teil = b => /^(.*\S)\s+(\d+)$/.exec(b.name || '');
+    for (const b of bereiche) {
+      const t = teil(b), vor = aus[aus.length - 1];
+      const vb = vor && vor.teile[vor.teile.length - 1].b, vt = vb && teil(vb);
+      if (t && vt && vt[1] === t[1] && (vb.gruppe || '') === (b.gruppe || '') && Number(t[2]) === Number(vt[2]) + 1) {
+        vor.teile.push({ b }); vor.positionen = vor.positionen.concat(b.positionen);
+      } else aus.push({ name: b.name, farbe: b.farbe, gruppe: b.gruppe, positionen: b.positionen, teile: [{ b }] });
+    }
+    for (const s of aus) if (s.teile.length > 1) {
+      const basis = teil(s.teile[0].b)[1];
+      s.name = /Tasche$/.test(basis) ? basis + 'n' : `${basis} ${teil(s.teile[0].b)[2]} – ${teil(s.teile[s.teile.length - 1].b)[2]}`;
+      const wort = basis.split(/\s+/).pop();
+      s.teile.forEach(x => { x.titel = `${wort} ${teil(x.b)[2]}`; });
+    }
+    return aus;
+  };
   // Lfd. Nr. wie auf der Papierliste („Nr. 1.2 · …“ im Hinweis), sonst die laufende Nummer
   window.BK.lfd = p => {
     const m = /^Nr\.\s*([\d.]+)\s*(?:·\s*)?(.*)$/.exec(p.hinweis || '');

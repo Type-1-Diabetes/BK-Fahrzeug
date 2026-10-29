@@ -28,16 +28,30 @@
         zeichnen();
       }
 
+      // Neu zeichnen, ohne dass Seitenliste und Tabelle nach oben springen
+      const tabelleBox = tbody.closest('.tablewrap');
       function zeichnen() {
+        const pos = [liste.scrollTop, tabelleBox ? tabelleBox.scrollTop : 0];
         leeren(liste);
-        for (const b of bereiche) {
-          liste.append(el('button', { type: 'button', class: 'vr' + (b.id === bereichId ? ' on' : ''), onclick: async () => {
-            if (b.id === bereichId || !await weiter()) return;
-            bereichId = b.id; positionId = null; ungesichert = false; zeichnen();
-          } }, el('span', { class: 'stripe ' + (b.farbe || '') }), el('div', el('b', b.name), el('span', [b.gruppe, b.positionen.length === 1 ? '1 Position' : `${b.positionen.length} Positionen`].filter(Boolean).join(' · ')))));
-        }
+        bereiche.forEach((b, i) => {
+          // Gruppe als Überschrift wie auf dem Tablet
+          if (b.gruppe && b.gruppe !== (bereiche[i - 1] || {}).gruppe) liste.append(el('div.vo-gruppe', b.gruppe));
+          liste.append(el('div', { class: 'vr vo-bereich' + (b.id === bereichId ? ' on' : ''), dataset: { id: b.id }, role: 'button', tabindex: 0,
+            onclick: () => bereichWaehlen(b.id), onkeydown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); bereichWaehlen(b.id); } } },
+            el('span.vo-griff', { title: 'Ziehen zum Verschieben', 'aria-hidden': 'true' }, icon('griff')),
+            el('span', { class: 'stripe ' + (b.farbe || '') }),
+            el('div', el('b', b.name), el('span', b.positionen.length === 1 ? '1 Position' : `${b.positionen.length} Positionen`))));
+        });
         if (!bereiche.length) liste.append(el('div.mleer', 'Noch kein Bereich.'));
         tabelle();
+        liste.scrollTop = pos[0];
+        if (tabelleBox) tabelleBox.scrollTop = pos[1];
+      }
+      async function bereichWaehlen(id) {
+        if (id === bereichId || !await weiter()) return;
+        const box = tbody.closest('.tablewrap');
+        bereichId = id; positionId = null; ungesichert = false; zeichnen();
+        if (box) box.scrollTop = 0;  // neuer Bereich: Tabelle von oben, Seitenliste bleibt stehen
       }
 
       // Kopf und Tabelle des gewählten Bereichs
@@ -49,19 +63,40 @@
         kopf.append(
           el('h2', el('span', { class: 'stripe ' + (b.farbe || '') }), b.name),
           el('span.vo-pfeile',
-            el('button.tb', { type: 'button', title: 'Bereich nach oben', disabled: i === 0, onclick: () => schieben('bereich', b.id, -1) }, icon('chevL')),
-            el('button.tb', { type: 'button', title: 'Bereich nach unten', disabled: i === bereiche.length - 1, onclick: () => schieben('bereich', b.id, 1) }, icon('chevR'))),
+            el('button.tb', { type: 'button', title: 'Bereich nach oben', 'aria-label': 'Bereich nach oben', disabled: i === 0, onclick: () => schieben('bereich', b.id, -1) }, icon('chevU')),
+            el('button.tb', { type: 'button', title: 'Bereich nach unten', 'aria-label': 'Bereich nach unten', disabled: i === bereiche.length - 1, onclick: () => schieben('bereich', b.id, 1) }, icon('chevD'))),
           el('button.pbtn', { type: 'button', onclick: () => bereichDialog(b) }, 'Bearbeiten'),
           el('button.pbtn.rot', { type: 'button', onclick: () => bereichLoeschen(b) }, 'Löschen'));
         b.positionen.forEach((p, j) => tbody.append(el('tr', { dataset: { id: p.id }, class: p.id === positionId ? 'sel' : null, onclick: () => waehlen(p.id) },
+          el('td.vo-griff', { title: 'Ziehen zum Verschieben, auch in einen anderen Bereich links' }, icon('griff')),
           el('td.num', String(j + 1)), el('td', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), el('td.vo-hinweis', p.hinweis || '–'), el('td', p.wo || '–'),
           el('td.num', String(p.soll)), el('td', PRUEF[p.pruefart] || p.pruefart),
           el('td.num', el('span.vo-pfeile',
-            el('button.tb', { type: 'button', title: 'Nach oben', disabled: j === 0, onclick: e => { e.stopPropagation(); schieben('position', p.id, -1); } }, BK.icon('chevL')),
-            el('button.tb', { type: 'button', title: 'Nach unten', disabled: j === b.positionen.length - 1, onclick: e => { e.stopPropagation(); schieben('position', p.id, 1); } }, BK.icon('chevR')))))));
-        if (!b.positionen.length) tbody.append(el('tr', el('td.mleer', { colspan: 7 }, 'Noch keine Position. Oben rechts „Neue Position“.')));
+            el('button.tb', { type: 'button', title: 'Nach oben (⌥↑)', 'aria-label': p.artikel + ' nach oben', disabled: j === 0, onclick: e => { e.stopPropagation(); schieben('position', p.id, -1); } }, icon('chevU')),
+            el('button.tb', { type: 'button', title: 'Nach unten (⌥↓)', 'aria-label': p.artikel + ' nach unten', disabled: j === b.positionen.length - 1, onclick: e => { e.stopPropagation(); schieben('position', p.id, 1); } }, icon('chevD')))))));
+        if (!b.positionen.length) tbody.append(el('tr', el('td.mleer', { colspan: 8 }, 'Noch keine Position. Oben rechts „Neue Position“.')));
         inspektor();
       }
+
+      // Drag & Drop: Bereiche links, Positionen in der Tabelle (auch auf einen anderen Bereich links ablegen)
+      const ordnen = async aufruf => {
+        try { await aufruf(); await laden(); }
+        catch (e) { alertDialog('Hat nicht geklappt', e.message); laden(); }
+      };
+      mac.sortierbar(liste, { zeilen: '.vo-bereich', griff: '.vo-griff', fertig: ({ ids }) => ordnen(() => api.bereicheOrdnen(vorlage.id, ids)) });
+      mac.sortierbar(tbody, { zeilen: 'tr[data-id]', griff: '.vo-griff',
+        ziel: (x, y) => {
+          const z = document.elementFromPoint(x, y)?.closest('.vo-bereich');
+          return z && z.dataset.id !== bereichId ? { el: z, id: z.dataset.id } : null;
+        },
+        fertig: ({ ids, id, ziel }) => {
+          if (ids) return ordnen(() => api.positionenOrdnen(bereichId, ids));
+          const zb = bereiche.find(b => b.id === ziel), p = bereich().positionen.find(x => x.id === id);
+          ordnen(async () => {
+            await api.positionenOrdnen(ziel, [...zb.positionen.map(x => x.id), id]);
+            showToast(`${p.artikel} → ${zb.name}`);
+          });
+        } });
 
       async function waehlen(id) {
         if (id === positionId || !await weiter()) return;
@@ -175,6 +210,10 @@
       };
       root.addEventListener('keydown', e => {
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); insp.querySelector('[data-sichern]')?.click(); }
+        // ⌥↑ / ⌥↓ verschiebt die gewählte Position
+        if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && positionId && positionId !== 'neu' && !e.target.closest('input, textarea, select')) {
+          e.preventDefault(); e.stopPropagation(); schieben('position', positionId, e.key === 'ArrowUp' ? -1 : 1);
+        }
       });
       BK.beiNeu(() => { if (!ungesichert) laden(); });
       await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)

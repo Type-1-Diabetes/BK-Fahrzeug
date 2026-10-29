@@ -399,3 +399,12 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Getestet in Chromium mit Testdaten (Fake-API, nicht im Repo): Tablet 1180×820, Mac 1280×800, iPad hochkant 820×1180, Handy 390×844 und 375 px. Ablauf Beginnen → Abhaken → Abweichung → Suche → Nicht vorhanden → Abschließen (Rückfrage „nicht geprüft“) → Materialvorschlag → Anfordern, TÜV speichern, Mangel aus der Akte öffnen, Fotos blättern. Keine Konsolenfehler.
 - **Offen:** Migration 028 im SQL-Editor ausführen (vorher klappt „Überprüfung beginnen“ nicht, die alten Tablet-Funktionen sind dann weg). Auf echtem iPad/iPhone (Safari) prüfen: Code-Felder, Foto-Ansicht (Wischen), Überprüfungs-Blatt. Alte Einträge in der Warteschlange eines Tablets („Checkliste abschließen“) schlagen nach 028 fehl → dort verwerfen.
 - Gefunden, nicht geändert: `mac.kurz()` zeigt in Chromium „01.06.. 10:00“ (doppelter Punkt).
+
+## Überprüfung größer, Taschen-Gruppen, Vorlage per Drag & Drop (2026-10-29, bk-v67, Migration 029)
+- Fahrzeug Überprüfung (Blatt): fast bildschirmfüllend, Hintergrund unscharf, ✕ neben der Scrollleiste.
+- Checkliste (Tablet) und Fahrzeug Überprüfung (bk-v68): „Hygiene Tasche 1 … 4“ ist in der Seitenliste ein Eintrag „Hygiene Taschen“ (ebenso „Wundversorgung Taschen“). Rechts stehen alle Artikel in einer Tabelle, mit Abschnitten „Tasche 1“, „Tasche 2“ … und Zähler je Tasche (`BK.bereichSeiten` in `dom.js`).
+- Vorlage: Griff ⠿ mittig, nur beim Darüberfahren sichtbar (mit dem Finger immer).
+- Vorlage bearbeiten: Griff ⠿ an Bereichen und Positionen, Ziehen mit Maus oder Finger ordnet um. Position auf einen Bereich links ziehen = verschieben. ‹ › ersetzt durch ↑ ↓, dazu ⌥↑/⌥↓ für die gewählte Position. Seitenliste mit Gruppen-Überschriften. Seitenliste und Tabelle springen beim Neuzeichnen nicht mehr nach oben (vorher sprang die Seitenliste bei jedem Klick).
+- Migration 029: `vorlage_bereiche_ordnen`, `vorlage_positionen_ordnen` (nur MPGler, IDs müssen zur Vorlage gehören).
+- Getestet in Chromium mit Testdaten: Umordnen, Verschieben in anderen Bereich, Zweige auf/zu, Scroll bleibt (Überprüfung und Vorlage). Nicht mit Touch am iPad.
+- 029 ist ausgeführt (laut Nutzer). In der Überprüfung blieb die Seitenliste im Test schon stehen; springt sie bei dir trotzdem, bitte Gerät/Browser nennen.

@@ -54,6 +54,8 @@ const pruefung = {
 
     let aktiv = 0;
     let offenePosition = null;
+    // Seiten = Bereiche, Taschen 1 … n zusammen auf einer Seite (Abschnitte in der Tabelle)
+    const seiten = BK.bereichSeiten(bereiche);
     const gesamt = bereiche.reduce((n, b) => n + b.positionen.length, 0);
     const abweichungen = b => b.positionen.filter(p => eintraege[p.id]).length;
 
@@ -92,14 +94,14 @@ const pruefung = {
         el('div.progress', balken(n / gesamt)),
         el('button.lnk.ckl-abbrechen', { type: 'button', onclick: abbrechen }, 'Überprüfung abbrechen'));
       leeren(sideListe).append(
-        ...bereiche.flatMap((b, i) => {
+        ...seiten.flatMap((b, i) => {
           const abw = abweichungen(b);
           // Unterüberschrift wie auf dem Papier (Patientenraum, Notfallrucksack …), sobald die Gruppe wechselt
-          const kopf = b.gruppe && b.gruppe !== (bereiche[i - 1] || {}).gruppe ? el('div.ckl-gruppe', b.gruppe) : null;
+          const kopf = b.gruppe && b.gruppe !== (seiten[i - 1] || {}).gruppe ? el('div.ckl-gruppe', b.gruppe) : null;
           return [kopf, el('button', { type: 'button', class: `area ${b.farbe || ''} ${i === aktiv && !q ? 'on' : ''}`, onclick: () => gehe(i) },
             b.name, el('span', abw ? el('b.abw', abw + ' offen') : null, bereichFertig(b) ? icon('check') : `${b.positionen.filter(istGeprueft).length}/${b.positionen.length}`))].filter(Boolean);
         }),
-        el('button', { type: 'button', class: 'area' + (aktiv === bereiche.length && !q ? ' on' : ''), onclick: () => gehe(bereiche.length) }, 'Abschließen', el('span', icon('chevR'))));
+        el('button', { type: 'button', class: 'area' + (aktiv === seiten.length && !q ? ' on' : ''), onclick: () => gehe(seiten.length) }, 'Abschließen', el('span', icon('chevR'))));
 
       // Neuer Bereich kommt von unten (weiter) oder oben (zurück), nicht beim Abhaken
       const vorher = bereichVorher;
@@ -112,26 +114,29 @@ const pruefung = {
         return;
       }
       const rein = () => vorher != null && vorher !== aktiv && BK.einblenden(main.firstElementChild, aktiv > vorher ? 'von-unten' : 'von-oben');
-      if (aktiv === bereiche.length) { abschluss(); return rein(); }
-      const b = bereiche[aktiv];
+      if (aktiv === seiten.length) { abschluss(); return rein(); }
+      const b = seiten[aktiv];
       const alleDa = b.positionen.every(istGeprueft);
       // Spalten wie MPG.doc, Kopf bleibt beim Scrollen stehen
       const zeilen = el('div.list.ck-liste', spalten());
-      for (const p of b.positionen) zeilen.append(zeile(p, b));
+      for (const t of b.teile) {
+        if (b.teile.length > 1) zeilen.append(el('div.ck-abschnitt', t.titel, el('span', `${t.b.positionen.filter(istGeprueft).length}/${t.b.positionen.length}`)));
+        for (const p of t.b.positionen) zeilen.append(zeile(p, t.b));
+      }
       leeren(main).append(
         el('div.content',
           el('div', { class: 'ckl-kopf ' + (b.farbe || '') }, el('span', { class: 'streifen ' + (b.farbe || '') }),
-            el('div.ckl-titel', el('h2', b.name), el('span', [b.gruppe, `Bereich ${aktiv + 1} von ${bereiche.length}`].filter(Boolean).join(' · ')))),
+            el('div.ckl-titel', el('h2', b.name), el('span', [b.gruppe, `Bereich ${aktiv + 1} von ${seiten.length}`].filter(Boolean).join(' · ')))),
           zeilen,
           el('div.ckl-alle', el('button.btn.sec', { type: 'button', onclick: () => {
             b.positionen.forEach(p => alleDa ? ok.delete(p.id) : ok.add(p.id)); sichern(); seite();
           } }, icon('check'), alleDa ? 'Haken im Bereich entfernen' : 'Alle im Bereich vorhanden')),
           el('div.foot', 'Hake ab, was vorhanden ist. Tippe auf den Namen, wenn etwas fehlt, defekt ist oder bald abläuft.')),
         el('div.bottombar',
-          aktiv > 0 ? el('button.btn.sec', { type: 'button', onclick: () => gehe(aktiv - 1) }, icon('chevL'), bereiche[aktiv - 1].name) : null,
+          aktiv > 0 ? el('button.btn.sec', { type: 'button', onclick: () => gehe(aktiv - 1) }, icon('chevL'), seiten[aktiv - 1].name) : null,
           el('span.sp'),
           el('button.btn', { type: 'button', onclick: () => gehe(aktiv + 1) },
-            aktiv + 1 < bereiche.length ? 'Weiter zu ' + bereiche[aktiv + 1].name : 'Weiter zum Abschluss', icon('chevR'))));
+            aktiv + 1 < seiten.length ? 'Weiter zu ' + seiten[aktiv + 1].name : 'Weiter zum Abschluss', icon('chevR'))));
       rein();
     }
 

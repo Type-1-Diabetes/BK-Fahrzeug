@@ -198,6 +198,9 @@
     positionSpeichern: (id, bereich, p) => rpc('vorlage_position_speichern', { p_id: id, p_bereich: bereich, p_artikel: p.artikel, p_hinweis: p.hinweis, p_soll: p.soll, p_pruefart: p.pruefart, p_optional: p.optional, p_wo: p.wo }),
     positionLoeschen: id => rpc('vorlage_position_loeschen', { p_id: id }),
     verschieben: (art, id, richtung) => rpc('vorlage_verschieben', { p_art: art, p_id: id, p_richtung: richtung }),
+    // Drag & Drop: neue Reihenfolge als ID-Liste (Migration 029)
+    bereicheOrdnen: (vorlage, ids) => rpc('vorlage_bereiche_ordnen', { p_vorlage: vorlage, p_ids: ids }),
+    positionenOrdnen: (bereich, ids) => rpc('vorlage_positionen_ordnen', { p_bereich: bereich, p_ids: ids }),
     checklisten: ({ fahrzeugId, offen } = {}) => lesen('checklisten',
       ['select=id,client_id,fahrzeug_id,vorlage_id,zeitraum,begonnen_am,abgeschlossen_am,mitarbeiter1,mitarbeiter2,gegengezeichnet_am,zurueck_grund,fahrzeug:fahrzeuge(name,kennzeichen),eintraege:checklisten_eintraege(position_id,ist,verfall,bemerkung,durchgestrichen,nicht_geprueft)', 'order=begonnen_am.desc']
         .concat(fahrzeugId ? ['fahrzeug_id=eq.' + fahrzeugId] : [], offen ? ['gegengezeichnet_am=is.null'] : []).join('&')),
