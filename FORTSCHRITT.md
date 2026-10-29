@@ -380,3 +380,8 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Tablet: Knopf „Vollbild“/„Fenster“ oben rechts neben Hell/Dunkel. Mac/Windows: Symbol-Knopf unten in der Seitenleiste neben Abmelden.
 - Nutzt die Fullscreen-API (auch `webkit…` für Safari/iPad). Kann das Gerät kein Vollbild (z. B. iPhone), erscheint kein Knopf.
 - Nur Syntax geprüft, nicht im Browser. Offen: auf Mac, Windows und iPad testen.
+
+## Demo-Knopf nur mit PIN (2026-10-29, bk-v64, Migration 027)
+- „Als MPGler anmelden“ fragt eine 4-stellige PIN ab. Die Datenbank prüft sie (`demo_anmelden(p_pin)`), PIN gehasht in `intern.konfig` ('demo_pin'), nicht im Repo.
+- Fehlversuche: höchstens 5 in 15 Minuten je Sitzung und je IP (`intern.demo_versuche`), parallel gesperrt.
+- Offen: 027 im SQL-Editor ausführen und PIN setzen (Befehl oben in der Migration). Bis dahin klappt der Demo-Login nicht. Nicht im Browser getestet.

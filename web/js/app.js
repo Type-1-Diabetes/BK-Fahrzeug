@@ -443,14 +443,19 @@
     inhalt.fokus.focus();
   }
 
-  // Demo: Anmelden per Knopf als MPGler (Migration 024), ohne Konto
+  // Demo: Anmelden per Knopf als MPGler mit PIN (Migration 024/027), ohne Konto
   function anmeldeFormular(fehler) {
     const knopf = el('button.btn', { type: 'submit' }, 'Als MPGler anmelden');
     const form = el('form', { onsubmit: async e => {
       e.preventDefault();
       fehler.textContent = '';
+      const pin = await promptDialog('PIN eingeben', 'Die 4-stellige PIN bekommst du vom MPGler.', { typ: 'password', inputmode: 'numeric', placeholder: 'PIN', confirmLabel: 'Anmelden' });
+      if (pin == null) return;
       knopf.disabled = true;
-      try { await api.demoAnmelden(); await starten(); }
+      try {
+        const nein = await api.demoAnmelden(pin.trim());
+        if (nein) fehler.textContent = nein; else await starten();
+      }
       catch (err) { fehler.textContent = err.offline ? 'Keine Verbindung. Zum Anmelden braucht das Gerät Internet.' : err.message; }
       knopf.disabled = false;
     } }, el('p.login-text', 'Demo mit Testdaten. Du siehst und bearbeitest alles.'), knopf);
