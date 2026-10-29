@@ -440,3 +440,5 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Migration 031: `nachrichten`, `nachricht_gelesen` (RLS, GRANT), RPCs `nachricht_senden`, `nachricht_zurueckziehen`, `nachricht_gelesen`, `tablet_push_abo`, Trigger für Push und Abo-Entzug.
 - Getestet in Chromium mit Testdaten: senden, Anzeige auf dem Tablet, Gelesen. Push nicht getestet (geht nur mit echtem Server und installierter App).
 - 031 ist ausgeführt (laut Nutzer). Offen: Edge Function `push-senden` neu deployen, auf einem iPad (installierte App) „Einschalten“ und eine Nachricht testen.
+- Fix (bk-v73): Nachrichten-Liste lud nicht („Hat nicht geklappt“), dadurch auch keine KTW-Auswahl und keine Anzeige auf dem Tablet. Ursache: `nachricht_gelesen` verbindet Nachrichten und Fahrzeuge, die Abfrage `fahrzeuge(name)` war für PostgREST mehrdeutig (PGRST201). Jetzt `fahrzeuge!nachrichten_fahrzeug_id_fkey(name)`. Nicht gegen die echte DB getestet.
+- Fix (bk-v74): Tablet-Übersicht zeigte den TÜV unter „Prüffristen“ nicht, wenn er nach dem Start eingetragen wurde. Die Prüffristen wurden mit dem alten KTW-Stand gezeichnet; jetzt erst nach dem Laden des KTW. Mit Testdaten geprüft.

@@ -113,8 +113,9 @@ BK.modul('uebersicht', {
       }
     }
 
-    BK.beiNeu(() => { laden(); geraeteZeigen(); });
-    geraeteZeigen();
+    // Prüffristen erst nach dem Laden des KTW zeichnen, sonst fehlt ein neu eingetragener TÜV
+    BK.beiNeu(async () => { await laden(); geraeteZeigen(); });
     await laden();
+    await geraeteZeigen();
   },
 });
