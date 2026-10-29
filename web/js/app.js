@@ -244,7 +244,7 @@
     const offen = liste.filter(n => !n.zurueckgezogen_am && (!n.fahrzeug_id || n.fahrzeug_id === fzId) && !(n.gelesen || []).some(g => g.fahrzeug_id === fzId));
     const zeilen = offen.map(n => el('div', { class: 'nachricht' + (n.wichtig ? ' wichtig' : '') },
       el('div.nachricht-ic', icon(n.wichtig ? 'alert' : 'inbox')),
-      el('div.t', el('b', n.wichtig ? 'Wichtig vom MPGler' : 'Nachricht vom MPGler'), el('p', n.text),
+      el('div.t', n.wichtig ? el('b', 'Wichtig') : null, el('p', n.text),
         el('span', [BK.datum(n.erstellt_am), n.wer_name].filter(Boolean).join(' · '))),
       el('button.btn', { type: 'button', onclick: async e => {
         const k = e.currentTarget; k.disabled = true; k.classList.add('laedt');
@@ -253,7 +253,14 @@
       } }, icon('check'), 'Gelesen')));
     const push = await pushHinweis(offen.length > 0);
     if (lauf !== nachrichtenLauf) return;  // ein neuerer Aufruf zeichnet
-    leeren(nachrichtenLeiste).append(...zeilen, ...push);
+    // Ungelesene Nachrichten als Fenster über allem (Hintergrund unscharf); Push-Hinweis bleibt als Leiste
+    leeren(nachrichtenLeiste).append(...push);
+    let fenster = document.querySelector('.nachricht-fenster');
+    if (!zeilen.length) { if (fenster) { fenster.classList.add('weg'); setTimeout(() => fenster.remove(), 150); } return; }
+    if (!fenster) document.body.append(fenster = el('div.nachricht-fenster', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Nachrichten vom MPGler' }));
+    leeren(fenster).append(el('div.nachricht-stapel',
+      el('h2', zeilen.length === 1 ? 'Nachricht vom MPGler' : `${zeilen.length} Nachrichten vom MPGler`), ...zeilen));
+    fenster.querySelector('.nachricht .btn')?.focus({ preventScroll: true });
   }
   // Einmal pro Tablet: Benachrichtigungen erlauben, damit Nachrichten auch bei geschlossener App ankommen
   async function pushHinweis(hatNachricht) {
@@ -319,6 +326,7 @@
 
   async function abmeldenUndStart(hinweis) {
     clearInterval(ampelTimer); ampelStand = null; document.onvisibilitychange = null;
+    document.querySelector('.nachricht-fenster')?.remove();
     await api.abmelden();
     try { localStorage.removeItem('bk_ich'); localStorage.setItem('bk_startmodus', 'koppeln'); } catch { /* privat */ }
     ctx = null;

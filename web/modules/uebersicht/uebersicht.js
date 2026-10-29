@@ -49,7 +49,7 @@ BK.modul('uebersicht', {
     root.querySelector('[data-kacheln]').append(
       kachel('mangel', 'f-rot', 'wrench', 'Mängelmeldung'),
       kachel('material', 'f-blau', 'box', 'Materialanforderung'),
-      kachel('sollliste', 'f-navy', 'check', 'Checkliste'));
+      kachel('sollliste', 'f-navy', 'list', 'Checkliste'));
 
     async function laden() {
       try { fz = (await api.fahrzeug(fz.id)) || fz; } catch { /* alter Stand */ }

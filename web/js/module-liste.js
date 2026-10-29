@@ -8,7 +8,7 @@ window.BK.MODULE = [
   { name: 'mangel',     label: 'Mängelmeldung',     icon: 'wrench', fuer: ['tablet'], schalter: 'mangel',   tab: 'Melden' },
   { name: 'material',   label: 'Materialanforderung', icon: 'box',   fuer: ['tablet'], schalter: 'material', tab: 'Melden' },
   // Checkliste zum Nachschauen. Die Fahrzeug Überprüfung (Modul checkliste) macht der MPGler im Portal (Überprüfungen › Blatt).
-  { name: 'sollliste',  label: 'Checkliste',  icon: 'check', fuer: ['tablet'], schalter: 'checkliste', tab: 'Checkliste' },
+  { name: 'sollliste',  label: 'Checkliste',  icon: 'list', fuer: ['tablet'], schalter: 'checkliste', tab: 'Checkliste' },
   { name: 'verlauf',    label: 'Verlauf',   icon: 'clock',  fuer: ['tablet'], schalter: 'verlauf' },
 
   // MPGler und Admin (Mac)
