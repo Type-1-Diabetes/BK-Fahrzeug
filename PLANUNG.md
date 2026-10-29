@@ -132,6 +132,10 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 - Formulare werden aus einer Beschreibung erzeugt (welche Felder, Pflichtfelder, Auswahllisten). Ein neues Feld braucht keinen neuen Code.
 - Gemeinsame Teile liegen an einer Stelle: Design (CSS-Variablen), Bausteine (Knöpfe, Listen, Formularfelder), `api.js` für den Datenzugriff.
 - Ideen für spätere Module: Gerätewartung (Prüffristen), Verfallsdaten, Fahrzeugübergabe, Statistik.
+- Für später vorgemerkt (Okt. 2026):
+  - **Materiallager:** Bestand am MPGler-Lager. „Ausgegeben“ zieht automatisch ab, Warnung bei wenig Bestand.
+  - **Erinnerung bei Fristen:** TÜV, STK/MTK und Überprüfung überfällig oder in 30 Tagen fällig, per Push an MPGler (täglicher Job, in Supabase `pg_cron`, später Job-Liste auf dem Webserver).
+  - **Ablaufdaten-Übersicht (Mac):** alles mit Ablaufdatum aus den letzten Überprüfungen, sortiert nach Datum, mit Filter nach KTW.
 
 ## 6. Offline-Modus mit Warteschlange
 

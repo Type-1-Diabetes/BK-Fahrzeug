@@ -18,7 +18,8 @@
       const uhr = t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
       if (t.toDateString() === heute.toDateString()) return 'heute ' + uhr;
       if (t.toDateString() === new Date(heute - 864e5).toDateString()) return 'gestern ' + uhr;
-      return t.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + '. ' + uhr;
+      // Selbst zusammensetzen: Browser liefern „01.06.“ oder „01.06“, das gab „01.06.. 10:00“
+      return `${String(t.getDate()).padStart(2, '0')}.${String(t.getMonth() + 1).padStart(2, '0')}. ${uhr}`;
     },
 
     // Fahrzeugstatus setzen. Rot braucht einen Grund, der auf dem Tablet steht.
