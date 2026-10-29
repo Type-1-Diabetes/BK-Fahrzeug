@@ -423,3 +423,12 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Vorlage bearbeiten: Gruppen (Patientenraum, Hygiene …) haben einen Kopf mit Griff, Umbenennen ✎ und Löschen ✕ (beim Darüberfahren). Gruppe ziehen verschiebt sie mit allen Bereichen. Bereich in eine andere Gruppe ziehen ändert seine Gruppe. „Neue Gruppe“ fragt den Namen und legt gleich den ersten Bereich an. Löschen entfernt nur die Überschrift, die Bereiche stehen danach unter „Ohne Gruppe“. Keine neue Migration (nutzt `vorlage_bereich_speichern` und 029).
 - Fahrzeug Überprüfung: Abgehakt zeigt „Anzahl ist“ gleich die Soll-Zahl, „Nicht vorhanden“ zeigt 0.
 - Getestet in Chromium mit Testdaten: Bereich in andere Gruppe, Gruppe nach oben, Umbenennen, Abhaken. Keine Fehler.
+
+## Geräte verwalten, Mangel-Art, Auswahllisten (2026-10-29, bk-v71, Migration 030)
+- Mängelmeldung: Art heißt „Fahrzeug“ / „Geräte“ (vorher KTW/MPG), Feld „Gerät“. Mängel-Tabelle und CSV: „Fahrzeug“/„Gerät“. Der Druck bleibt wie das Papier (KTW/MPG).
+- Neu: Verwaltung › **Geräte** (Modul `geraete`): Gerätearten anlegen, ändern, löschen (Name, Hersteller, STK/MTK), mit Anzahl der KTW.
+- Fahrzeug-Akte › Geräte: „Gerät hinzufügen“ (Geräteart wählen oder frei, SN, Hersteller, STK/MTK, fällig am), Zeile antippen = bearbeiten/entfernen. Text „Geräte pflegt später …“ entfernt.
+- Migration 030: Tabelle `geraete_typen` (RLS, GRANT), `geraete.typ_id`, RPCs `geraetetyp_speichern/_loeschen`, `geraet_speichern/_loeschen` (Besitz geprüft). Demo-Geräte: Namen in den Katalog übernommen, an den KTW gelöscht; Meldungen behalten den Gerätenamen als Text.
+- Auswahllisten: Maus-Hover scrollt die Liste nicht mehr, beim Öffnen steht die Auswahl mittig, nur die Liste scrollt (nie die Seite), Scrollen am Listenende schiebt die Seite nicht mehr weg.
+- Getestet in Chromium mit Testdaten: Geräteart anlegen, Gerät am KTW hinzufügen, Liste offen/Hover/Scrollen. Keine Fehler.
+- Offen: 030 im SQL-Editor ausführen. Danach Geräte je KTW neu vergeben.

@@ -49,3 +49,10 @@
 .fz-mangel > svg { color: var(--label3); flex: none; }
 @media (hover: hover) { .fz-mangel:hover { background: var(--fill); } }
 .fz-mangel:active { background: var(--fill2); }
+/* Geräte am KTW */
+.fz-geraete-kopf { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.fz-geraete-kopf .pbtn { display: inline-flex; align-items: center; gap: 5px; }
+.fz-geraet-blatt h2 { font-size: 20px; padding-right: 40px; }
+.fz-geraet-blatt .foot { padding: 2px 0 12px; }
+.fz-geraet-blatt .kv { grid-template-columns: 110px 1fr; }
+.fz-geraet-blatt .acts { justify-content: flex-end; margin-top: 16px; }

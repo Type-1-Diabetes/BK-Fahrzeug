@@ -80,6 +80,61 @@ BK.modul('fahrzeuge', {
       zu.focus();
     }
 
+    // Gerät am KTW anlegen oder ändern: Geräteart aus dem Katalog, dazu SN, Hersteller, STK/MTK und Fälligkeit
+    async function geraetDialog(f, g) {
+      let typen = [];
+      try { typen = await api.geraeteTypen(); } catch { /* ohne Katalog: Name frei */ }
+      const typ = el('select.tf', { 'aria-label': 'Geräteart' }, el('option', { value: '' }, 'Geräteart wählen'),
+        ...typen.map(t => el('option', { value: t.id, selected: g && g.typ_id === t.id }, t.name)), el('option', { value: 'frei', selected: g && !g.typ_id }, 'Andere (Name eintippen)'));
+      const name = el('input.tf', { maxlength: 80, value: g ? g.name : '', placeholder: 'Name des Geräts', 'aria-label': 'Name' });
+      const sn = el('input.tf', { maxlength: 60, value: g ? g.seriennummer || '' : '', placeholder: 'z. B. SN 12345', 'aria-label': 'Seriennummer', autocomplete: 'off' });
+      const hersteller = el('input.tf', { maxlength: 80, value: g ? g.hersteller || '' : '', 'aria-label': 'Hersteller' });
+      const pruef = el('select.tf', { 'aria-label': 'Prüfung' }, ...[['', 'Keine'], ['stk', 'STK'], ['mtk', 'MTK']].map(([k, t]) => el('option', { value: k, selected: ((g && g.pruefart) || '') === k }, t)));
+      const bis = el('input.tf', { type: 'date', value: g ? g.pruefung_bis || '' : '', 'aria-label': 'Fällig am' });
+      const nameZeile = el('div', name);
+      const fehler = el('p.ffehler', { role: 'alert' });
+      // Geräteart übernimmt Name, Hersteller und Prüfung; „Andere“ zeigt das Namensfeld
+      const umschalten = () => { nameZeile.hidden = typ.value !== 'frei'; nameLabel.hidden = nameZeile.hidden; };
+      typ.onchange = () => {
+        const t = typen.find(x => x.id === typ.value);
+        if (t) { name.value = t.name; if (!hersteller.value) hersteller.value = t.hersteller || ''; pruef.value = t.pruefart || ''; pruef.dispatchEvent(new Event('change')); }
+        umschalten();
+      };
+      const nameLabel = el('span.l', 'Name');
+      const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, BK.icon('x'));
+      const speichern = async () => {
+        const t = typen.find(x => x.id === typ.value);
+        const daten = { typ_id: t ? t.id : null, name: t ? t.name : name.value.trim(), seriennummer: sn.value.trim(), hersteller: hersteller.value.trim(), pruefart: pruef.value, pruefung_bis: bis.value };
+        if (!daten.name) { fehler.textContent = typ.value ? 'Bitte den Namen eintragen.' : 'Bitte eine Geräteart wählen.'; return; }
+        try { await api.geraetSpeichern(g && g.id, f.id, daten); showToast(g ? 'Gerät gespeichert' : `${daten.name} hinzugefügt`); weg(); datei(); }
+        catch (e) { fehler.textContent = e.message; }
+      };
+      const overlay = el('div.blatt-overlay', el('div.blatt.blatt-klein.fz-geraet-blatt', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Gerät' }, zu,
+        el('h2', g ? g.name : 'Gerät hinzufügen'), el('p.foot', f.name),
+        el('div.kv',
+          el('span.l', 'Geräteart'), el('div', typ),
+          nameLabel, nameZeile,
+          el('span.l', 'Seriennummer'), el('div', sn),
+          el('span.l', 'Hersteller'), el('div', hersteller),
+          el('span.l', 'Prüfung'), el('div', pruef),
+          el('span.l', 'Fällig am'), el('div', bis)),
+        fehler,
+        el('div.acts',
+          g ? el('button.pbtn.rot', { type: 'button', onclick: async () => {
+            if (!await confirmDialog(`${g.name} entfernen?`, `Das Gerät verschwindet von ${f.name}. Alte Meldungen behalten den Namen.`)) return;
+            try { await api.geraetLoeschen(g.id); showToast(`${g.name} entfernt`); weg(); datei(); } catch (e) { fehler.textContent = e.message; }
+          } }, 'Entfernen') : null,
+          el('button.pbtn.def', { type: 'button', onclick: speichern }, g ? 'Speichern' : 'Hinzufügen'))));
+      const weg = () => { document.removeEventListener('keydown', esc, true); overlay.classList.add('weg'); setTimeout(() => overlay.remove(), 150); };
+      const esc = e => { if (e.key === 'Escape' && !document.querySelector('.auswahl-liste, ._ad-open')) { e.stopPropagation(); weg(); } };
+      zu.onclick = weg;
+      overlay.addEventListener('mousedown', e => { if (e.target === overlay) weg(); });
+      document.addEventListener('keydown', esc, true);
+      document.body.append(overlay);
+      umschalten();
+      zu.focus();
+    }
+
     // Ohne Auswahl: Kacheln. Mit Auswahl: Akte des KTW.
     function zeichnen() {
       const q = suche.value.trim().toLowerCase();
@@ -180,11 +235,13 @@ BK.modul('fahrzeuge', {
             el('td', c.abgeschlossen_am ? String(c.eintraege.filter(e => !e.nicht_geprueft).length) + (c.eintraege.some(e => e.nicht_geprueft) ? ` · ${c.eintraege.filter(e => e.nicht_geprueft).length} nicht geprüft` : '') : '–'), el('td', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '–'))),
           'Noch keine Checkliste.'));
       } else if (reiter === 'geraete') {
-        inhalt.append(tabelle(['Gerät', 'Seriennummer', 'Hersteller', 'Prüfung', 'Fällig'],
-          geraete.map(g => el('tr', el('td', g.name), el('td', g.seriennummer || '–'), el('td', g.hersteller || '–'), el('td', (g.pruefart || '–').toUpperCase()),
-            el('td', { class: g.pruefung_bis && new Date(g.pruefung_bis) < jetzt ? 'red' : null }, g.pruefung_bis ? BK.datum(g.pruefung_bis, false) : '–'))),
-          'Keine Geräte eingetragen.'),
-          el('div.foot', { style: 'padding:8px 0 0' }, 'Geräte pflegt später der MPGler auf dem eigenen Webserver.'));
+        inhalt.append(
+          el('div.fz-geraete-kopf', el('button.pbtn.def', { type: 'button', onclick: () => geraetDialog(f, null) }, BK.icon('plus'), 'Gerät hinzufügen')),
+          tabelle(['Gerät', 'Seriennummer', 'Hersteller', 'Prüfung', 'Fällig'],
+            geraete.map(g => el('tr', { dataset: { klick: '' }, title: 'Bearbeiten', onclick: () => geraetDialog(f, g) },
+              el('td', g.name), el('td', g.seriennummer || '–'), el('td', g.hersteller || '–'), el('td', (g.pruefart || '–').toUpperCase()),
+              el('td', { class: g.pruefung_bis && new Date(g.pruefung_bis) < jetzt ? 'red' : null }, g.pruefung_bis ? BK.datum(g.pruefung_bis, false) : '–'))),
+            'Noch kein Gerät. „Gerät hinzufügen“ wählt aus den Gerätearten (Verwaltung › Geräte).'));
       } else {
         try {
           if (verlauf instanceof Error) throw verlauf;
@@ -197,7 +254,8 @@ BK.modul('fahrzeuge', {
               tablet_gekoppelt: 'Tablet gekoppelt', tablet_entkoppelt: 'Tablet entkoppelt', tablet_angelegt: 'Tablet angelegt',
               tablet_neuer_code: 'Neuer Kopplungscode', tablet_bearbeitet: 'Tablet bearbeitet', tablet_gesperrt: 'Tablet gesperrt', tablet_entsperrt: 'Tablet entsperrt',
               meldung_geloescht: e.details.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', checkliste_geloescht: 'Checkliste gelöscht', checkliste_abgebrochen: 'Überprüfung abgebrochen',
-              checkliste_geprueft: 'Fahrzeug Überprüfung abgeschlossen', tuev: 'TÜV bis ' + (e.details.bis || '–') })[e.aktion] || BK.aktionText(e.aktion)),
+              checkliste_geprueft: 'Fahrzeug Überprüfung abgeschlossen', tuev: 'TÜV bis ' + (e.details.bis || '–'),
+              geraet: 'Gerät gespeichert: ' + (e.details.name || ''), geraet_geloescht: 'Gerät entfernt: ' + (e.details.name || '') })[e.aktion] || BK.aktionText(e.aktion)),
             el('td', e.wer_name || '–'))), 'Noch nichts passiert.'));
         } catch (e) { inhalt.append(el('div.mleer', e.message)); }
       }

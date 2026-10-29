@@ -103,7 +103,7 @@
           tbody.append(el('tr', { dataset: { id: m.id }, class: m.id === gewaehlt ? 'sel' : null, onclick: () => waehlen(m.id) },
             el('td', mac.pill(m.status)),
             el('td', mac.titel(m) + (fz.ampel === 'nicht_einsatzbereit' && m.status !== 'erledigt' ? ' · KTW nicht einsatzbereit' : '')),
-            el('td', m.fahrzeug.name), el('td', m.betrifft === 'mpg' ? 'MPG' : 'KTW'),
+            el('td', m.fahrzeug.name), el('td', m.betrifft === 'mpg' ? 'Gerät' : 'Fahrzeug'),
             el('td', mac.kurz(m.erstellt_am)), el('td', m.gemeldet_von)));
         }
         inspektor();
@@ -266,7 +266,7 @@
 
       root.querySelector('[data-export]').onclick = () => {
         const zeilen = gefiltert().map(m => ({
-          Status: mac.STATUS[m.status], Mangel: mac.titel(m), KTW: m.fahrzeug.name, Art: m.betrifft === 'mpg' ? 'MPG' : 'KTW',
+          Status: mac.STATUS[m.status], Mangel: mac.titel(m), KTW: m.fahrzeug.name, Art: m.betrifft === 'mpg' ? 'Gerät' : 'Fahrzeug',
           Beschreibung: m.beschreibung, Gemeldet: BK.datum(m.erstellt_am), Von: m.gemeldet_von, Erledigt: m.erledigt_am ? BK.datum(m.erledigt_am) : '',
           ...m.bearbeitung }));
         if (!exportCSV('maengel-' + new Date().toISOString().slice(0, 10) + '.csv', zeilen)) alertDialog('Nichts zu exportieren', 'Die Liste ist leer.');

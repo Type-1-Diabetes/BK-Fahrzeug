@@ -17,10 +17,10 @@ BK.modul('mangel', {
 
     const FELDER = [
       { name: 'betrifft', typ: 'segment', label: 'Art', pflicht: true, standard: 'fahrzeug',
-        optionen: [['fahrzeug', 'KTW'], ['mpg', 'MPG']] },
+        optionen: [['fahrzeug', 'Fahrzeug'], ['mpg', 'Geräte']] },
       { name: 'gegenstand', typ: 'text', label: 'Gegenstand', pflicht: true, max: 200,
         platzhalter: 'z. B. Trage, Schiebetür, Blaulicht', wenn: w => w.betrifft === 'fahrzeug' },
-      { name: 'geraet_id', typ: 'auswahl', label: 'MPG: SN', pflicht: true, platzhalter: 'Gerät wählen',
+      { name: 'geraet_id', typ: 'auswahl', label: 'Gerät', pflicht: true, platzhalter: 'Gerät wählen',
         optionen: [...geraete.map(g => [g.id, geraetText(g)]), ['anders', 'Anderes Gerät']],
         hinweis: 'Seriennummer und Hersteller kommen aus der Geräteliste dieses KTW.', wenn: w => w.betrifft === 'mpg' },
       { name: 'geraet_frei', typ: 'text', label: 'Welches Gerät?', pflicht: true, max: 120,

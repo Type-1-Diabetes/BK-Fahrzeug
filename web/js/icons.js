@@ -20,7 +20,7 @@
     upload: '<path d="M12 16V5M7 10l5-5 5 5"/><path d="M5 19h14"/>', logout: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>',
     search: '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>', export: '<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/>',
     download: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 19h14"/>',
-    chevD: '<path d="m6 9 6 6 6-6"/>', chevU: '<path d="m6 15 6-6 6 6"/>',
+    chevD: '<path d="m6 9 6 6 6-6"/>', puls: '<path d="M3 12h4l2-5 4 10 2-5h6"/>', chevU: '<path d="m6 15 6-6 6 6"/>',
     griff: '<circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/>', pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
     moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',

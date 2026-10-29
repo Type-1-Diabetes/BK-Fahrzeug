@@ -158,7 +158,14 @@
     fahrzeuge: () => lesen('fahrzeuge', 'aktiv=eq.true&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,module,vorlage_id,wache_id,tuev_bis,wache:wachen(id,name)&order=name'),
     // TÜV: Monat und Jahr, bis = 'JJJJ-MM-01' oder null
     tuevSetzen: (fahrzeugId, bis) => rpc('fahrzeug_tuev_setzen', { p_fahrzeug: fahrzeugId, p_bis: bis || null }),
-    geraete: fahrzeugId => lesen('geraete', `fahrzeug_id=eq.${fahrzeugId}&select=id,name,seriennummer,hersteller,pruefart,pruefung_bis&order=name`),
+    geraete: fahrzeugId => lesen('geraete', `fahrzeug_id=eq.${fahrzeugId}&select=id,typ_id,name,seriennummer,hersteller,pruefart,pruefung_bis&order=name`),
+    // Geräte (Migration 030): Katalog der Gerätearten und Geräte pro KTW
+    geraeteTypen: () => lesen('geraete_typen', 'select=id,name,hersteller,pruefart&order=name'),
+    geraetetypSpeichern: (id, t) => rpc('geraetetyp_speichern', { p_id: id || null, p_name: t.name, p_hersteller: t.hersteller || null, p_pruefart: t.pruefart || null }),
+    geraetetypLoeschen: id => rpc('geraetetyp_loeschen', { p_id: id }),
+    geraetSpeichern: (id, fahrzeugId, g) => rpc('geraet_speichern', { p_id: id || null, p_fahrzeug: fahrzeugId, p_typ: g.typ_id || null, p_name: g.name,
+      p_seriennummer: g.seriennummer || null, p_hersteller: g.hersteller || null, p_pruefart: g.pruefart || null, p_pruefung_bis: g.pruefung_bis || null }),
+    geraetLoeschen: id => rpc('geraet_loeschen', { p_id: id }),
     ampelSetzen: (fahrzeugId, ampel, grund) => rpc('ampel_setzen', { p_fahrzeug: fahrzeugId, p_ampel: ampel, p_grund: grund || null }),
 
     // Meldungen ---------------------------------------------------------

@@ -496,7 +496,7 @@ input[type="date"].tf::-webkit-calendar-picker-indicator { opacity: .55; }
 .auswahl-knopf.field svg { font-size: 22px; }
 
 .auswahl-liste {
-  position: fixed; z-index: 300; overflow: auto; padding: 6px; border-radius: 14px; outline: none;
+  position: fixed; z-index: 300; overflow: auto; overscroll-behavior: contain; padding: 6px; border-radius: 14px; outline: none;
   background: var(--bg2); box-shadow: 0 0 0 .5px var(--sep), 0 12px 32px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.08);
   animation: auswahl-ein .16s cubic-bezier(.2,.8,.2,1); transform-origin: top center;
 }

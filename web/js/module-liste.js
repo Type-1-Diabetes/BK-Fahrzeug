@@ -18,6 +18,7 @@ window.BK.MODULE = [
   { name: 'gegenzeichnen', label: 'Überprüfungen', icon: 'list',   fuer: ['mpg'], bereich: 'Checklisten' },
   { name: 'vorlage',       label: 'Vorlage bearbeiten', icon: 'pen', fuer: ['mpg'],        bereich: 'Checklisten' },
   { name: 'fristen',       label: 'Fristen',       icon: 'clock',  fuer: ['mpg'],          bereich: 'Checklisten' },
+  { name: 'geraete',       label: 'Geräte',        icon: 'puls',   fuer: ['mpg'],          bereich: 'Verwaltung' },
   { name: 'tablets',       label: 'Tablets',       icon: 'tablet', fuer: ['mpg'],          bereich: 'Verwaltung' },
   { name: 'einstellungen', label: 'Einstellungen', icon: 'gear',   fuer: ['mpg'], bereich: 'Verwaltung' },
 ];

@@ -67,7 +67,7 @@
       z.append(s);
       if (o.disabled) z.setAttribute('aria-disabled', 'true');
       z.addEventListener('click', () => waehlen(i));
-      z.addEventListener('mousemove', () => markieren(i));
+      z.addEventListener('mousemove', () => markieren(i, false));  // Maus markiert nur, scrollt nicht
       liste.append(z);
     });
     document.body.append(liste);
@@ -75,7 +75,7 @@
     knopf.setAttribute('aria-expanded', 'true');
     knopf.classList.add('offen');
     platzieren();
-    markieren(offen.aktiv);
+    markieren(offen.aktiv, 'mitte');
     liste.focus({ preventScroll: true });
     liste.addEventListener('keydown', taste);
   }
@@ -95,12 +95,18 @@
     l.classList.toggle('nach-oben', nachOben);
   }
 
-  function markieren(i) {
+  // rollen: true = Eintrag in Sicht holen (Tastatur), 'mitte' = beim Öffnen mittig, false = nicht scrollen (Maus).
+  // Nur die Liste selbst scrollt, nie die Seite dahinter (scrollIntoView würde alle Eltern mitscrollen).
+  function markieren(i, rollen = true) {
     if (!offen) return;
     offen.aktiv = i;
-    offen.liste.querySelectorAll('.auswahl-option').forEach(z => z.classList.toggle('aktiv', Number(z.dataset.i) === i));
-    const z = offen.liste.querySelector(`[data-i="${i}"]`);
-    if (z) z.scrollIntoView({ block: 'nearest' });
+    const l = offen.liste;
+    l.querySelectorAll('.auswahl-option').forEach(z => z.classList.toggle('aktiv', Number(z.dataset.i) === i));
+    const z = l.querySelector(`[data-i="${i}"]`);
+    if (!z || !rollen) return;
+    if (rollen === 'mitte') l.scrollTop = z.offsetTop - (l.clientHeight - z.offsetHeight) / 2;
+    else if (z.offsetTop < l.scrollTop) l.scrollTop = z.offsetTop - 4;
+    else if (z.offsetTop + z.offsetHeight > l.scrollTop + l.clientHeight) l.scrollTop = z.offsetTop + z.offsetHeight - l.clientHeight + 4;
   }
 
   function waehlen(i) {
