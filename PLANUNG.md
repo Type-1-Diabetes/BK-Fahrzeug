@@ -144,7 +144,7 @@ Die App soll leicht erweiterbar sein. Neue Funktionen sollen sich hinzufügen od
 ## 6a. Benachrichtigungen (Push)
 
 - Jeder MPGler und Admin schaltet sie pro Gerät ein (Mac: Einstellungen › Benachrichtigungen) und wählt, wobei er Bescheid bekommt.
-- Anlässe: neuer Mangel, Material angefordert, KTW nicht einsatzbereit, Checkliste zum Gegenzeichnen. Empfänger: Admins und MPGler der Wache des KTW, nicht wer es selbst ausgelöst hat.
+- Anlässe: neuer Mangel, Material angefordert, KTW nicht einsatzbereit, Checkliste zum Gegenzeichnen. Dazu Nachrichten vom MPGler an Tablets (Migration 031): an einen KTW oder alle, bleiben bis „Gelesen“, Push hält 7 Tage. Empfänger: Admins und MPGler der Wache des KTW, nicht wer es selbst ausgelöst hat.
 - Technik in der Demo: Ein neuer Eintrag im Verlauf löst einen Trigger aus (Migration 004). Der ruft die Edge Function `push-senden` auf, die per Web Push (VAPID) verschickt. Abgelaufene Geräte werden automatisch entfernt.
 - Geheimnisse liegen nur in Supabase (Edge Functions › Secrets und Vault), nie im Repo.
 - iPad/iPhone: nur in der installierten App (Home-Bildschirm), ab iOS 16.4.

@@ -149,6 +149,7 @@
       if (!ctx || document.visibilityState !== 'visible' || !navigator.onLine) return;
       // Tablet meldet sich höchstens jede Minute als online (auch nach dem Wiederöffnen)
       if (ctx.ich.tablet_id && Date.now() - letzterPing > 60000) { letzterPing = Date.now(); api.tabletPing().catch(() => {}); }
+      if (ctx.ich.tablet_id) nachrichtenZeigen();
       let l;
       try { l = await api.ampeln(); } catch { return; }
       if (!ctx) return;
@@ -231,6 +232,57 @@
     return b;
   }
 
+  // Nachrichten vom MPGler: Leiste über allen Reitern, bis jemand „Gelesen“ tippt. Dazu ggf. Knopf für Benachrichtigungen.
+  let nachrichtenLeiste = null, nachrichtenLauf = 0;
+  const vapidSchluessel = b64 => Uint8Array.from(atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  async function nachrichtenZeigen() {
+    if (!nachrichtenLeiste || !ctx || !ctx.fahrzeug) return;
+    const lauf = ++nachrichtenLauf;
+    let liste;
+    try { liste = await api.nachrichten(); } catch { return; }
+    const fzId = ctx.fahrzeug.id;
+    const offen = liste.filter(n => !n.zurueckgezogen_am && (!n.fahrzeug_id || n.fahrzeug_id === fzId) && !(n.gelesen || []).some(g => g.fahrzeug_id === fzId));
+    const zeilen = offen.map(n => el('div', { class: 'nachricht' + (n.wichtig ? ' wichtig' : '') },
+      el('div.nachricht-ic', icon(n.wichtig ? 'alert' : 'inbox')),
+      el('div.t', el('b', n.wichtig ? 'Wichtig vom MPGler' : 'Nachricht vom MPGler'), el('p', n.text),
+        el('span', [BK.datum(n.erstellt_am), n.wer_name].filter(Boolean).join(' · '))),
+      el('button.btn', { type: 'button', onclick: async e => {
+        const k = e.currentTarget; k.disabled = true; k.classList.add('laedt');
+        try { await api.nachrichtGelesen(n.id); api.frischLesen(); nachrichtenZeigen(); }
+        catch (err) { k.disabled = false; k.classList.remove('laedt'); alertDialog('Nicht gespeichert', err.offline ? 'Zum Bestätigen braucht das Tablet Netz.' : err.message); }
+      } }, icon('check'), 'Gelesen')));
+    const push = await pushHinweis(offen.length > 0);
+    if (lauf !== nachrichtenLauf) return;  // ein neuerer Aufruf zeichnet
+    leeren(nachrichtenLeiste).append(...zeilen, ...push);
+  }
+  // Einmal pro Tablet: Benachrichtigungen erlauben, damit Nachrichten auch bei geschlossener App ankommen
+  async function pushHinweis(hatNachricht) {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined' || Notification.permission === 'denied') return [];
+    let reg, sub;
+    try { reg = await navigator.serviceWorker.ready; sub = await reg.pushManager.getSubscription(); } catch { return []; }
+    if (sub && Notification.permission === 'granted') {
+      // Abo bei jedem Start bestätigen (z. B. nach neuer Kopplung), Fehler still
+      if (!pushHinweis.gemeldet) { pushHinweis.gemeldet = true; api.tabletPushAbo(sub).catch(() => {}); }
+      return [];
+    }
+    let spaeter = false;
+    try { spaeter = !!localStorage.getItem('bk_push_spaeter'); } catch { /* privat */ }
+    if (!hatNachricht && spaeter) return [];
+    return [el('div.nachricht.push',
+      el('div.nachricht-ic', icon('inbox')),
+      el('div.t', el('b', 'Nachrichten auch bei geschlossener App'), el('span', 'Erlaube Benachrichtigungen, dann meldet sich das Tablet, wenn der MPGler schreibt.')),
+      el('button.btn.sec', { type: 'button', onclick: () => { try { localStorage.setItem('bk_push_spaeter', '1'); } catch { /* privat */ } nachrichtenZeigen(); } }, 'Später'),
+      el('button.btn', { type: 'button', onclick: async () => {
+        try {
+          if (await Notification.requestPermission() !== 'granted') return nachrichtenZeigen();
+          const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidSchluessel(BK_CONFIG.vapid) });
+          await api.tabletPushAbo(neu);
+          showToast('Benachrichtigungen sind an');
+        } catch (e) { alertDialog('Hat nicht geklappt', e.offline ? 'Dafür braucht das Tablet Netz.' : e.message); }
+        nachrichtenZeigen();
+      } }, 'Einschalten'))];
+  }
+
   // Tablet-Menü: Infos zum Gerät und Entkoppeln (nur mit PIN)
   async function tabletMenue() {
     const fz = ctx.fahrzeug;
@@ -279,6 +331,7 @@
     const inhalt = el('main.content', { id: 'inhalt' });
     const fz = ctx.fahrzeug;
     const streifen = el('button.netz-streifen', { type: 'button', role: 'status', hidden: true });
+    nachrichtenLeiste = el('div.nachrichten-leiste', { role: 'region', 'aria-label': 'Nachrichten vom MPGler', 'aria-live': 'polite' });
     app.className = 'huelle-tablet';
     document.removeEventListener('keydown', macTasten);
     leeren(app).append(
@@ -292,7 +345,7 @@
         vollbildKnopf('tablet-ab', true),
         themeKnopf('tablet-ab.thema-knopf'),
         el('button.tb.tablet-ab', { type: 'button', title: 'Abmelden (mit PIN)', onclick: tabletMenue }, icon('logout'), 'Abmelden'))),
-      streifen, el('div.reiter-leiste', { id: 'reiter-leiste', hidden: true }), inhalt);
+      streifen, nachrichtenLeiste, el('div.reiter-leiste', { id: 'reiter-leiste', hidden: true }), inhalt);
     let warten = [];
     const meldungen = n => n === 1 ? '1 Meldung' : n + ' Meldungen';
     // Streifen: offline, wartet oder Fehler. Tippen öffnet den Verlauf (dort Erneut/Verwerfen).
@@ -322,6 +375,7 @@
       geoeffnetTimer = setTimeout(() => inhalt.classList.remove('geoeffnet'), 800);
     };
     navigieren(liste[0].name);
+    nachrichtenZeigen();
     vorladen(liste);
     letzterPing = 0;
     statusBeobachten();

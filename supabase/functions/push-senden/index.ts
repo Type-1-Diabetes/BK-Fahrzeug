@@ -55,12 +55,44 @@ async function empfaenger(fz: any, schluessel: string, ohne: string | null): Pro
   return [...ids];
 }
 
+// An Abos schicken; abgelaufene Abos löschen
+async function schicken(abos: any[], payload: string, ttl: number) {
+  let gesendet = 0;
+  await Promise.all((abos || []).filter(a => PUSH_HOST.test(a.endpoint)).map(async a => {
+    try {
+      await webpush.sendNotification({ endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } }, payload, { TTL: ttl });
+      gesendet++;
+    } catch (e: any) {
+      if (e.statusCode === 404 || e.statusCode === 410) await db.from('push_abos').delete().eq('id', a.id);
+      else console.error('Push fehlgeschlagen', e.statusCode);
+    }
+  }));
+  return gesendet;
+}
+
+// Nachricht vom MPGler (Migration 031): nur an gekoppelte, nicht gesperrte Tablets der Empfänger. Hält 7 Tage, falls das Tablet aus ist.
+async function nachrichtSenden(id: string) {
+  const { data: n, error } = await db.from('nachrichten').select('id, fahrzeug_id, text, wichtig, zurueckgezogen_am').eq('id', id).single();
+  if (error || !n || n.zurueckgezogen_am) return new Response('nichts', { status: 200 });
+  let q = db.from('tablets').select('auth_uid, fahrzeug:fahrzeuge!inner(aktiv)').eq('gesperrt', false).not('auth_uid', 'is', null).eq('fahrzeug.aktiv', true);
+  if (n.fahrzeug_id) q = q.eq('fahrzeug_id', n.fahrzeug_id);
+  const { data: tablets, error: e2 } = await q;
+  if (e2) return new Response('Fehler', { status: 500 });
+  const ids = (tablets || []).map((t: any) => t.auth_uid);
+  if (!ids.length) return new Response('keine Empfänger', { status: 200 });
+  const { data: abos } = await db.from('push_abos').select('id, endpoint, p256dh, auth').in('user_id', ids);
+  const payload = JSON.stringify({ title: n.wichtig ? 'Wichtige Nachricht vom MPGler' : 'Nachricht vom MPGler', body: n.text.slice(0, 180), tag: 'nachricht-' + n.id, url: './' });
+  const gesendet = await schicken(abos || [], payload, 60 * 60 * 24 * 7);
+  return new Response(JSON.stringify({ gesendet }), { headers: { 'Content-Type': 'application/json' } });
+}
+
 Deno.serve(async req => {
   if (fehlend.length) return new Response('Secret fehlt: ' + fehlend.join(', '), { status: 500 });
   if (req.method !== 'POST' || req.headers.get('x-push-geheimnis') !== Deno.env.get('PUSH_GEHEIMNIS')) {
     return new Response('nein', { status: 401 });
   }
-  const { verlauf_id } = await req.json().catch(() => ({}));
+  const { verlauf_id, nachricht_id } = await req.json().catch(() => ({}));
+  if (typeof nachricht_id === 'string' && /^[0-9a-f-]{36}$/.test(nachricht_id)) return nachrichtSenden(nachricht_id);
   if (!verlauf_id) return new Response('verlauf_id fehlt', { status: 400 });
 
   const { data: v } = await db.from('verlauf').select('*').eq('id', verlauf_id).single();

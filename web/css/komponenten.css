@@ -741,3 +741,19 @@ button, a, [role="button"], [role="tab"], .tile, .vr, .si { touch-action: manipu
   .blatt.blatt-klein { min-height: 0; margin: auto 12px; width: calc(100% - 24px); border-radius: 14px; }
   .blatt-overlay:has(> .blatt-klein) { place-items: center; padding: 12px 0; }
 }
+
+/* Nachrichten vom MPGler auf dem Tablet (app.js nachrichtenZeigen): über allen Reitern, bis „Gelesen“ */
+.nachrichten-leiste { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 0 max(28px, env(safe-area-inset-right)) 0 max(28px, env(safe-area-inset-left)); }
+.nachrichten-leiste:not(:empty) { padding-top: 8px; padding-bottom: 4px; }
+.nachricht { display: flex; align-items: center; gap: 14px; padding: 12px 14px 12px 16px; border-radius: 14px; background: color-mix(in srgb, var(--navy2) 10%, var(--bg2)); box-shadow: inset 0 0 0 .5px color-mix(in srgb, var(--navy2) 30%, transparent); animation: ein .2s cubic-bezier(.25,1,.5,1) both; }
+.nachricht.wichtig { background: color-mix(in srgb, var(--bad) 10%, var(--bg2)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bad) 40%, transparent); }
+.nachricht.push { background: var(--bg2); box-shadow: inset 0 0 0 .5px var(--sep); }
+.nachricht-ic { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 19px; color: var(--navy2); background: color-mix(in srgb, var(--navy2) 14%, transparent); }
+.nachricht.wichtig .nachricht-ic { color: var(--bad-ink); background: color-mix(in srgb, var(--bad) 16%, transparent); }
+.nachricht .t { flex: 1; min-width: 0; }
+.nachricht .t b { display: block; font-size: 13px; color: var(--label2); font-weight: 600; }
+.nachricht.wichtig .t b { color: var(--bad-ink); }
+.nachricht .t p { margin: 2px 0 0; font-size: 17px; line-height: 1.35; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nachricht .t span { display: block; font-size: 13px; color: var(--label2); margin-top: 3px; }
+.nachricht .btn { min-height: 44px; padding: 0 16px; font-size: 15px; flex: none; }
+@media (max-width: 600px) { .nachricht { flex-wrap: wrap; } .nachricht .btn { flex: 1; } }

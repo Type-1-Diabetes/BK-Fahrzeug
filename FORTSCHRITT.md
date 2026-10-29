@@ -432,3 +432,11 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Auswahllisten: Maus-Hover scrollt die Liste nicht mehr, beim Öffnen steht die Auswahl mittig, nur die Liste scrollt (nie die Seite), Scrollen am Listenende schiebt die Seite nicht mehr weg.
 - Getestet in Chromium mit Testdaten: Geräteart anlegen, Gerät am KTW hinzufügen, Liste offen/Hover/Scrollen. Keine Fehler.
 - Offen: 030 im SQL-Editor ausführen. Danach Geräte je KTW neu vergeben.
+
+## Nachrichten an Tablets (2026-10-29, bk-v72, Migration 031)
+- MPGler: Verwaltung › **Nachrichten** (Modul `nachrichten`): an einen KTW oder an alle, optional „wichtig“ (rot). Liste mit Status (Offen / Gelesen / Zurückgezogen) und „x von y gelesen“, Inspektor zeigt pro KTW, wann gelesen. Zurückziehen nimmt sie von allen Tablets.
+- Tablet: Nachricht steht oben über allen Reitern, bis jemand „Gelesen“ tippt (Knopf, ohne Namen). Bei „an alle“ quittiert jedes Tablet für sich. Prüft alle 10 s und beim Öffnen.
+- Push: Tablet zeigt einmal „Nachrichten auch bei geschlossener App · Einschalten / Später“. Abo über `tablet_push_abo` (nur gekoppeltes Tablet). Entkoppeln, Sperren oder Löschen löscht das Abo sofort (Trigger). `push-senden` schickt neue Nachrichten nur an Tablets der Empfänger, Haltbarkeit 7 Tage (kommt also auch, wenn das Tablet später eingeschaltet wird).
+- Migration 031: `nachrichten`, `nachricht_gelesen` (RLS, GRANT), RPCs `nachricht_senden`, `nachricht_zurueckziehen`, `nachricht_gelesen`, `tablet_push_abo`, Trigger für Push und Abo-Entzug.
+- Getestet in Chromium mit Testdaten: senden, Anzeige auf dem Tablet, Gelesen. Push nicht getestet (geht nur mit echtem Server und installierter App).
+- 031 ist ausgeführt (laut Nutzer). Offen: Edge Function `push-senden` neu deployen, auf einem iPad (installierte App) „Einschalten“ und eine Nachricht testen.

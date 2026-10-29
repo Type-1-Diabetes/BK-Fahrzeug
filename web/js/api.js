@@ -247,6 +247,15 @@
         method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates' },
         body: JSON.stringify({ user_id: sitzung && sitzung.user && sitzung.user.id, endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth }) });
     },
+    // Nachrichten an Tablets (Migration 031). RLS: Tablet sieht nur eigene und „an alle“.
+    nachrichten: () => lesen('nachrichten', 'select=id,fahrzeug_id,text,wichtig,erstellt_am,wer_name,zurueckgezogen_am,fahrzeug:fahrzeuge(name),gelesen:nachricht_gelesen(fahrzeug_id,am)&order=erstellt_am.desc&limit=200'),
+    nachrichtSenden: (fahrzeugId, text, wichtig) => rpc('nachricht_senden', { p_fahrzeug: fahrzeugId || null, p_text: text, p_wichtig: !!wichtig }),
+    nachrichtZurueckziehen: id => rpc('nachricht_zurueckziehen', { p_id: id }),
+    nachrichtGelesen: id => rpc('nachricht_gelesen', { p_id: id }),
+    tabletPushAbo(sub) {
+      const j = sub.toJSON();
+      return rpc('tablet_push_abo', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+    },
     pushAboLoeschen: endpoint => mitLogin('/rest/v1/push_abos?endpoint=eq.' + encodeURIComponent(endpoint), { method: 'DELETE' }),
 
     // Wird nur von der Warteschlange benutzt
