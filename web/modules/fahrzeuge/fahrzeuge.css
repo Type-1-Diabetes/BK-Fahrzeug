@@ -29,3 +29,23 @@
 .fz-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; }
 .fz-trenner { width: .5px; height: 20px; background: var(--sep); margin: 0 4px; }
 .fz-zahlen > div:last-child dd { white-space: normal; }
+/* TÜV auf der Kachel, nur wenn bald fällig oder überfällig */
+.fz-tuev-k { font-size: 12px; font-weight: 600; }
+.fz-tuev-k.warnt { color: var(--warn-ink); } .fz-tuev-k.red { color: var(--bad-ink); }
+.fz-tuev-blatt h2 { font-size: 20px; padding-right: 40px; }
+.fz-tuev-blatt .foot { padding: 4px 0 12px; }
+.fz-tuev-wahl { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 8px; }
+.fz-tuev-blatt .acts { justify-content: flex-end; margin-top: 16px; }
+/* Offene Mängel in der Akte: bleiben stehen, bis sie behoben sind */
+.fz-maengel { margin-top: 16px; }
+.fz-maengel h3 { font-size: 13px; font-weight: 600; color: var(--bad-ink); margin: 0 0 6px; }
+.fz-maengel-liste { border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 .5px var(--sep); background: var(--bg2); }
+.fz-mangel { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 8px 12px; text-align: left; }
+.fz-mangel + .fz-mangel { border-top: .5px solid var(--sep); }
+.fz-mangel-t { flex: 1; min-width: 0; }
+.fz-mangel-t b { font-weight: 500; }
+.fz-mangel-t span { display: block; color: var(--label2); font-size: 12px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fz-mangel-d { color: var(--label2); font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fz-mangel > svg { color: var(--label3); flex: none; }
+@media (hover: hover) { .fz-mangel:hover { background: var(--fill); } }
+.fz-mangel:active { background: var(--fill2); }

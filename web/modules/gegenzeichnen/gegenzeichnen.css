@@ -21,3 +21,8 @@
 .blatt.gz-blatt { width: min(1100px, 100%); }
 .gz-blatt .pliste { width: 100%; table-layout: auto; }
 .gz-blatt .pliste th { white-space: normal; }
+/* KTW wählen für eine neue Überprüfung */
+.gz-wahl-titel { font-size: 20px; padding: 4px 40px 12px 0; }
+.gz-ktw { gap: 12px; width: 100%; text-align: left; }
+.gz-ktw > svg { color: var(--label3); flex: none; }
+.tool [data-neu] { display: inline-flex; align-items: center; gap: 5px; }

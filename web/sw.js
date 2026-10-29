@@ -1,13 +1,13 @@
 /* Service Worker: App-Dateien offline verfügbar, Web-Push.
    Aufbau angelehnt an die Website Schrietz (admin/sw.js), erweitert um den Offline-Modus.
    Bei Änderungen an App-Dateien VERSION erhöhen, dann holt sich jedes Gerät die neuen Dateien. */
-const VERSION = 'bk-v64';
+const VERSION = 'bk-v65';
 const DATEIEN = [
   './', 'index.html', 'manifest.webmanifest',
   'icons/logo-256.png', 'icons/banner.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'icons/favicon-16.png',
   'css/basis.css', 'css/komponenten.css',
   'js/config.js', 'js/dom.js', 'js/icons.js', 'js/api.js', 'js/warteschlange.js', 'js/auswahl.js', 'js/fristen.js', 'js/formular.js', 'js/mac.js', 'js/module-liste.js', 'js/app.js',
-  'js/lib/pwa.js', 'js/lib/alert-dialog.js', 'js/lib/ui-helpers.js', 'js/lib/settings-layout.js',
+  'js/lib/pwa.js', 'js/lib/alert-dialog.js', 'js/lib/ui-helpers.js', 'js/lib/settings-layout.js', 'js/lib/foto-ansicht.js',
   // Tablet-Module, damit das Tablet auch ohne Netz startet
   ...['uebersicht', 'mangel', 'material', 'checkliste', 'sollliste', 'verlauf'].flatMap(m => ['html', 'css', 'js'].map(x => `modules/${m}/${m}.${x}`)),
 ];

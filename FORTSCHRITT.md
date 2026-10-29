@@ -385,3 +385,17 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - „Als MPGler anmelden“ fragt eine 4-stellige PIN ab. Die Datenbank prüft sie (`demo_anmelden(p_pin)`), PIN gehasht in `intern.konfig` ('demo_pin'), nicht im Repo.
 - Fehlversuche: höchstens 5 in 15 Minuten je Sitzung und je IP (`intern.demo_versuche`), parallel gesperrt.
 - Offen: 027 im SQL-Editor ausführen und PIN setzen (Befehl oben in der Migration). Bis dahin klappt der Demo-Login nicht. Nicht im Browser getestet.
+
+## Überprüfung durch MPGler, TÜV, Fotos, Handy (2026-10-29, bk-v65, Migration 028)
+- **Koppeln (iOS):** Code-Felder ohne eigenes iOS-Padding/Aussehen (`appearance: none`, `padding: 0`). Auf dem Handy teilen sich die 8 Felder die Breite. Vorher lief die Karte bei 375 px über den Rand.
+- **Fahrzeug Überprüfung macht der MPGler** im Portal: Überprüfungen › „Überprüfung“ (KTW wählen) oder Fahrzeug-Akte › „Fahrzeug Überprüfung“. Öffnet als großes Blatt (Handy: Vollbild). Gleicher Aufbau wie vorher am Tablet, mit **Suche**. Abschließen = gegengezeichnet (Name vorausgefüllt). „Zurück ans Team“ entfernt. Tablet hat nur noch die Checkliste zum Nachschauen.
+- **Nicht abgehakt = nicht geprüft:** Positionen ohne Haken werden beim Abschließen als `nicht_geprueft` gespeichert und überall getrennt gezählt (Abschluss, Überprüfungen, Akte, Papierliste/PDF, CSV).
+- **Materialanforderung nach dem Abschließen:** Liste mit Fehlendem (Ist < Soll), „Nicht vorhanden“ und Abgelaufenem, Mengen vorausgefüllt, Häkchen abwählbar. „Material anfordern“ legt die Anforderung an, „Ohne Anforderung schließen“ nicht.
+- **TÜV pro KTW** (Monat/Jahr): Akte › „TÜV eintragen/ändern“, Kennzahl „TÜV“, Kachel zeigt „TÜV fällig/überfällig“ ab 30 Tagen. Tablet: Zeile unter „Prüffristen“ und Hinweis oben, wenn bald fällig.
+- **Bekannte Mängel:** Tablet-Übersicht zeigt alle offenen Mängel ohne Zeitgrenze (vorher nur 60 Tage). Akte am Mac: Block „offene Mängel“, Klick öffnet den Mangel in Mängelmeldungen.
+- **Verlauf am Tablet** ohne Tablet-/Systemeinträge. Gesperrt per RLS (Migration 028) und in `verlauf.js`.
+- **Fotos** öffnen in der App (`js/lib/foto-ansicht.js`): Vollbild, ←/→ und Wischen, Doppeltipp zoomt, Esc/✕ schließt.
+- **Handy (≤ 600 px):** Werkzeugleiste bricht um, Tabellen als Karten, Inspektor/Blätter im Vollbild, Kennzahlen zweispaltig. Handy quer und iPad hochkant: Seitenleiste zum Ausklappen, Inspektor öffnet nicht mehr von selbst (verdeckte sonst die Liste).
+- Getestet in Chromium mit Testdaten (Fake-API, nicht im Repo): Tablet 1180×820, Mac 1280×800, iPad hochkant 820×1180, Handy 390×844 und 375 px. Ablauf Beginnen → Abhaken → Abweichung → Suche → Nicht vorhanden → Abschließen (Rückfrage „nicht geprüft“) → Materialvorschlag → Anfordern, TÜV speichern, Mangel aus der Akte öffnen, Fotos blättern. Keine Konsolenfehler.
+- **Offen:** Migration 028 im SQL-Editor ausführen (vorher klappt „Überprüfung beginnen“ nicht, die alten Tablet-Funktionen sind dann weg). Auf echtem iPad/iPhone (Safari) prüfen: Code-Felder, Foto-Ansicht (Wischen), Überprüfungs-Blatt. Alte Einträge in der Warteschlange eines Tablets („Checkliste abschließen“) schlagen nach 028 fehl → dort verwerfen.
+- Gefunden, nicht geändert: `mac.kurz()` zeigt in Chromium „01.06.. 10:00“ (doppelter Punkt).

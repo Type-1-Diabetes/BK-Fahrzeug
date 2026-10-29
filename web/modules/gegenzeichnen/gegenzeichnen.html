@@ -3,18 +3,18 @@
   <span class="sp"></span>
   <div class="mseg" role="tablist" aria-label="Status" data-status>
     <button type="button" data-v="alle" class="on">Alle</button>
-    <button type="button" data-v="wartet">Wartet auf dich</button>
-    <button type="button" data-v="team">Beim Team</button>
-    <button type="button" data-v="fertig">Gegengezeichnet</button>
+    <button type="button" data-v="laeuft">Läuft</button>
+    <button type="button" data-v="fertig">Abgeschlossen</button>
   </div>
   <select class="tf auto" aria-label="KTW" data-ktw><option value="">Alle KTW</option></select>
   <button type="button" class="tb" data-csv title="Als Tabelle (CSV) herunterladen"></button>
   <button type="button" class="tb" data-pdf title="Drucken oder als PDF speichern"></button>
+  <button type="button" class="pbtn def" data-neu title="Fahrzeug Überprüfung beginnen oder weitermachen">Überprüfung</button>
 </div>
 <div class="mbody">
   <div class="tablewrap">
     <table class="tab">
-      <thead><tr><th>Status</th><th>KTW</th><th>Zeitraum</th><th>Abweichungen</th><th>Abgeschlossen</th><th>Team</th></tr></thead>
+      <thead><tr><th>Status</th><th>KTW</th><th>Zeitraum</th><th>Abweichungen</th><th>Abgeschlossen</th><th>Geprüft von</th></tr></thead>
       <tbody data-liste></tbody>
     </table>
   </div>

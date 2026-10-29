@@ -45,7 +45,7 @@ BK.modul('ausgabe', {
 
     function zeichnen() {
       const l = gefiltert();
-      if (!l.some(m => m.id === gewaehlt)) gewaehlt = l[0] ? l[0].id : null;
+      if (!l.some(m => m.id === gewaehlt)) gewaehlt = mac.ersteWahl(l);
       leeren(tbody);
       if (!l.length) tbody.append(el('tr', el('td.mleer', { colspan: 6 }, status === 'erledigt' ? 'Noch nichts ausgegeben.' : status === 'offen' ? 'Keine offenen Anforderungen.' : 'Nichts in dieser Liste.')));
       for (const m of l) tbody.append(el('tr', { dataset: { id: m.id }, class: m.id === gewaehlt ? 'sel' : null, onclick: () => waehlen(m.id) },

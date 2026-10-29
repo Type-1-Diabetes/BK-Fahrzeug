@@ -65,7 +65,7 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 - **Farben (Legende):** Sauerstoff blau, Hygiene orange, Wundversorgung rot, Diagnostik grün, Immobilisation gelb. Diese Farben übernehmen wir in der App als Markierung der Bereiche, aber dezent (z. B. Farbstreifen am Rand), damit es ruhig bleibt.
 - **Geräte mit Seriennummer** (Trage, Defi, Absaugung, Druckminderer usw.) werden eigene Einträge mit SN, Hersteller und Prüffrist. Daraus kann später das Modul Gerätewartung werden.
 - **Fußnoten** wie „Guedel-Tuben nach Verbrauch ersetzen“ oder „nur notieren, wenn vorhanden“ werden Hinweise am Eintrag bzw. optionale Einträge.
-- **Abschluss:** Bestätigung durch Mitarbeiter 1 und 2, Gegenzeichnung durch MPG-Beauftragten, Datum. In der App: Team schließt ab, MPGler zeichnet gegen.
+- **Abschluss:** Bestätigung durch Mitarbeiter 1 und 2, Gegenzeichnung durch MPG-Beauftragten, Datum. In der App (seit Migration 028): Der MPGler prüft selbst im Portal. Sein Abschließen gilt zugleich als Gegenzeichnung.
 - **In der App:** Pro Bereich eine Seite mit großen Zeilen. Standard ist „vollständig“, nur Abweichungen tippt man an (Ist-Menge, Verfallsdatum). Fehlendes wird mit einem Tipp zur Materialanforderung.
 - **Import:** Die Liste wird einmal in die App übernommen (als Vorlage „KTW Standard“). Admins können sie pro Fahrzeug anpassen (Seriennummern sind pro Fahrzeug verschieden).
 
@@ -82,7 +82,7 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 ## 3. Checklisten pro Fahrzeug
 
 - Für jedes Fahrzeug gibt es eine Soll-Liste: was wo in welcher Menge sein muss (Fahrzeug, Rucksack, Fächer).
-- Das Team hakt ab. Was fehlt, wird mit einem Tipp zur Materialanforderung.
+- Der MPGler hakt im Portal ab (Überprüfungen › „Überprüfung“, großes Blatt). Nicht Abgehaktes wird als „nicht geprüft“ gespeichert. Nach dem Abschließen schlägt die App eine Materialanforderung vor (Fehlendes, nicht Vorhandenes, Abgelaufenes), die man bestätigt.
 - Die Listen kann der Admin anlegen und ändern. Mehrere Fahrzeuge können dieselbe Vorlage nutzen.
 - Vorlage: „Überprüfung Vollzähligkeit KTW“ (siehe Abschnitt 2a).
 - **Prüfzeit:** Die App speichert, wann die Checkliste begonnen und wann sie abgeschlossen wurde. Steht im Verlauf und im Export.
@@ -116,10 +116,10 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 - Kein Login für das Team. Das Tablet selbst ist angemeldet, aber nur für sein Fahrzeug.
 - **Erst installieren:** Im Browser zeigt die App nur „Erst die App installieren“ mit Knopf bzw. Anleitung. Anmelden und Koppeln gibt es nur in der installierten App (PC und Mobilgerät). Ausnahme: lokal (`localhost`) zum Testen.
 - **Koppeln:** Der Admin legt am Mac ein Tablet an und bekommt Link (`…/?koppeln`) und einmaligen Code. Am Tablet den Link öffnen, App installieren, in der App den Code eingeben. Danach öffnet die App nur das Menü dieses KTW. Am Mac erscheint „Tablet ist gekoppelt“.
-- Das Tablet darf nur: Meldungen für sein Fahrzeug anlegen, die Checkliste abhaken, offene Meldungen ansehen. Es darf nichts löschen und keine anderen Fahrzeuge sehen.
+- Das Tablet darf nur: Meldungen für sein Fahrzeug anlegen, die Checkliste zum Nachschauen nutzen (Haken nur lokal), offene Meldungen ansehen. Die Fahrzeug Überprüfung macht der MPGler. Es darf nichts löschen und keine anderen Fahrzeuge sehen.
 - Geht ein Tablet verloren, sperrt der Admin es mit einem Klick. Ein neues Tablet bekommt einen neuen Code.
 - Das gleiche Fahrzeug-Menü kann auch auf einem Mac geöffnet werden (z. B. in der Wache).
-- Menü am Tablet: 4 Reiter wie im Mockup – Übersicht, Melden (Umschalter Mangel / Material), Checkliste (Umschalter „Fahrzeug Überprüfung“ zum Gegenzeichnen / „Checkliste“ zum Nachschauen), Verlauf.
+- Menü am Tablet: 4 Reiter wie im Mockup – Übersicht, Melden (Umschalter Mangel / Material), Checkliste (zum Nachschauen), Verlauf (ohne Tablet- und Systemeinträge).
 - In der Demo gilt **Tablet = KTW**: „Neues Tablet“ legt den KTW gleich mit an (Wache, Name, Kennzeichen). KTW ohne Tablet sind ausgeblendet. Entkoppeln löst nur die Kopplung, der KTW bleibt.
 
 ## 5b. Modularer Aufbau

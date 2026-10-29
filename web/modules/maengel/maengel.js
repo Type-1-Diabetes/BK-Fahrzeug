@@ -47,6 +47,7 @@
       const suche = root.querySelector('[data-suche]');
       root.querySelector('[data-export]').append(icon('export'), 'Export');
       let status = 'alle', alle = [], fahrzeuge = [], gewaehlt = null, ungesichert = false, speichernAktuell = null;
+      let ziel = (ctx.extra && ctx.extra.meldung) || null;  // aus der Fahrzeug-Akte: diese Meldung gleich öffnen
       // Vor dem Wechseln oder Schließen: speichern, verwerfen oder bleiben
       const weiter = async () => {
         if (!ungesichert) return true;
@@ -87,13 +88,14 @@
         }
         const offen = alle.filter(m => m.status === 'offen').length;
         root.querySelector('[data-sub]').textContent = offen === 1 ? '1 offen' : `${offen} offen`;
-        if (!behalten) gewaehlt = null;
+        if (!behalten) gewaehlt = ziel;
+        ziel = null;
         zeichnen();
       }
 
       function zeichnen() {
         const liste = gefiltert();
-        if (!liste.some(m => m.id === gewaehlt)) gewaehlt = liste[0] ? liste[0].id : null;
+        if (!liste.some(m => m.id === gewaehlt)) gewaehlt = mac.ersteWahl(liste);
         leeren(tbody);
         if (!liste.length) tbody.append(el('tr', el('td.mleer', { colspan: 6 }, status === 'offen' ? 'Keine offenen Mängel.' : 'Nichts in dieser Liste.')));
         for (const m of liste) {
@@ -190,9 +192,15 @@
               : el('button.pbtn.def', { type: 'button', dataset: { fertig: '' }, title: 'Als erledigt markieren (⌘↩ / Strg+↩)', onclick: e => mitStatus(e.currentTarget, () => sichern(m, werte, 'erledigt')) }, 'Als erledigt markieren')));
 
         sichtbar(werte);
-        for (const f of m.fotos || []) api.fotoUrl(f.pfad)
-          .then(u => fotos.append(el('a', { href: u, target: '_blank', rel: 'noopener', title: 'Foto groß öffnen' }, el('img', { src: u, alt: 'Foto zum Mangel' }))))
-          .catch(() => {});
+        // Fotos in Reihenfolge; Antippen öffnet sie groß in der App
+        const urls = [];
+        (m.fotos || []).forEach((f, nr) => api.fotoUrl(f.pfad).then(u => {
+          urls[nr] = u;
+          const knopf = el('button', { type: 'button', title: 'Foto groß öffnen', 'aria-label': `Foto ${nr + 1} groß öffnen`, dataset: { nr },
+            onclick: () => { const da = urls.filter(Boolean); BK.fotoAnsicht(da, da.indexOf(u)); } }, el('img', { src: u, alt: 'Foto zum Mangel' }));
+          const nach = [...fotos.children].find(k => Number(k.dataset.nr) > nr);
+          fotos.insertBefore(knopf, nach || null);
+        }).catch(() => {}));
         try {
           const v = await api.verlauf({ meldungId: m.id });
           leeren(verlauf).append(...v.reverse().map(e => el('div',

@@ -130,3 +130,28 @@
 .box.durch { background: var(--fill2); color: var(--label2); }
 /* Ablaufdatum: Monat und Jahr nebeneinander */
 .ck-monat { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 8px; }
+/* Suche über den Bereichen (Überprüfung und Checkliste) */
+.sl-suche { display: block; min-height: 44px; padding: 0 12px; border-radius: 10px; background: var(--fill); margin: 0 0 10px; font-size: 16px; }
+/* Abschluss: drei Zahlen statt einer Zeile */
+.ckl-zahlen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--sep); border-radius: 12px; overflow: hidden; }
+.ckl-zahl { background: var(--bg2); padding: 12px 16px; }
+.ckl-zahl b { display: block; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--label); }
+.ckl-zahl span { font-size: 14px; color: var(--label2); }
+.ckl-zahl.warnt b { color: var(--warn-ink); }
+.ckl-zahl.red b { color: var(--bad-ink); }
+.ckl-ng { padding: 10px 2px 0; line-height: 1.4; }
+/* Materialvorschlag nach dem Abschließen */
+.ckl-vorschlag { margin-top: 12px; }
+.ckl-vorschlag .row { gap: 14px; }
+.ckl-vorschlag .row.aus .t { opacity: .5; }
+.ckl-vorschlag .cb { margin: 0; min-height: 44px; min-width: 44px; justify-content: center; }
+.ckl-vorschlag .cb input { width: 24px; height: 24px; }
+.ckl-vorschlag .stepper button:disabled { opacity: .35; }
+.ckl-fertig { display: flex; gap: 10px; align-items: center; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--ok) 14%, var(--bg2)); font-size: 15px; }
+.ckl-fertig svg { color: var(--ok); font-size: 20px; flex: none; }
+/* Im großen Blatt (MPGler-Portal) füllt die Überprüfung das ganze Blatt */
+.blatt.blatt-gross .blatt-inhalt > .ckl { flex: 1; min-height: 0; }
+.blatt.blatt-gross .ckl-main .content { padding: 12px 24px 24px; }
+.blatt.blatt-gross .ckl-side { padding-top: 14px; }
+.blatt.blatt-gross .ckl-kopf { margin-right: 36px; }
+.blatt.blatt-gross .ckl-side h2 { padding-right: 8px; }

@@ -3,8 +3,12 @@
   'use strict';
   const STATUS = { offen: 'Offen', in_bearbeitung: 'In Bearbeitung', erledigt: 'Erledigt' };
 
+  // Inspektor als Blatt (iPad hochkant, Handy): dann nichts von selbst öffnen, sonst verdeckt es die Liste
+  const SCHMAL = '(orientation: portrait) and (max-width: 1100px), (max-height: 500px) and (max-width: 1000px)';
   BK.mac = {
     STATUS,
+    SCHMAL,
+    ersteWahl: l => !matchMedia(SCHMAL).matches && l[0] ? l[0].id : null,
     pill: s => BK.el('span', { class: 'pill mp ' + s }, STATUS[s] || s),
     titel: m => m.art === 'material'
       ? `Materialanforderung: ${m.positionen.length} Artikel`
@@ -91,6 +95,10 @@
             j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
             el('td.pl-art', el('b', p.artikel)), el('td.num', String(p.soll)), el('td.num', '–'), el('td'), el('td', p.wo || ''),
             el('td', e.bemerkung ? 'Nicht vorhanden · ' + e.bemerkung : 'Nicht vorhanden'));
+          if (e && e.nicht_geprueft) return el('tr.nicht-geprueft',
+            j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
+            el('td.pl-art', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : ''))), el('td.num', String(p.soll)), el('td.num', '?'),
+            el('td', l.frist || frist[p.pruefart] || ''), el('td', p.wo || ''), el('td.red', 'Nicht geprüft'));
           return el('tr', { class: e ? 'abw' : null },
             j === 0 ? el('td', { class: 'pl-mat ' + (b.farbe || ''), rowspan: b.positionen.length }, b.name) : null,
             el('td.pl-art', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), l.text ? el('span', l.text) : null),

@@ -147,9 +147,12 @@ table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 .code { display: flex; justify-content: center; gap: 6px; }
 .code i { width: 12px; align-self: center; height: 2px; background: var(--label3); }
 .code-feld {
-  width: 40px; height: 56px; border-radius: 10px; border: 2px solid transparent; background: var(--bg);
-  text-align: center; font: 600 28px var(--font); color: var(--label); font-variant-numeric: tabular-nums; caret-color: var(--tint);
+  width: 42px; min-width: 0; height: 56px; padding: 0; border-radius: 10px; border: 2px solid transparent; background: var(--bg);
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+  text-align: center; font: 600 26px/1 var(--font); color: var(--label); font-variant-numeric: tabular-nums; caret-color: var(--tint);
 }
+/* iOS: eigenes Padding und Schrift-Skalierung schnitten die Ziffern ab. Schmale Handys: Felder teilen sich die Breite */
+@media (max-width: 420px) { .code { gap: 4px; } .code-feld { flex: 1 1 0; width: 0; max-width: 42px; height: 50px; font-size: 22px; } .code i { width: 8px; } }
 .code-feld:focus { outline: none; border-color: var(--navy2); }
 
 /* Fenster zum Bestätigen (alert-dialog.js) ------------------------------- */
@@ -285,7 +288,7 @@ textarea.tf { height: auto; min-height: 48px; padding: 5px 7px; resize: vertical
 .red { color: var(--bad-ink); } .warnt { color: var(--warn-ink); }
 .mleer { padding: 40px 20px; text-align: center; color: var(--label2); }
 .fotos-m { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.fotos-m a { width: 84px; height: 84px; border-radius: 8px; overflow: hidden; background: var(--fill); display: block; }
+.fotos-m button { width: 84px; height: 84px; border-radius: 8px; overflow: hidden; background: var(--fill); display: block; padding: 0; cursor: zoom-in; }
 .fotos-m img { width: 100%; height: 100%; object-fit: cover; }
 .pill.mp.erledigt, .pill.mp.offen, .pill.mp.in_bearbeitung { font-size: 11px; }
 @media (max-width: 1100px) { .insp { width: 300px; } .vlist { width: 220px; } }
@@ -394,6 +397,11 @@ input[type="date"].tf::-webkit-calendar-picker-indicator { opacity: .55; }
 @keyframes blatt-hoch { from { transform: translateY(12px); opacity: 0; } }
 .blatt-overlay.weg { background: rgba(0,0,0,0); transition: background-color .15s ease-out; pointer-events: none; }
 .blatt-overlay.weg .blatt { opacity: 0; transform: translateY(8px); transition: opacity .15s ease-out, transform .15s ease-out; }
+/* Großes Blatt für Arbeiten mit eigenem Aufbau (Fahrzeug Überprüfung am Mac/iPad) */
+.blatt-overlay:has(> .blatt-gross) { padding: 24px; place-items: stretch center; overflow: hidden; }
+.blatt.blatt-gross { width: min(1280px, 100%); height: calc(100dvh - 48px); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.blatt.blatt-gross > .blatt-inhalt { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+@media (max-width: 700px) { .blatt-overlay:has(> .blatt-gross) { padding: 0; } .blatt.blatt-gross { height: 100dvh; border-radius: 0; padding-top: env(safe-area-inset-top); } }
 
 /* Rückmeldung: Toast unten, Knopf läuft/fertig, große Bestätigung (Tablet) */
 .toasts { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
@@ -534,6 +542,7 @@ button.veh:active { background: var(--fill); }
 .pliste .pl-art b { font-weight: 500; }
 .pliste .pl-art span { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; }
 .pliste tr.abw td { background: color-mix(in srgb, var(--warn) 9%, var(--bg2)) !important; }
+.pliste tr.nicht-geprueft td { background: color-mix(in srgb, var(--bad) 7%, var(--bg2)) !important; }
 .pliste tr.durch td.pl-art, .pliste tr.durch td.num { text-decoration: line-through; color: var(--label2); }
 /* Material-Spalte farbig wie in MPG.doc, Gruppe als unterstrichene Überschrift */
 .pl-gruppe td { font-weight: 700; text-decoration: underline; padding: 10px 10px 6px; background: var(--bg2) !important; }
@@ -611,9 +620,10 @@ button.veh:active { background: var(--fill); }
   .vfile table.pliste th { top: -18px; z-index: 1; }
 }
 
-/* iPad hochkant und schmale Hochkant-Fenster (MPGler): Seitenleiste schiebt sich über den Inhalt, Liste und Akte nacheinander */
+/* iPad hochkant, schmale Hochkant-Fenster und Handy quer (MPGler): Seitenleiste schiebt sich über den Inhalt, Liste und Akte nacheinander.
+   Gleiche Abfrage wie BK.mac.SCHMAL in mac.js */
 .seite-knopf, .zur-liste, .seite-abdeckung { display: none; }
-@media (orientation: portrait) and (max-width: 1100px) {
+@media (orientation: portrait) and (max-width: 1100px), (max-height: 500px) and (max-width: 1000px) {
   .huelle-mac .seite-knopf { display: inline-flex; margin-left: -6px; }
   .huelle-mac .mside { position: fixed; z-index: 60; inset: 0 auto 0 0; padding-top: max(14px, env(safe-area-inset-top));
     transform: translateX(-100%); transition: transform .25s cubic-bezier(.2,.8,.2,1); box-shadow: none; }
@@ -662,3 +672,61 @@ button, a, [role="button"], [role="tab"], .tile, .vr, .si { touch-action: manipu
 .geoeffnet .list > .row:nth-child(2) { animation-delay: 35ms; } .geoeffnet .list > .row:nth-child(3) { animation-delay: 70ms; }
 .geoeffnet .list > .row:nth-child(4) { animation-delay: 105ms; } .geoeffnet .list > .row:nth-child(n+5) { animation-delay: 140ms; }
 @keyframes zeile-ein { from { opacity: 0; transform: translateY(6px); } }
+
+/* Foto groß in der App (js/lib/foto-ansicht.js) ------------------------- */
+.fa { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.92); animation: fa-ein .18s ease-out; touch-action: none; }
+.fa.weg { opacity: 0; transition: opacity .15s ease-out; pointer-events: none; }
+@keyframes fa-ein { from { opacity: 0; } }
+.fa-buehne { position: absolute; inset: 0; display: grid; place-items: center; padding: max(56px, env(safe-area-inset-top)) 64px max(40px, env(safe-area-inset-bottom)); overflow: hidden; }
+.fa-bild { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; transition: transform .2s cubic-bezier(.25,1,.5,1); cursor: zoom-in; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.fa.gezoomt .fa-bild { cursor: grab; transition: none; }
+.fa-knopf { position: absolute; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: rgba(255,255,255,.14); font-size: 20px; }
+.fa-knopf:disabled { opacity: .25; }
+.fa-zu { top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
+.fa-pfeil { top: 50%; margin-top: -22px; }
+.fa-pfeil.links { left: max(12px, env(safe-area-inset-left)); } .fa-pfeil.rechts { right: max(12px, env(safe-area-inset-right)); }
+.fa-zahl { position: absolute; left: 0; right: 0; bottom: max(12px, env(safe-area-inset-bottom)); text-align: center; color: rgba(255,255,255,.8); font-size: 14px; font-variant-numeric: tabular-nums; }
+@media (hover: hover) { .fa-knopf:hover:not(:disabled) { background: rgba(255,255,255,.24); } }
+.fa-knopf:active:not(:disabled) { background: rgba(255,255,255,.3); }
+@media (max-width: 600px) { .fa-buehne { padding-left: 0; padding-right: 0; } .fa-pfeil { top: auto; bottom: max(4px, env(safe-area-inset-bottom)); margin: 0; } }
+
+/* Handy (MPGler schaut schnell etwas nach) -------------------------------- */
+@media (max-width: 600px) {
+  .huelle-mac .mside { width: min(300px, 86vw); }
+  /* Werkzeugleiste umbrechen: Titel, dann Filter, Suche über die ganze Breite */
+  .huelle-mac .tool { flex-wrap: wrap; height: auto; min-height: 52px; padding: 8px 12px; gap: 8px; padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  .huelle-mac .tool > div:has(h1) { flex: 1; min-width: 0; }
+  .huelle-mac .tool .sp { display: none; }
+  .huelle-mac .tool .mseg { order: 5; flex: 1 1 100%; overflow-x: auto; scrollbar-width: none; }
+  .huelle-mac .tool .mseg button { flex: 1 0 auto; }
+  .huelle-mac .tool .search { order: 6; flex: 1 1 100%; width: auto; height: 40px; font-size: 16px; }
+  .huelle-mac .tool select.tf, .huelle-mac .tool .auswahl-knopf { order: 4; }
+  /* Tabellen als Karten: Status und Titel oben, der Rest klein darunter */
+  .huelle-mac table.tab thead { display: none; }
+  .huelle-mac table.tab, .huelle-mac table.tab tbody { display: block; }
+  .huelle-mac table.tab tbody tr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 10px 14px; border-bottom: .5px solid var(--sep); }
+  .huelle-mac table.tab td { display: block; height: auto; min-height: 0; padding: 0; border: 0; white-space: normal; background: none !important; font-size: 13px; color: var(--label2); }
+  .huelle-mac table.tab td:nth-child(2) { flex: 1 1 0; min-width: 50%; font-size: 15px; font-weight: 500; color: var(--label); }
+  .huelle-mac table.tab td:nth-child(n+3) { flex: 0 0 auto; }
+  .huelle-mac table.tab td.mleer { flex: 1 1 100%; padding: 16px 0; text-align: center; }
+  .huelle-mac table.tab tbody tr.sel { background: var(--navy2); }
+  .huelle-mac table.tab tbody tr.sel td { color: #fff; }
+  .huelle-mac table.tab tbody tr:nth-child(even) { background: none; }
+  /* Fahrzeug-Akte und Inspektor */
+  .huelle-mac .vfile { padding: 14px max(14px, env(safe-area-inset-left)) 28px; }
+  .huelle-mac .kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .huelle-mac .fz-aktionen .pbtn.gross { flex: 1 1 calc(50% - 8px); justify-content: center; }
+  .huelle-mac .fz-trenner { display: none; }
+  .huelle-mac .tabs { overflow-x: auto; scrollbar-width: none; }
+  .huelle-mac .tabs button { flex: none; }
+  .huelle-mac .mbody > .insp { width: 100vw; border-left: 0; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  .huelle-mac .insp .acts { flex-wrap: wrap; }
+  .huelle-mac .kv { grid-template-columns: 1fr; gap: 2px 0; }
+  .huelle-mac .kv > span.l, .huelle-mac .kv > label { line-height: 1.3; margin-top: 8px; text-align: left; }
+  .fz-liste { padding: 4px 12px 24px; }
+  /* Blätter (Formulare) als Vollbild */
+  .blatt-overlay { padding: 0; }
+  .blatt { width: 100%; min-height: 100dvh; border-radius: 0; padding: max(14px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); }
+  .blatt.blatt-klein { min-height: 0; margin: auto 12px; width: calc(100% - 24px); border-radius: 14px; }
+  .blatt-overlay:has(> .blatt-klein) { place-items: center; padding: 12px 0; }
+}

@@ -25,7 +25,11 @@
     meldung_geloescht: d => [d.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', 'alert'],
     checkliste_geloescht: () => ['Checkliste gelöscht', 'list'],
     checkliste_abgebrochen: () => ['Überprüfung abgebrochen', 'list'],
+    checkliste_geprueft: () => ['Fahrzeug Überprüfung abgeschlossen', 'check'],
+    tuev: d => ['TÜV bis ' + (d.bis || '–'), 'clock'],
   };
+  // Das Team sieht nur, was das Fahrzeug betrifft. Tablet- und Systemeinträge nur im MPGler-Portal (auch per RLS, Migration 028).
+  const FUERS_TEAM = new Set(['gemeldet', 'status', 'bearbeitet', 'ausgegeben', 'teilweise_ausgegeben', 'ampel', 'meldung_geloescht', 'checkliste_geprueft', 'tuev']);
   const FARBE = { wrench: 'f-rot', box: 'f-blau', list: 'f-navy', check: 'f-gruen', alert: 'f-rot', pen: 'f-orange', tablet: 'f-navy' };
 
   BK.modul('verlauf', {
@@ -59,7 +63,8 @@
       });
 
       try {
-        const [eintraege, meldungen] = await Promise.all([api.verlauf({ fahrzeugId: fz.id, limit: 200 }), api.meldungen({ fahrzeugId: fz.id })]);
+        const [alleEintraege, meldungen] = await Promise.all([api.verlauf({ fahrzeugId: fz.id, limit: 200 }), api.meldungen({ fahrzeugId: fz.id })]);
+        const eintraege = alleEintraege.filter(v => FUERS_TEAM.has(v.aktion));
         const mNach = Object.fromEntries(meldungen.map(m => [m.id, m]));
         const titel = m => m.art === 'material' ? `Material: ${m.positionen.length} Artikel` : (m.geraet ? m.geraet.name : (m.gegenstand || m.geraet_frei));
         leeren(vBox);

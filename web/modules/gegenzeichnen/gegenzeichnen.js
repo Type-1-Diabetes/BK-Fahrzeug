@@ -1,4 +1,4 @@
-// Modul Überprüfungen (Mac): Tabelle und Inspektor wie bei den Mängeln. Team schließt ab, MPGler zeichnet gegen.
+// Modul Überprüfungen (Mac): Tabelle und Inspektor wie bei den Mängeln. Der MPGler prüft selbst (großes Blatt), Abschließen = gegengezeichnet.
 BK.modul('gegenzeichnen', {
   async start(root) {
     const { el, icon, api, leeren, mac } = BK;
@@ -10,10 +10,48 @@ BK.modul('gegenzeichnen', {
     const vorlagen = {};  // vorlage_id → Bereiche
     let listen = [];  // Vorlagen mit „Liste Feuerwehr“
     api.vorlagen().then(v => { listen = v; }).catch(() => {});
-    let alle = [], gewaehlt = null, status = 'alle';
+    let alle = [], fahrzeuge = [], fristen = [], gewaehlt = null, status = 'alle';
     const quartal = BK.fristen.zeitraumText;
-    const STAND = c => c.gegengezeichnet_am ? 'fertig' : c.abgeschlossen_am ? 'wartet' : 'team';
-    const PILL = { wartet: ['Wartet auf dich', 'in_bearbeitung'], team: ['Beim Team', 'warte'], fertig: ['Gegengezeichnet', 'erledigt'] };
+    // wartet: alte Listen vom Team, die noch gegengezeichnet werden müssen
+    const STAND = c => c.gegengezeichnet_am ? 'fertig' : c.abgeschlossen_am ? 'wartet' : 'laeuft';
+    const PILL = { wartet: ['Wartet auf Gegenzeichnung', 'in_bearbeitung'], laeuft: ['Läuft', 'warte'], fertig: ['Abgeschlossen', 'erledigt'] };
+    const abw = c => c.eintraege.filter(x => !x.nicht_geprueft).length;
+    const ng = c => c.eintraege.filter(x => x.nicht_geprueft).length;
+
+    // Überprüfung im großen Blatt beginnen oder weitermachen
+    async function pruefen(fahrzeugId) {
+      const fz = fahrzeuge.find(f => f.id === fahrzeugId);
+      if (!fz) return alertDialog('KTW nicht gefunden', 'Bitte die Seite neu laden.');
+      if (!fz.vorlage_id) return alertDialog('Keine Checkliste', `Für ${fz.name} ist noch keine Checkliste hinterlegt.`);
+      await BK.blatt('checkliste', fz, () => { api.frischLesen(); laden(); }, { gross: true });
+    }
+
+    // KTW wählen: läuft schon eine, geht es dort weiter
+    function ktwWaehlen() {
+      const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, icon('x'));
+      const zeilen = fahrzeuge.filter(f => f.vorlage_id).map(f => {
+        const laeuft = alle.find(c => c.fahrzeug_id === f.id && !c.abgeschlossen_am);
+        const fr = BK.fristen.fuer(fristen, f);
+        const fertig = alle.find(c => c.fahrzeug_id === f.id && c.zeitraum === fr.key && c.abgeschlossen_am);
+        const [text, klasse] = laeuft ? ['Läuft, weitermachen', 'warte'] : fertig ? ['Für diesen Zeitraum erledigt', 'erledigt'] : [fr.tage < 0 ? 'Überfällig' : 'Fällig bis ' + fr.bis, fr.tage < 0 ? 'offen' : 'in_bearbeitung'];
+        return el('button.row.gz-ktw', { type: 'button', onclick: () => { weg(); pruefen(f.id); } },
+          el('div.t', el('b', f.name), el('span', [f.kennzeichen, f.wache && f.wache.name].filter(Boolean).join(' · '))),
+          el('span', { class: 'pill ' + klasse }, text), icon('chevR'));
+      });
+      const overlay = el('div.blatt-overlay', el('div.blatt.blatt-klein', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Überprüfung beginnen' }, zu,
+        el('h2.gz-wahl-titel', 'Welcher KTW?'),
+        zeilen.length ? el('div.list', zeilen) : el('p.foot', 'Kein KTW mit Checkliste.')));
+      const weg = () => { document.removeEventListener('keydown', esc, true); overlay.classList.add('weg'); setTimeout(() => overlay.remove(), 150); };
+      const esc = e => { if (e.key === 'Escape') { e.stopPropagation(); weg(); } };
+      zu.onclick = weg;
+      overlay.addEventListener('mousedown', e => { if (e.target === overlay) weg(); });
+      document.addEventListener('keydown', esc, true);
+      document.body.append(overlay);
+      zu.focus();
+    }
+    const neu = root.querySelector('[data-neu]');
+    neu.prepend(icon('plus'));
+    neu.onclick = () => ktw.value ? pruefen(ktw.value) : ktwWaehlen();
 
     async function vorlage(id) {
       if (!vorlagen[id]) vorlagen[id] = await api.vorlage(id, { alle: true });
@@ -27,31 +65,30 @@ BK.modul('gegenzeichnen', {
     });
     ktw.onchange = () => { gewaehlt = null; zeichnen(); };
     mac.tastatur(tbody, id => waehlen(id));
-    const gefiltert = () => alle.filter(c => (status === 'alle' || STAND(c) === status) && (!ktw.value || c.fahrzeug_id === ktw.value));
+    const gefiltert = () => alle.filter(c => (status === 'alle' || STAND(c) === status || (status === 'fertig' && STAND(c) === 'wartet')) && (!ktw.value || c.fahrzeug_id === ktw.value));
 
     async function laden() {
-      try { alle = await api.checklisten(); }
+      try { [alle, fahrzeuge, fristen] = await Promise.all([api.checklisten(), api.fahrzeuge(), api.fristen().catch(() => [])]); }
       catch (e) { leeren(tbody).append(el('tr', el('td', { colspan: 6 }, 'Liste lässt sich nicht laden: ' + e.message))); return; }
-      const n = alle.filter(c => STAND(c) === 'wartet').length;
-      root.querySelector('[data-sub]').textContent = n === 0 ? 'Nichts wartet auf dich' : n === 1 ? '1 wartet auf dich' : `${n} warten auf dich`;
-      if (ktw.options.length === 1) {
-        const fz = new Map(alle.map(c => [c.fahrzeug_id, c.fahrzeug.name]));
-        ktw.append(...[...fz].sort((a, b) => a[1].localeCompare(b[1])).map(([id, name]) => el('option', { value: id }, name)));
-      }
+      fahrzeuge.sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
+      const faellig = fahrzeuge.filter(f => f.vorlage_id && !alle.some(c => c.fahrzeug_id === f.id && c.zeitraum === BK.fristen.fuer(fristen, f).key && c.abgeschlossen_am)).length;
+      const laeuft = alle.filter(c => STAND(c) === 'laeuft').length;
+      root.querySelector('[data-sub]').textContent = [faellig ? `${faellig} KTW noch zu prüfen` : 'Alle KTW geprüft', laeuft && `${laeuft} läuft`].filter(Boolean).join(' · ');
+      if (ktw.options.length === 1) ktw.append(...fahrzeuge.map(f => el('option', { value: f.id }, f.name)));
       await zeichnen();
     }
 
     function zeichnen() {
       const l = gefiltert();
-      if (!l.some(c => c.id === gewaehlt)) gewaehlt = l[0] ? l[0].id : null;
+      if (!l.some(c => c.id === gewaehlt)) gewaehlt = mac.ersteWahl(l);
       leeren(tbody);
-      if (!l.length) tbody.append(el('tr', el('td.mleer', { colspan: 6 }, status === 'wartet' ? 'Nichts wartet auf dich.' : 'Nichts in dieser Liste.')));
+      if (!l.length) tbody.append(el('tr', el('td.mleer', { colspan: 6 }, 'Nichts in dieser Liste.')));
       for (const c of l) {
         const [text, art] = PILL[STAND(c)];
         // Abweichungen erst nach dem Abschließen zeigen
         tbody.append(el('tr', { dataset: { id: c.id }, class: c.id === gewaehlt ? 'sel' : null, onclick: () => waehlen(c.id) },
           el('td', el('span', { class: 'pill mp ' + art }, text)), el('td', c.fahrzeug.name), el('td', quartal(c.zeitraum)),
-          el('td', c.abgeschlossen_am ? (c.eintraege.length ? String(c.eintraege.length) : 'keine') : '–'),
+          el('td', c.abgeschlossen_am ? (abw(c) ? String(abw(c)) : 'keine') + (ng(c) ? ` · ${ng(c)} nicht geprüft` : '') : '–'),
           el('td', c.abgeschlossen_am ? mac.kurz(c.abgeschlossen_am) : 'begonnen ' + mac.kurz(c.begonnen_am)),
           el('td', [c.mitarbeiter1, c.mitarbeiter2].filter(Boolean).join(', ') || '–')));
       }
@@ -97,22 +134,23 @@ BK.modul('gegenzeichnen', {
       leeren(insp).append(mac.zuKnopf(schliessen),
         el('h2', `${c.fahrzeug.name} · ${quartal(c.zeitraum)}`),
         el('div.m', 'Überprüfung Vollzähligkeit · § 20 Abs. 2 HmbRDG'));
-      // Beim Team: Ergebnis erst nach dem Abschicken, vorher nur „angefangen“
+      // Läuft: weitermachen im großen Blatt
       if (!c.abgeschlossen_am) return insp.append(
-        c.zurueck_grund ? el('div.m.red', 'Zurück ans Team: ' + c.zurueck_grund) : '',
-        el('div.gz-team', icon('clock'), el('div', el('b', 'Beim Team'),
-          el('span', `Begonnen ${BK.datum(c.begonnen_am)}. Das Ergebnis siehst du, sobald das Team abschließt.`))),
-        el('div.acts', mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); })));
+        el('div.gz-team', icon('clock'), el('div', el('b', 'Läuft'),
+          el('span', `Begonnen ${BK.datum(c.begonnen_am)}. ${c.eintraege.length === 1 ? '1 Abweichung' : c.eintraege.length + ' Abweichungen'} bisher.`))),
+        el('div.acts',
+          mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); }),
+          el('button.pbtn.def', { type: 'button', dataset: { fertig: '' }, title: 'Weitermachen (⌘↩ / Strg+↩)', onclick: () => pruefen(c.fahrzeug_id) }, 'Weitermachen')));
       const pos = new Map(bereiche.flatMap(b => b.positionen.map(p => [p.id, { ...p, bereich: b }])));
       const gesamt = pos.size;
-      const befund = (p, e) => [e.ist != null ? `Ist ${e.ist} / Soll ${p ? p.soll : '?'}` : null, e.verfall ? 'Ablaufdatum ' + new Date(e.verfall).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' }) : null].filter(Boolean).join(' · ') || 'Hinweis';
+      const befund = (p, e) => e.nicht_geprueft ? 'Nicht geprüft' : e.durchgestrichen ? 'Nicht vorhanden' : [e.ist != null ? `Ist ${e.ist} / Soll ${p ? p.soll : '?'}` : null, e.verfall ? 'Ablaufdatum ' + new Date(e.verfall).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' }) : null].filter(Boolean).join(' · ') || 'Hinweis';
       const warten = !c.gegengezeichnet_am;
 
       insp.append(
         el('div.kv',
           el('span.l', 'Geprüft'), el('div', `${BK.datum(c.begonnen_am)} bis ${new Date(c.abgeschlossen_am).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`),
-          el('span.l', 'Mitarbeiter 1'), el('div', c.mitarbeiter1 || '–'),
-          el('span.l', 'Mitarbeiter 2'), el('div', c.mitarbeiter2 || '–'),
+          el('span.l', c.mitarbeiter2 ? 'Mitarbeiter 1' : 'Geprüft von'), el('div', c.mitarbeiter1 || '–'),
+          c.mitarbeiter2 ? el('span.l', 'Mitarbeiter 2') : '', c.mitarbeiter2 ? el('div', c.mitarbeiter2) : '',
           el('span.l', 'Gegengezeichnet'), el('div', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am) : '–')),
         ...uebersicht(c, pos, gesamt, befund),
         el('button.pbtn.gz-ganz', { type: 'button', onclick: () => ganzeListe(c, bereiche) }, icon('list'), `Ganze Liste ansehen (${gesamt || '?'})`),
@@ -126,9 +164,9 @@ BK.modul('gegenzeichnen', {
               BK.linie('KTW:', c.fahrzeug.name), BK.linie('Amtliches Kennzeichen:', c.fahrzeug.kennzeichen))),
           BK.papierliste(bereiche, c.eintraege),
           el('div.dr-unter',
-            BK.linie('Unterschrift Mitarbeiter 1:', c.mitarbeiter1 ? c.mitarbeiter1 + ' (digital)' : ''),
-            BK.linie('Unterschrift Mitarbeiter 2:', c.mitarbeiter2 ? c.mitarbeiter2 + ' (digital)' : ''),
-            BK.linie('Gegengezeichnet MPG-Beauftragter:', c.gegengezeichnet_am ? 'digital' : ''),
+            BK.linie(c.mitarbeiter2 ? 'Unterschrift Mitarbeiter 1:' : 'Geprüft von:', c.mitarbeiter1 ? c.mitarbeiter1 + ' (digital)' : ''),
+            c.mitarbeiter2 ? BK.linie('Unterschrift Mitarbeiter 2:', c.mitarbeiter2 + ' (digital)') : '',
+            BK.linie('Gegengezeichnet MPG-Beauftragter:', c.gegengezeichnet_am ? (c.mitarbeiter2 ? 'digital' : c.mitarbeiter1 + ' (digital)') : ''),
             BK.linie('Datum:', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '')),
           el('div.dr-legende', el('span', 'Legende:'), el('span'),
             ...[['blau', 'Sauerstoff'], ['orange', 'Hygiene'], ['rot', 'Wundversorgung'], ['gruen', 'Diagnostik'], ['gelb', 'Immobilisation']]
@@ -137,11 +175,6 @@ BK.modul('gegenzeichnen', {
           el('button.pbtn', { type: 'button', title: 'Drucken oder als PDF speichern (⌘P / Strg+P)', onclick: () => window.print() }, 'Drucken'),
           mac.loeschKnopf('Checkliste', () => api.checklisteLoeschen(c.id), () => { gewaehlt = null; laden(); }),
         ...(warten ? [
-          el('button.pbtn', { type: 'button', onclick: async () => {
-            const grund = await promptDialog('Zurück ans Team?', 'Das Team sieht den Grund auf dem Tablet und kann die Checkliste ändern.', { placeholder: 'z. B. Bereich Sauerstoff bitte nochmal prüfen', confirmLabel: 'Zurückgeben' });
-            if (grund == null) return;
-            try { await api.checklisteZurueck(c.id, grund.trim().slice(0, 300)); showToast('Checkliste ist zurück beim Team'); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
-          } }, 'Zurück ans Team'),
           el('button.pbtn.def', { type: 'button', dataset: { fertig: '' }, title: 'Gegenzeichnen (⌘↩ / Strg+↩)', onclick: async () => {
             if (!await confirmDialog('Gegenzeichnen?', `${c.fahrzeug.name}, ${quartal(c.zeitraum)}. Dein Name und die Uhrzeit werden gespeichert.`)) return;
             try { await api.checklisteGegenzeichnen(c.id); showToast(`${c.fahrzeug.name} gegengezeichnet`); laden(); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
@@ -151,7 +184,8 @@ BK.modul('gegenzeichnen', {
     // Kurz: Zahlen oben, darunter nur, was nicht stimmt, nach Bereich
     function uebersicht(c, pos, gesamt, befund) {
       const e = c.eintraege;
-      const fehlt = e.filter(x => { const p = pos.get(x.position_id); return x.ist != null && p && x.ist < p.soll; }).length;
+      const nichtGeprueft = e.filter(x => x.nicht_geprueft).length;
+      const fehlt = e.filter(x => { const p = pos.get(x.position_id); return x.durchgestrichen || (x.ist != null && p && x.ist < p.soll); }).length;
       const verfall = e.filter(x => x.verfall).length;
       const kasten = el('div.gz-befunde');
       const nachBereich = new Map();
@@ -166,12 +200,12 @@ BK.modul('gegenzeichnen', {
           ...l.map(([p, x]) => el('div.gz-befund',
             el('span.gz-nr', p ? BK.lfd(p).nr : ''),
             el('div', el('b', p ? p.artikel : 'Position'), x.bemerkung ? el('span', x.bemerkung) : null),
-            el('span.warnt', befund(p, x)))));
+            el('span', { class: x.nicht_geprueft ? 'red' : 'warnt' }, befund(p, x)))));
       }
       return [
         el('div.kpis',
-          el('div.kpi', el('span', 'Geprüft'), el('b', `${gesamt} Positionen`)),
-          el('div.kpi', el('span', 'Vollständig'), el('b.gruen-t', String(gesamt - e.length))),
+          el('div.kpi', el('span', 'Vollständig'), el('b.gruen-t', `${gesamt - e.length} von ${gesamt}`)),
+          el('div.kpi', el('span', 'Nicht geprüft'), el('b', { class: nichtGeprueft ? 'red' : null }, String(nichtGeprueft))),
           el('div.kpi', el('span', 'Fehlt'), el('b', { class: fehlt ? 'warnt' : null }, String(fehlt))),
           el('div.kpi', el('span', 'Ablaufdatum / Prüffrist'), el('b', { class: verfall ? 'warnt' : null }, String(verfall)))),
         e.length ? kasten : el('div.gz-alles', icon('check'), 'Alles vollständig. Nichts fehlt, nichts läuft ab.'),
@@ -183,12 +217,13 @@ BK.modul('gegenzeichnen', {
     root.querySelector('[data-pdf]').onclick = () => { if (fertigGewaehlt()) window.print(); };
     root.querySelector('[data-csv]').onclick = async () => {
       const c = fertigGewaehlt();
-      if (!c) return alertDialog('Noch nicht abgeschlossen', 'Die Liste ist noch beim Team.');
+      if (!c) return alertDialog('Noch nicht abgeschlossen', 'Die Überprüfung läuft noch.');
       const bereiche = await vorlage(c.vorlage_id).catch(() => []);
       const zeilen = bereiche.flatMap(b => b.positionen.map(p => {
         const e = c.eintraege.find(x => x.position_id === p.id) || {};
         return { KTW: c.fahrzeug.name, Zeitraum: quartal(c.zeitraum), Bereich: b.name, Nr: p.nr, Artikel: p.artikel, Soll: p.soll,
-          Ist: e.ist ?? p.soll, Ablaufdatum: e.verfall ? e.verfall.slice(0, 7) : '', Bemerkung: e.bemerkung || '', 'Mitarbeiter 1': c.mitarbeiter1 || '', 'Mitarbeiter 2': c.mitarbeiter2 || '',
+          Ist: e.nicht_geprueft ? '' : e.durchgestrichen ? 0 : e.ist ?? p.soll, Ablaufdatum: e.verfall ? e.verfall.slice(0, 7) : '',
+          Bemerkung: e.nicht_geprueft ? 'Nicht geprüft' : e.durchgestrichen ? ['Nicht vorhanden', e.bemerkung].filter(Boolean).join(' · ') : e.bemerkung || '', 'Mitarbeiter 1': c.mitarbeiter1 || '', 'Mitarbeiter 2': c.mitarbeiter2 || '',
           Begonnen: BK.datum(c.begonnen_am), Abgeschlossen: c.abgeschlossen_am ? BK.datum(c.abgeschlossen_am) : '', Gegengezeichnet: c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am) : '' };
       }));
       if (!exportCSV(`checkliste-${c.fahrzeug.name.replace(/\W+/g, '-')}-${c.zeitraum}.csv`, zeilen)) alertDialog('Nichts zu exportieren', 'Die Vorlage lässt sich nicht laden.');

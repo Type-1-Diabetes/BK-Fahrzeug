@@ -83,10 +83,11 @@
     setTimeout(() => overlay.remove(), 150);
   };
 
-  BK.blatt = async (name, fahrzeug, fertig) => {
+  // gross: fast bildschirmfüllend (Fahrzeug Überprüfung)
+  BK.blatt = async (name, fahrzeug, fertig, { gross } = {}) => {
     const inhalt = el('div.blatt-inhalt');
     const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, icon('x'));
-    const overlay = el('div.blatt-overlay', el('div.blatt', { role: 'dialog', 'aria-modal': 'true', 'aria-label': fahrzeug.name }, zu, inhalt));
+    const overlay = el('div.blatt-overlay', el('div', { class: 'blatt' + (gross ? ' blatt-gross' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': fahrzeug.name }, zu, inhalt));
     const vorher = BK.vorVerlassen;
     BK.vorVerlassen = null;
     const schliessen = async gesendet => {
@@ -98,7 +99,7 @@
     };
     const esc = e => { if (e.key === 'Escape' && !document.querySelector('._ad-open')) schliessen(false); };
     zu.onclick = () => schliessen(false);
-    overlay.addEventListener('mousedown', e => { if (e.target === overlay) schliessen(false); });
+    if (!gross) overlay.addEventListener('mousedown', e => { if (e.target === overlay) schliessen(false); });
     document.addEventListener('keydown', esc);
     document.body.append(overlay);
     try {

@@ -1,4 +1,4 @@
-// Modul Übersicht (Tablet): Ampel, was jetzt zu tun ist, Kacheln, aktuelle Meldungen, Geräte mit Prüffrist
+// Modul Übersicht (Tablet): Ampel, Hinweis (TÜV), Kacheln, bekannte Mängel bis zur Reparatur, aktuelle Meldungen, Prüffristen
 BK.modul('uebersicht', {
   async start(root, ctx) {
     const { el, icon, api, leeren } = BK;
@@ -6,6 +6,7 @@ BK.modul('uebersicht', {
     const ampel = root.querySelector('[data-ampel]');
     const tun = root.querySelector('[data-tun]');
     const liste = root.querySelector('[data-liste]');
+    const maengelBox = root.querySelector('[data-maengel]');
     const geraeteBox = root.querySelector('[data-geraete]');
     const STATUS = { offen: 'Offen', in_bearbeitung: 'In Bearbeitung', erledigt: 'Erledigt' };
 
@@ -22,46 +23,52 @@ BK.modul('uebersicht', {
           bereit ? null : el('p', [fz.ampel_grund, fz.ampel_am && 'seit ' + BK.datum(fz.ampel_am)].filter(Boolean).join(' · '))));
     }
 
-    // Ein Satz: was das Team jetzt tun sollte
-    function tunZeigen(checkliste, meldungen, frist) {
-      const { tage, bis } = frist;
-      let titel, text, ziel = null, warn = false;
-      if (checkliste && checkliste.zurueck_grund && !checkliste.abgeschlossen_am) {
-        [titel, text, ziel, warn] = ['Fahrzeug Überprüfung korrigieren', 'Zurück vom MPGler: ' + checkliste.zurueck_grund, 'checkliste', true];
-      } else if (checkliste && !checkliste.abgeschlossen_am) {
-        [titel, text, ziel] = ['Fahrzeug Überprüfung weitermachen', `Angefangen, aber noch nicht abgeschlossen. Fällig bis ${bis}.`, 'checkliste'];
-      } else if (!checkliste && frist.bald) {
-        [titel, text, ziel, warn] = [tage < 0 ? 'Fahrzeug Überprüfung überfällig' : `Fahrzeug Überprüfung fällig bis ${bis}`, 'Vollzähligkeit prüfen und abschließen.', 'checkliste', true];
-      } else {
-        tun.hidden = true;  // nichts steht an
-        return;
-      }
-      tun.hidden = false;
-      if (ziel && !(fz.module || []).includes(ziel)) ziel = null;
-      leeren(tun).className = 'tun' + (warn ? ' warn' : ' ok');
-      tun.append(...[el('div.tun-ic', icon(warn ? 'alert' : ziel ? 'list' : 'check')), el('div.t', el('b', titel), el('span', text)),
-        ziel && el('button.btn', { type: 'button', onclick: () => ctx.oeffnen(ziel) }, 'Öffnen', icon('chevR'))].filter(Boolean));
+    // TÜV-Monat (gespeichert als 1. des Monats): Tage bis Monatsende
+    const tuevTage = bis => {
+      const [j, m] = bis.split('-').map(Number);
+      const heute = new Date(); heute.setHours(0, 0, 0, 0);
+      return Math.round((new Date(j, m, 0) - heute) / 864e5);
+    };
+    const tuevText = bis => bis.slice(5, 7) + '/' + bis.slice(0, 4);
+
+    // Ein Hinweis, wenn der TÜV bald fällig oder überfällig ist (die Fahrzeug Überprüfung macht der MPGler)
+    function tunZeigen() {
+      const tage = fz.tuev_bis ? tuevTage(fz.tuev_bis) : null;
+      tun.hidden = tage == null || tage > 30;
+      if (tun.hidden) return;
+      leeren(tun).className = 'tun warn';
+      tun.append(el('div.tun-ic', icon('alert')), el('div.t', el('b', tage < 0 ? 'TÜV überfällig' : `TÜV fällig ${tuevText(fz.tuev_bis)}`),
+        el('span', tage < 0 ? `Der TÜV ist seit ${tuevText(fz.tuev_bis)} abgelaufen. Bitte dem MPGler sagen.` : 'Der MPGler kümmert sich um den Termin.')));
     }
 
-    const kachel = (modul, farbe, ic, titel) => (fz.module || []).includes(modul)
+    // Kachel nur, wenn das Modul für diesen KTW an ist (Checkliste hängt am Schalter „checkliste“)
+    const kachel = (modul, farbe, ic, titel) => (fz.module || []).includes(modul === 'sollliste' ? 'checkliste' : modul)
       ? el('button.tile', { type: 'button', onclick: () => ctx.oeffnen(modul) },
           el('div.ic', { class: 'ic ' + farbe }, icon(ic)), el('h3', titel))
       : null;
     root.querySelector('[data-kacheln]').append(
       kachel('mangel', 'f-rot', 'wrench', 'Mängelmeldung'),
       kachel('material', 'f-blau', 'box', 'Materialanforderung'),
-      kachel('checkliste', 'f-navy', 'list', 'Fahrzeug Überprüfung'));
+      kachel('sollliste', 'f-navy', 'check', 'Checkliste'));
 
     async function laden() {
       try { fz = (await api.fahrzeug(fz.id)) || fz; } catch { /* alter Stand */ }
       ampelZeigen();
+      tunZeigen();
       try {
-        const [alle, cl, fristen] = await Promise.all([api.meldungen({ fahrzeugId: fz.id, seitTagen: 60 }), api.checklisten({ fahrzeugId: fz.id }).catch(() => []), api.fristen().catch(() => [])]);
-        const frist = BK.fristen.fuer(fristen, fz);
-        const meldungen = alle.filter(m => m.status !== 'erledigt' || Date.now() - new Date(m.erledigt_am) < 7 * 864e5);
-        tunZeigen(cl.find(c => c.zeitraum === frist.key), meldungen, frist);
+        // Offene Mängel ohne Zeitgrenze: sie bleiben sichtbar, bis sie behoben sind
+        const [alle, offeneMaengel] = await Promise.all([api.meldungen({ fahrzeugId: fz.id, seitTagen: 60 }),
+          api.meldungen({ fahrzeugId: fz.id, art: 'mangel', status: ['offen', 'in_bearbeitung'] })]);
+        leeren(maengelBox);
+        if (!offeneMaengel.length) maengelBox.append(el('div.row', el('div', { class: 'ico f-gruen' }, icon('check')), el('div.t', el('b', 'Keine bekannten Mängel'))));
+        for (const m of offeneMaengel) maengelBox.append(el('div.row',
+          el('div', { class: 'ico ' + (m.status === 'offen' ? 'f-rot' : 'f-orange') }, icon('wrench')),
+          el('div.t', el('b', m.geraet ? m.geraet.name : (m.gegenstand || m.geraet_frei || 'Mangel')),
+            el('span', [m.beschreibung, 'gemeldet ' + BK.datum(m.erstellt_am, false), m.gemeldet_von].filter(Boolean).join(' · '))),
+          el('span', { class: 'pill ' + m.status }, STATUS[m.status])));
+        const meldungen = alle.filter(m => !(m.art === 'mangel' && m.status !== 'erledigt') && (m.status !== 'erledigt' || Date.now() - new Date(m.erledigt_am) < 7 * 864e5));
         leeren(liste);
-        if (!meldungen.length) liste.append(el('div.row', el('div', { class: 'ico f-gruen' }, icon('check')), el('div.t', el('b', 'Keine offenen Meldungen'))));
+        if (!meldungen.length) liste.append(el('div.row', el('div', { class: 'ico f-gruen' }, icon('check')), el('div.t', el('b', 'Nichts offen'), el('span', 'Keine offene Materialanforderung, nichts in den letzten 7 Tagen erledigt.'))));
         for (const m of meldungen) {
           const titel = m.art === 'material'
             ? `Materialanforderung: ${m.positionen.length} Artikel`
@@ -82,7 +89,16 @@ BK.modul('uebersicht', {
       try {
         const g = (await api.geraete(fz.id)).filter(x => x.pruefung_bis).sort((a, b) => a.pruefung_bis.localeCompare(b.pruefung_bis));
         leeren(geraeteBox);
-        if (!g.length) return geraeteBox.append(el('div.row', el('div.t', el('b', 'Keine Geräte mit Prüffrist'))));
+        // TÜV des KTW zuerst
+        if (fz.tuev_bis) {
+          const t = tuevTage(fz.tuev_bis);
+          const [klasse, text] = t < 0 ? ['offen', 'Überfällig'] : t <= 30 ? ['in_bearbeitung', 'Bald fällig'] : [null, null];
+          geraeteBox.append(el('div.row',
+            el('div', { class: 'ico ' + (klasse === 'offen' ? 'f-rot' : klasse ? 'f-orange' : 'f-navy') }, icon('car')),
+            el('div.t', el('b', 'TÜV (Hauptuntersuchung)'), el('span', 'Fällig ' + tuevText(fz.tuev_bis))),
+            text ? el('span', { class: 'pill ' + klasse }, text) : null));
+        }
+        if (!g.length && !fz.tuev_bis) return geraeteBox.append(el('div.row', el('div.t', el('b', 'Keine Prüffristen eingetragen'))));
         const heute = new Date(); heute.setHours(0, 0, 0, 0);
         for (const x of g) {
           const tage = Math.round((new Date(x.pruefung_bis) - heute) / 864e5);

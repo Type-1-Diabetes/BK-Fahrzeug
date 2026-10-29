@@ -82,7 +82,7 @@ Nach https://github.com/multica-ai/andrej-karpathy-skills (CLAUDE.md). Bei klein
 
 ## Rollen
 - **MPGler** (Demo: einzige Rolle, seit Migration 024): sieht und bearbeitet alles – Meldungen, Checklisten, Wachen, Fahrzeuge, Vorlagen, Tablets, Fristen.
-- **Fahrzeug-Tablet**: kein Login, per Kopplungscode an ein Fahrzeug gebunden, sieht nur dieses Fahrzeug.
+- **Fahrzeug-Tablet**: kein Login, per Kopplungscode an ein Fahrzeug gebunden, sieht nur dieses Fahrzeug. Macht keine Fahrzeug Überprüfung mehr (seit Migration 028 nur MPGler).
 
 ## Neues Modul anlegen (Checkliste)
 Jede Funktion ist ein Modul (z. B. `mangel`, `material`, `checkliste`, `verlauf`).
@@ -90,7 +90,7 @@ Jede Funktion ist ein Modul (z. B. `mangel`, `material`, `checkliste`, `verlauf`
 2. Modul in `web/js/module-liste.js` eintragen (name, label, icon, fuer: `tablet`/`mpg`/`admin`, bereich bzw. schalter). Tablet-Module mit gleichem `tab` teilen sich einen Reiter (z. B. „Melden“) und bekommen oben einen Umschalter.
 3. Formulare als Beschreibung für `BK.formular.bauen()` (`web/js/formular.js`) anlegen, nicht hart codieren
 4. Datenzugriff als Funktionen in `web/js/api.js` ergänzen
-5. Tabellen/Rechte als neue Datei in `supabase/migrations/` (fortlaufend nummeriert, aktuell bis 027): RLS-Regeln und `GRANT`. Schreiben nur über Funktionen. Edge Functions liegen in `supabase/functions/<name>/`.
+5. Tabellen/Rechte als neue Datei in `supabase/migrations/` (fortlaufend nummeriert, aktuell bis 028): RLS-Regeln und `GRANT`. Schreiben nur über Funktionen. Edge Functions liegen in `supabase/functions/<name>/`.
 6. Offline-Fall bedenken: Schreibaktionen vom Tablet über `BK.warteschlange`
 7. Neue App-Dateien in `web/sw.js` (Liste `DATEIEN`) eintragen und `VERSION` erhöhen
 8. UI für Mac und iPad prüfen (Touch-Größen, Hoch- und Querformat)

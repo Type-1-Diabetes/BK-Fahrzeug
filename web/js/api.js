@@ -145,7 +145,7 @@
 
     // Fahrzeuge ---------------------------------------------------------
     async fahrzeug(id) {
-      const d = await lesen('fahrzeuge', `id=eq.${id}&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,module,vorlage_id,wache_id,wache:wachen(id,name)`);
+      const d = await lesen('fahrzeuge', `id=eq.${id}&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,module,vorlage_id,wache_id,tuev_bis,wache:wachen(id,name)`);
       return d[0] || null;
     },
     // Nur Fahrzeugstatus, immer frisch vom Server (für die Live-Anzeige)
@@ -155,7 +155,9 @@
     frischLesen: () => { erzwingen = Date.now(); },
     // Neuester Verlaufseintrag (RLS: nur was diese Rolle sehen darf). Ändert er sich, gibt es Neues.
     letzteAenderung: () => mitLogin('/rest/v1/verlauf?select=id&order=id.desc&limit=1').then(d => (d[0] || {}).id || 0),
-    fahrzeuge: () => lesen('fahrzeuge', 'aktiv=eq.true&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,wache:wachen(id,name)&order=name'),
+    fahrzeuge: () => lesen('fahrzeuge', 'aktiv=eq.true&select=id,name,kennzeichen,kennnummer,ampel,ampel_grund,ampel_am,module,vorlage_id,wache_id,tuev_bis,wache:wachen(id,name)&order=name'),
+    // TÜV: Monat und Jahr, bis = 'JJJJ-MM-01' oder null
+    tuevSetzen: (fahrzeugId, bis) => rpc('fahrzeug_tuev_setzen', { p_fahrzeug: fahrzeugId, p_bis: bis || null }),
     geraete: fahrzeugId => lesen('geraete', `fahrzeug_id=eq.${fahrzeugId}&select=id,name,seriennummer,hersteller,pruefart,pruefung_bis&order=name`),
     ampelSetzen: (fahrzeugId, ampel, grund) => rpc('ampel_setzen', { p_fahrzeug: fahrzeugId, p_ampel: ampel, p_grund: grund || null }),
 
@@ -197,16 +199,16 @@
     positionLoeschen: id => rpc('vorlage_position_loeschen', { p_id: id }),
     verschieben: (art, id, richtung) => rpc('vorlage_verschieben', { p_art: art, p_id: id, p_richtung: richtung }),
     checklisten: ({ fahrzeugId, offen } = {}) => lesen('checklisten',
-      ['select=id,client_id,fahrzeug_id,vorlage_id,zeitraum,begonnen_am,abgeschlossen_am,mitarbeiter1,mitarbeiter2,gegengezeichnet_am,zurueck_grund,fahrzeug:fahrzeuge(name,kennzeichen),eintraege:checklisten_eintraege(position_id,ist,verfall,bemerkung,durchgestrichen)', 'order=begonnen_am.desc']
+      ['select=id,client_id,fahrzeug_id,vorlage_id,zeitraum,begonnen_am,abgeschlossen_am,mitarbeiter1,mitarbeiter2,gegengezeichnet_am,zurueck_grund,fahrzeug:fahrzeuge(name,kennzeichen),eintraege:checklisten_eintraege(position_id,ist,verfall,bemerkung,durchgestrichen,nicht_geprueft)', 'order=begonnen_am.desc']
         .concat(fahrzeugId ? ['fahrzeug_id=eq.' + fahrzeugId] : [], offen ? ['gegengezeichnet_am=is.null'] : []).join('&')),
-    checklisteStarten: zeitraum => rpc('checkliste_starten', { p_client_id: crypto.randomUUID(), p_zeitraum: zeitraum }),
+    checklisteStarten: (fahrzeugId, zeitraum) => rpc('checkliste_starten', { p_client_id: crypto.randomUUID(), p_fahrzeug: fahrzeugId, p_zeitraum: zeitraum }),
     checklisteEintrag: (checkliste, position, e) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_eintrag', daten: { p_checkliste: checkliste, p_position: position, p_ist: e.ist ?? null, p_verfall: e.verfall || null, p_bemerkung: e.bemerkung || null, p_entfernen: !!e.entfernen, p_durchgestrichen: !!e.durchgestrichen } }),
-    checklisteAbschliessen: (id, m1, m2) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_abschliessen', daten: { p_checkliste: id, p_mitarbeiter1: m1, p_mitarbeiter2: m2 } }, { warten: true }),
+    // Abschließen = gegengezeichnet; nichtGeprueft = IDs der Positionen ohne Haken
+    checklisteAbschliessen: (id, name, nichtGeprueft) => BK.warteschlange.hinzufuegen({ typ: 'checkliste_abschliessen', daten: { p_checkliste: id, p_name: name, p_nicht_geprueft: nichtGeprueft } }, { warten: true }),
     checklisteGegenzeichnen: id => rpc('checkliste_gegenzeichnen', { p_checkliste: id }),
     meldungLoeschen: id => rpc('meldung_loeschen', { p_id: id }),
     checklisteLoeschen: id => rpc('checkliste_loeschen', { p_id: id }),
     checklisteAbbrechen: id => rpc('checkliste_abbrechen', { p_id: id }),
-    checklisteZurueck: (id, grund) => rpc('checkliste_zurueck', { p_checkliste: id, p_grund: grund }),
 
     // Verlauf -----------------------------------------------------------
     verlauf: ({ fahrzeugId, meldungId, limit = 50 } = {}) => lesen('verlauf',

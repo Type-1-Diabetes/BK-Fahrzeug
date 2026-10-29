@@ -37,9 +37,49 @@ BK.modul('fahrzeuge', {
       const c = checklisten.find(x => x.fahrzeug_id === f.id && x.zeitraum === fr.key);
       if (c && c.gegengezeichnet_am) return ['erledigt', 'Checkliste erledigt'];
       if (c && c.abgeschlossen_am) return ['warte', 'wartet auf Gegenzeichnung'];
-      if (c) return ['warte', 'Checkliste läuft'];
+      if (c) return ['warte', 'Überprüfung läuft'];
       return [fr.tage < 0 ? 'rot' : 'warte', 'fällig ' + fr.bis];
     };
+    // TÜV (Monat/Jahr, gespeichert als 1. des Monats): Text und Stand bis Monatsende
+    const tuev = f => {
+      if (!f.tuev_bis) return null;
+      const [j, m] = f.tuev_bis.split('-').map(Number);
+      const tage = Math.round((new Date(j, m, 0) - new Date(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate())) / 864e5);
+      return { text: f.tuev_bis.slice(5, 7) + '/' + j, klasse: tage < 0 ? 'red' : tage <= 30 ? 'warnt' : null, tage };
+    };
+
+    // TÜV eintragen: Monat und Jahr wie auf der Plakette
+    function tuevDialog(f) {
+      const [jA, mA] = f.tuev_bis ? f.tuev_bis.split('-').map(Number) : [];
+      const monat = el('select.tf', { 'aria-label': 'Monat' }, el('option', { value: '' }, 'Monat'),
+        ...['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+          .map((t, i) => el('option', { value: String(i + 1).padStart(2, '0'), selected: mA === i + 1 }, t)));
+      const jahr = el('select.tf', { 'aria-label': 'Jahr' }, el('option', { value: '' }, 'Jahr'),
+        ...Array.from({ length: 6 }, (_, i) => jetzt.getFullYear() - 1 + i).map(x => el('option', { value: String(x), selected: jA === x }, String(x))));
+      const fehler = el('p.ffehler', { role: 'alert' });
+      const zu = el('button.blatt-zu', { type: 'button', 'aria-label': 'Schließen', title: 'Schließen (Esc)' }, BK.icon('x'));
+      const speichern = async bis => {
+        try { await api.tuevSetzen(f.id, bis); showToast(bis ? `${f.name}: TÜV bis ${bis.slice(5, 7)}/${bis.slice(0, 4)}` : `${f.name}: TÜV entfernt`); weg(); laden(); }
+        catch (e) { fehler.textContent = e.message; }
+      };
+      const overlay = el('div.blatt-overlay', el('div.blatt.blatt-klein.fz-tuev-blatt', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'TÜV eintragen' }, zu,
+        el('h2', 'TÜV ' + f.name), el('p.foot', 'Monat und Jahr wie auf der Plakette.'),
+        el('div.fz-tuev-wahl', monat, jahr), fehler,
+        el('div.acts',
+          f.tuev_bis ? el('button.pbtn', { type: 'button', onclick: () => speichern(null) }, 'Entfernen') : null,
+          el('button.pbtn.def', { type: 'button', onclick: () => {
+            if (!monat.value || !jahr.value) { fehler.textContent = 'Bitte Monat und Jahr wählen.'; return; }
+            speichern(`${jahr.value}-${monat.value}-01`);
+          } }, 'Speichern'))));
+      const weg = () => { document.removeEventListener('keydown', esc, true); overlay.classList.add('weg'); setTimeout(() => overlay.remove(), 150); };
+      const esc = e => { if (e.key === 'Escape' && !document.querySelector('.auswahl-liste')) { e.stopPropagation(); weg(); } };
+      zu.onclick = weg;
+      overlay.addEventListener('mousedown', e => { if (e.target === overlay) weg(); });
+      document.addEventListener('keydown', esc, true);
+      document.body.append(overlay);
+      zu.focus();
+    }
+
     // Ohne Auswahl: Kacheln. Mit Auswahl: Akte des KTW.
     function zeichnen() {
       const q = suche.value.trim().toLowerCase();
@@ -60,9 +100,11 @@ BK.modul('fahrzeuge', {
         const mg = offeneVon(f, 'mangel').length, mt = offeneVon(f, 'material').length;
         const [ck, ckText] = checkStand(f);
         const rot = f.ampel !== 'einsatzbereit';
+        const t = tuev(f);
         raster.append(el('button', { type: 'button', class: 'fz-kachel' + (rot ? ' rot' : '') + (geaendert.has(f.id) ? ' aufleuchten' : ''), onclick: () => { gewaehlt = f.id; reiter = 'meldungen'; zeichnen(); } },
           el('div.fz-kopf', el('b', f.name), el('span', { class: 'amp klein ' + f.ampel }, rot ? 'Nicht einsatzbereit' : 'Einsatzbereit')),
           rot && f.ampel_grund ? el('div.fz-grund-k', f.ampel_grund) : el('div.fz-kz', f.kennzeichen || ''),
+          t && t.klasse ? el('div', { class: 'fz-tuev-k ' + t.klasse }, t.tage < 0 ? `TÜV überfällig (${t.text})` : `TÜV fällig ${t.text}`) : null,
           el('dl.fz-zahlen',
             el('div', el('dt', 'Mängel'), el('dd', { class: mg ? 'red' : null }, String(mg))),
             el('div', el('dt', 'Material'), el('dd', String(mt))),
@@ -86,6 +128,7 @@ BK.modul('fahrzeuge', {
       const tab = tablets.filter(t => t.fahrzeug_id === f.id && t.zuletzt_online).sort((a, b) => b.zuletzt_online.localeCompare(a.zuletzt_online))[0];
       const mg = offeneVon(f, 'mangel'), mt = offeneVon(f, 'material');
       const [ck, ckText] = checkStand(f);
+      const t = tuev(f);
       const inhalt = el('div');
       akte.append(
         el('div.hd', el('h2', f.name), el('span', { class: 'amp ' + f.ampel }, f.ampel === 'einsatzbereit' ? 'Einsatzbereit' : 'Nicht einsatzbereit')),
@@ -97,11 +140,19 @@ BK.modul('fahrzeuge', {
           } }, BK.icon(f.ampel === 'einsatzbereit' ? 'alert' : 'check'), f.ampel === 'einsatzbereit' ? 'Nicht einsatzbereit melden' : 'Wieder einsatzbereit'),
           el('span.fz-trenner'),
           el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('mangel', f, laden) }, BK.icon('wrench'), 'Mängelmeldung erstellen'),
-          el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('material', f, laden) }, BK.icon('box'), 'Materialanforderung erstellen')),
+          el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('material', f, laden) }, BK.icon('box'), 'Materialanforderung erstellen'),
+          f.vorlage_id ? el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('checkliste', f, () => { api.frischLesen(); laden(); }, { gross: true }) }, BK.icon('list'), 'Fahrzeug Überprüfung') : null,
+          el('button.pbtn.gross', { type: 'button', onclick: () => tuevDialog(f) }, BK.icon('clock'), f.tuev_bis ? 'TÜV ändern' : 'TÜV eintragen')),
+        // Offene Mängel bleiben oben, bis sie behoben sind
+        mg.length ? el('section.fz-maengel', el('h3', mg.length === 1 ? '1 offener Mangel' : `${mg.length} offene Mängel`),
+          el('div.fz-maengel-liste', mg.map(m => el('button.fz-mangel', { type: 'button', title: 'In Mängelmeldungen öffnen', onclick: () => ctx.oeffnen('maengel', { meldung: m.id }) },
+            mac.pill(m.status), el('span.fz-mangel-t', el('b', mac.titel(m)), m.beschreibung ? el('span', m.beschreibung) : null),
+            el('span.fz-mangel-d', mac.kurz(m.erstellt_am)), BK.icon('chevR'))))) : null,
         el('div.kpis',
           el('div.kpi', el('span', 'Offene Mängel'), el('b', { class: mg.length ? 'red' : null }, String(mg.length))),
           el('div.kpi', el('span', 'Offene Materialanforderungen'), el('b', String(mt.length))),
           el('div.kpi', el('span', 'Checkliste'), el('b', { class: ck === 'rot' ? 'red' : ck === 'warte' ? 'warnt' : null }, ckText)),
+          el('div.kpi', el('span', 'TÜV'), el('b', { class: t && t.klasse }, t ? (t.tage < 0 ? `überfällig (${t.text})` : t.text) : '–')),
           el('div.kpi', el('span', 'Nächste STK/MTK'), el('b', { 'data-stk': '' }, '…'))),
         el('div.tabs', { role: 'tablist' }, [['meldungen', 'Meldungen'], ['checklisten', 'Checklisten'], ['geraete', 'Geräte'], ['verlauf', 'Verlauf']].map(([k, t]) =>
           el('button', { type: 'button', role: 'tab', 'aria-selected': String(reiter === k), class: reiter === k ? 'on' : null, onclick: () => { reiter = k; datei(); } }, t))),
@@ -123,10 +174,10 @@ BK.modul('fahrzeuge', {
           'Noch keine Meldungen.'));
       } else if (reiter === 'checklisten') {
         const cs = checklisten.filter(c => c.fahrzeug_id === f.id);
-        inhalt.append(tabelle(['Zeitraum', 'Begonnen', 'Abgeschlossen', 'Team', 'Abweichungen', 'Gegengezeichnet'],
+        inhalt.append(tabelle(['Zeitraum', 'Begonnen', 'Abgeschlossen', 'Geprüft von', 'Abweichungen', 'Gegengezeichnet'],
           cs.map(c => el('tr', el('td', BK.fristen.zeitraumText(c.zeitraum)), el('td', BK.datum(c.begonnen_am)),
             el('td', c.abgeschlossen_am ? BK.datum(c.abgeschlossen_am) : '–'), el('td', [c.mitarbeiter1, c.mitarbeiter2].filter(Boolean).join(', ') || '–'),
-            el('td', c.abgeschlossen_am ? String(c.eintraege.length) : '–'), el('td', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '–'))),
+            el('td', c.abgeschlossen_am ? String(c.eintraege.filter(e => !e.nicht_geprueft).length) + (c.eintraege.some(e => e.nicht_geprueft) ? ` · ${c.eintraege.filter(e => e.nicht_geprueft).length} nicht geprüft` : '') : '–'), el('td', c.gegengezeichnet_am ? BK.datum(c.gegengezeichnet_am, false) : '–'))),
           'Noch keine Checkliste.'));
       } else if (reiter === 'geraete') {
         inhalt.append(tabelle(['Gerät', 'Seriennummer', 'Hersteller', 'Prüfung', 'Fällig'],
@@ -145,7 +196,8 @@ BK.modul('fahrzeuge', {
               checkliste_abgeschlossen: 'Checkliste abgeschlossen', gegengezeichnet: 'Checkliste gegengezeichnet', checkliste_zurueck: 'Checkliste zurück ans Team',
               tablet_gekoppelt: 'Tablet gekoppelt', tablet_entkoppelt: 'Tablet entkoppelt', tablet_angelegt: 'Tablet angelegt',
               tablet_neuer_code: 'Neuer Kopplungscode', tablet_bearbeitet: 'Tablet bearbeitet', tablet_gesperrt: 'Tablet gesperrt', tablet_entsperrt: 'Tablet entsperrt',
-              meldung_geloescht: e.details.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', checkliste_geloescht: 'Checkliste gelöscht', checkliste_abgebrochen: 'Überprüfung abgebrochen' })[e.aktion] || BK.aktionText(e.aktion)),
+              meldung_geloescht: e.details.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', checkliste_geloescht: 'Checkliste gelöscht', checkliste_abgebrochen: 'Überprüfung abgebrochen',
+              checkliste_geprueft: 'Fahrzeug Überprüfung abgeschlossen', tuev: 'TÜV bis ' + (e.details.bis || '–') })[e.aktion] || BK.aktionText(e.aktion)),
             el('td', e.wer_name || '–'))), 'Noch nichts passiert.'));
         } catch (e) { inhalt.append(el('div.mleer', e.message)); }
       }
