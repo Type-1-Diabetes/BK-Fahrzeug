@@ -177,7 +177,8 @@ const pruefung = {
         el('div.ck', haken, el('button.ck-text', { type: 'button', 'aria-expanded': String(offenePosition === p.id), onclick: () => { offenePosition = offenePosition === p.id ? null : p.id; seite(); } },
           el('div.t', el('b', p.artikel + (p.optional ? ' (falls vorhanden)' : '')), zweite ? el('span', zweite) : null),
           el('span.zahl', String(p.soll)),
-          el('span', { class: 'zahl ist' + (e && e.ist != null ? ' warnt' : '') }, e && e.ist != null ? String(e.ist) : ''),
+          // Abgehakt = vollständig: „Anzahl ist“ zeigt gleich die Soll-Zahl
+          el('span', { class: 'zahl ist' + (e && e.ist != null ? ' warnt' : '') }, e && e.ist != null ? String(e.ist) : durch ? '0' : da || e ? String(p.soll) : ''),
           el('span', { class: 'ck-frist' + (e && e.verfall ? ' warnt' : '') }, fristText(p, e)),
           el('span.ck-wo', p.wo || ''))));
       if (offenePosition === p.id) wrap.append(editor(p, e));
@@ -194,7 +195,7 @@ const pruefung = {
         ...['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
           .map((t, i) => el('option', { value: String(i + 1).padStart(2, '0'), selected: mA === i + 1 }, t)));
       const jahrWahl = el('select.field', { 'aria-label': 'Jahr' }, el('option', { value: '' }, 'Jahr'),
-        ...Array.from({ length: 13 }, (_, i) => jahrJetzt - 2 + i).map(j => el('option', { value: String(j), selected: jA === j }, String(j))));
+        ...Array.from({ length: 53 }, (_, i) => jahrJetzt - 2 + i).map(j => el('option', { value: String(j), selected: jA === j }, String(j))));
       const verfallWert = () => monatWahl.value && jahrWahl.value ? `${jahrWahl.value}-${monatWahl.value}-01` : null;
       const bem = el('input.field', { maxlength: 300, placeholder: 'z. B. defekt, Fülldruck unter 100 bar', value: (e && e.bemerkung) || '', 'aria-label': 'Bemerkung' });
       const speichern = async (entfernen, durchstreichen = false) => {
@@ -263,10 +264,6 @@ const pruefung = {
           el('label', { for: 'ckl_wer' }, 'Geprüft und gegengezeichnet'), wer,
           el('span', 'Datum'), el('b', tag(new Date()))),
         fehler,
-        el('div.foot', 'Statt einer Unterschrift speichern wir Namen und Uhrzeit.'),
-        el('div.ckl-legende', el('span', 'Legende:'),
-          ...[['blau', 'Sauerstoff'], ['orange', 'Hygiene'], ['rot', 'Wundversorgung'], ['gruen', 'Diagnostik'], ['gelb', 'Immobilisation']]
-            .map(([f, t]) => el('span', el('i', { class: f }), t))),
         el('div.acts.links', knopf)));
     }
 

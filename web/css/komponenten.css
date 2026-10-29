@@ -218,6 +218,12 @@ table.tab tbody tr.sel .pill { background: rgba(255,255,255,.22); color: #fff; }
 .insp h2 { font-size: 17px; padding-right: 32px; }
 .insp { position: relative; }
 .insp.zu { display: none; }
+/* Griff links am Inspektor: Breite ziehen */
+.insp-griff { flex: none; width: 7px; margin: 0 -4px 0 -3px; position: relative; z-index: 3; cursor: col-resize; touch-action: none; }
+.insp-griff::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 2px; background: transparent; transition: background-color .12s ease-out; }
+.insp-griff:hover::after, body.am-breite .insp-griff::after { background: var(--navy2); }
+.insp-griff:has(+ .insp.zu) { display: none; }
+body.am-breite, body.am-breite * { cursor: col-resize !important; -webkit-user-select: none; user-select: none; }
 /* Inspektor kommt von rechts, geht schneller */
 .insp { transition: opacity .15s ease-out, transform .15s ease-out, display .15s allow-discrete; }
 .insp:not(.zu) { transition-duration: .25s; transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
@@ -628,6 +634,8 @@ button.veh:active { background: var(--fill); }
 .seite-knopf, .zur-liste, .seite-abdeckung { display: none; }
 @media (orientation: portrait) and (max-width: 1100px), (max-height: 500px) and (max-width: 1000px) {
   .huelle-mac .seite-knopf { display: inline-flex; margin-left: -6px; }
+  .huelle-mac .insp-griff { display: none; }
+  .huelle-mac .mbody > .insp { width: min(440px, 92vw) !important; }
   .huelle-mac .mside { position: fixed; z-index: 60; inset: 0 auto 0 0; padding-top: max(14px, env(safe-area-inset-top));
     transform: translateX(-100%); transition: transform .25s cubic-bezier(.2,.8,.2,1); box-shadow: none; }
   .huelle-mac.seite-offen .mside { transform: none; box-shadow: 0 0 40px rgba(0,0,0,.25); }
@@ -722,7 +730,7 @@ button, a, [role="button"], [role="tab"], .tile, .vr, .si { touch-action: manipu
   .huelle-mac .fz-trenner { display: none; }
   .huelle-mac .tabs { overflow-x: auto; scrollbar-width: none; }
   .huelle-mac .tabs button { flex: none; }
-  .huelle-mac .mbody > .insp { width: 100vw; border-left: 0; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  .huelle-mac .mbody > .insp { width: 100vw !important; border-left: 0; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
   .huelle-mac .insp .acts { flex-wrap: wrap; }
   .huelle-mac .kv { grid-template-columns: 1fr; gap: 2px 0; }
   .huelle-mac .kv > span.l, .huelle-mac .kv > label { line-height: 1.3; margin-top: 8px; text-align: left; }

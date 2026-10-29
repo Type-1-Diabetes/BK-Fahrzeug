@@ -147,7 +147,7 @@ BK.modul('fahrzeuge', {
         mg.length ? el('section.fz-maengel', el('h3', mg.length === 1 ? '1 offener Mangel' : `${mg.length} offene Mängel`),
           el('div.fz-maengel-liste', mg.map(m => el('button.fz-mangel', { type: 'button', title: 'In Mängelmeldungen öffnen', onclick: () => ctx.oeffnen('maengel', { meldung: m.id }) },
             mac.pill(m.status), el('span.fz-mangel-t', el('b', mac.titel(m)), m.beschreibung ? el('span', m.beschreibung) : null),
-            el('span.fz-mangel-d', mac.kurz(m.erstellt_am)), BK.icon('chevR'))))) : null,
+            el('span.fz-mangel-d', mac.kurz(m.erstellt_am)), BK.icon('chevR'))))) : '',
         el('div.kpis',
           el('div.kpi', el('span', 'Offene Mängel'), el('b', { class: mg.length ? 'red' : null }, String(mg.length))),
           el('div.kpi', el('span', 'Offene Materialanforderungen'), el('b', String(mt.length))),

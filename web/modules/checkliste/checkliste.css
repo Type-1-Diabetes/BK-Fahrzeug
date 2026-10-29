@@ -71,7 +71,7 @@
 /* Unterüberschrift der Gruppe in der Seitenliste */
 .ckl-gruppe { margin: 14px 0 4px; padding: 0 12px; font-size: 12px; font-weight: 600; color: var(--label2); text-transform: uppercase; letter-spacing: .03em; }
 /* Raster: Haken | Nr. | Artikel | Soll | Ist | Verfall | Wo */
-.ck-liste { overflow: visible; }
+.ck-liste { overflow: clip; }
 .ckl-main { container-type: inline-size; }
 .ck-liste { --ck-spalten: minmax(0, 1fr) 54px 54px 118px 72px; }
 .ck-text, .ck-spalten { display: grid; grid-template-columns: var(--ck-spalten); column-gap: 10px; align-items: center; }

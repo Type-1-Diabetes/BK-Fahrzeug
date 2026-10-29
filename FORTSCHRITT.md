@@ -408,3 +408,18 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Migration 029: `vorlage_bereiche_ordnen`, `vorlage_positionen_ordnen` (nur MPGler, IDs müssen zur Vorlage gehören).
 - Getestet in Chromium mit Testdaten: Umordnen, Verschieben in anderen Bereich, Zweige auf/zu, Scroll bleibt (Überprüfung und Vorlage). Nicht mit Touch am iPad.
 - 029 ist ausgeführt (laut Nutzer). In der Überprüfung blieb die Seitenliste im Test schon stehen; springt sie bei dir trotzdem, bitte Gerät/Browser nennen.
+
+## Feinschliff Checkliste und Vorlage (2026-10-29, bk-v69)
+- Ablaufdatum: Jahr bis 50 Jahre voraus. Abschluss ohne Legende und ohne „Statt einer Unterschrift …“.
+- Farbstreifen der Zeilen ragen nicht mehr über die runde Ecke (`.ck-liste { overflow: clip }`).
+- Schmale, blasse Scrollleisten überall (`basis.css`, Safari über `::-webkit-scrollbar`).
+- „Nr. 1.0.1“ wird nirgends mehr gezeigt (Befunde, Vorlage-Tabelle, Vorlage-Formular; beim Speichern einer Position fällt sie weg).
+- Detailbereich (Inspektor) in Mängel, Material, Überprüfungen, Vorlage: am linken Rand breiter/schmaler ziehen, Breite pro Bereich gemerkt, Doppelklick = Standard. Nicht im Hochformat/Handy (dort Blatt).
+- Vorlage bearbeiten: Taschen wie auf dem Tablet als eine Seite („Hygiene Taschen“), in der Tabelle Abschnitte je Tasche mit Bearbeiten/Löschen. Der markierte Abschnitt nimmt neue Positionen auf. Ziehen über Abschnitte verschiebt in die andere Tasche. Gezogene Zeile deutlich hervorgehoben.
+- Behoben: „null“ als Text in der Fahrzeug-Akte (ohne offene Mängel) und im Vorlage-Kopf.
+- Getestet in Chromium mit Testdaten (Mac 1280×800, Handy 390): keine Fehler.
+
+## Gruppen in der Vorlage, „Anzahl ist“ beim Abhaken (2026-10-29, bk-v70)
+- Vorlage bearbeiten: Gruppen (Patientenraum, Hygiene …) haben einen Kopf mit Griff, Umbenennen ✎ und Löschen ✕ (beim Darüberfahren). Gruppe ziehen verschiebt sie mit allen Bereichen. Bereich in eine andere Gruppe ziehen ändert seine Gruppe. „Neue Gruppe“ fragt den Namen und legt gleich den ersten Bereich an. Löschen entfernt nur die Überschrift, die Bereiche stehen danach unter „Ohne Gruppe“. Keine neue Migration (nutzt `vorlage_bereich_speichern` und 029).
+- Fahrzeug Überprüfung: Abgehakt zeigt „Anzahl ist“ gleich die Soll-Zahl, „Nicht vorhanden“ zeigt 0.
+- Getestet in Chromium mit Testdaten: Bereich in andere Gruppe, Gruppe nach oben, Umbenennen, Abhaken. Keine Fehler.

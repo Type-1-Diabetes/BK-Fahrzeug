@@ -48,7 +48,7 @@
       ziel.innerHTML = html;  // nur eigene Moduldateien, keine Benutzereingaben
       aktiv = { name, def: module[name] };
       await module[name].start(ziel, { ...ctx, oeffnen: (n, x) => navigieren(n, x), extra });
-      if (!ctx.ich.tablet_id) hochformat(ziel);
+      if (!ctx.ich.tablet_id) { hochformat(ziel); inspBreite(ziel, name); }
     } catch (e) {
       ziel.append(el('div.leer', el('p', 'Dieser Bereich lässt sich gerade nicht laden.'), el('p.foot', e.message)));
     }
@@ -371,6 +371,32 @@
       if (!body.querySelector(':scope > .vlist') || !body.querySelector(':scope > .vfile')) continue;
       body.prepend(el('button.tb.zur-liste', { type: 'button', onclick: () => body.classList.remove('akte-offen') }, icon('chevL'), 'Liste'));
       body.addEventListener('click', e => { if (e.target.closest('.vlist .vr')) setTimeout(() => body.classList.add('akte-offen')); });
+    }
+  }
+
+  // Inspektor (Detail rechts) breiter oder schmaler ziehen, Breite pro Modul merken. Doppelklick = Standard.
+  function inspBreite(ziel, modul) {
+    const schluessel = 'bk_insp_' + modul;
+    for (const insp of ziel.querySelectorAll('.mbody > .insp')) {
+      let w = 0;
+      try { w = Number(localStorage.getItem(schluessel)) || 0; } catch { /* privat */ }
+      if (w) insp.style.width = w + 'px';
+      const griff = el('div.insp-griff', { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': 'Breite des Detailbereichs', title: 'Ziehen ändert die Breite. Doppelklick: Standard.' });
+      insp.before(griff);
+      griff.addEventListener('dblclick', () => { insp.style.width = ''; try { localStorage.removeItem(schluessel); } catch { /* privat */ } });
+      griff.addEventListener('pointerdown', e => {
+        if (e.button > 0) return;
+        e.preventDefault();
+        const x0 = e.clientX, w0 = insp.getBoundingClientRect().width, max = insp.parentElement.getBoundingClientRect().width * .7;
+        document.body.classList.add('am-breite');
+        const bewegen = ev => { insp.style.width = Math.round(Math.max(280, Math.min(max, w0 + x0 - ev.clientX))) + 'px'; };
+        const ende = () => {
+          window.removeEventListener('pointermove', bewegen); window.removeEventListener('pointerup', ende); window.removeEventListener('pointercancel', ende);
+          document.body.classList.remove('am-breite');
+          try { localStorage.setItem(schluessel, String(Math.round(insp.getBoundingClientRect().width))); } catch { /* privat */ }
+        };
+        window.addEventListener('pointermove', bewegen); window.addEventListener('pointerup', ende); window.addEventListener('pointercancel', ende);
+      });
     }
   }
 

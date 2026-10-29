@@ -6,7 +6,7 @@
 .gz-bereich.rot { border-color: var(--b-rot); background: color-mix(in srgb, var(--b-rot) 12%, var(--bg2)); }
 .gz-bereich.gruen { border-color: var(--b-gruen); background: color-mix(in srgb, var(--b-gruen) 14%, var(--bg2)); }
 .gz-bereich.gelb { border-color: var(--b-gelb); background: color-mix(in srgb, var(--b-gelb) 22%, var(--bg2)); }
-.gz-befund { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: baseline; padding: 9px 12px; border-top: .5px solid var(--sep); }
+.gz-befund { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: baseline; padding: 9px 12px; border-top: .5px solid var(--sep); }
 .gz-befund b { font-weight: 500; }
 .gz-befund div span { display: block; color: var(--label2); font-size: 13px; margin-top: 2px; }
 .gz-nr { color: var(--label2); font-variant-numeric: tabular-nums; }

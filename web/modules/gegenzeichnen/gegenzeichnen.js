@@ -198,7 +198,6 @@ BK.modul('gegenzeichnen', {
       for (const { b, l } of nachBereich.values()) {
         kasten.append(el('div', { class: 'gz-bereich ' + ((b && b.farbe) || '') }, b ? b.name : 'Unbekannter Bereich'),
           ...l.map(([p, x]) => el('div.gz-befund',
-            el('span.gz-nr', p ? BK.lfd(p).nr : ''),
             el('div', el('b', p ? p.artikel : 'Position'), x.bemerkung ? el('span', x.bemerkung) : null),
             el('span', { class: x.nicht_geprueft ? 'red' : 'warnt' }, befund(p, x)))));
       }

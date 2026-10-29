@@ -11,7 +11,12 @@ table.tab tbody tr.sel td.vo-hinweis { color: rgba(255,255,255,.8); }
 .vo-form { display: flex; flex-direction: column; gap: 4px; }
 .vo-form .kv { margin-top: 10px; }
 /* Seitenliste: Gruppe als Überschrift, Griff zum Ziehen */
-.vo-gruppe { position: sticky; top: 0; z-index: 1; padding: 12px 14px 4px; font-size: 11px; font-weight: 600; color: var(--label2); text-transform: uppercase; letter-spacing: .03em; background: var(--bg2); }
+.vo-gruppe { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 8px 8px 4px 14px; font-size: 11px; font-weight: 600; color: var(--label2); text-transform: uppercase; letter-spacing: .03em; background: var(--bg2); }
+.vo-gruppe.ohne { color: var(--label3); }
+.vo-gruppe .vo-griff { display: grid; place-items: center; width: 18px; height: 24px; margin-left: -10px; font-size: 14px; }
+.vo-gruppe-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vo-gruppe-k { height: 24px; padding: 0 5px; font-size: 13px; color: var(--label2); }
+.vo-gruppe-box.zieht { box-shadow: 0 8px 24px rgba(0,0,0,.2); background: var(--bg2); outline: 1.5px solid var(--navy2); outline-offset: -1.5px; }
 .vo-bereich { cursor: default; }
 .vo-griff { color: var(--label3); cursor: grab; touch-action: none; }
 table.tab td.vo-griff svg { display: block; }
@@ -22,13 +27,27 @@ th.vo-griff-sp { width: 28px; padding: 0; }
 table.tab tbody tr.sel td.vo-griff { color: rgba(255,255,255,.6); }
 /* Griff nur beim Darüberfahren (Maus); mit dem Finger immer sichtbar */
 @media (hover: hover) {
-  .vo-griff svg { opacity: 0; transition: opacity .12s ease-out; }
+  .vo-griff svg, .vo-gruppe-k { opacity: 0; transition: opacity .12s ease-out; }
+  .vo-gruppe:hover .vo-griff svg, .vo-gruppe:hover .vo-gruppe-k, .vo-gruppe-k:focus-visible { opacity: 1; }
   .vo-bereich:hover .vo-griff svg, .vo-bereich:focus-visible .vo-griff svg, table.tab tbody tr:hover td.vo-griff svg, .zieht .vo-griff svg { opacity: 1; }
   .vo-bereich:hover span.vo-griff, table.tab tbody tr:hover td.vo-griff { color: var(--label2); }
 }
 /* Beim Ziehen: Zeile angehoben, Ziel-Bereich markiert */
 .zieht { position: relative; z-index: 2; box-shadow: 0 6px 18px rgba(0,0,0,.18); background: var(--bg2); }
-tr.zieht td { background: var(--bg2) !important; }
 .vo-bereich.ablage { background: color-mix(in srgb, var(--navy2) 22%, transparent); box-shadow: inset 0 0 0 2px var(--navy2); }
 body.am-ziehen, body.am-ziehen * { cursor: grabbing !important; -webkit-user-select: none; user-select: none; }
 @media (pointer: coarse) { .vr span.vo-griff { width: 32px; height: 44px; font-size: 20px; } table.tab td.vo-griff { width: 40px; font-size: 20px; } .vo-pfeile .tb { min-height: 40px; min-width: 40px; } }
+/* Taschen als eine Seite: Abschnitt je Tasche, der aktive nimmt neue Positionen auf */
+tr.vo-abschnitt td { height: auto; padding: 14px 10px 6px; background: var(--bg2) !important; border-bottom: .5px solid var(--sep); }
+.vo-abschnitt-kopf { display: flex; align-items: center; gap: 10px; }
+.vo-abschnitt-kopf b { font-size: 13px; }
+.vo-abschnitt-kopf > span { color: var(--label2); font-size: 12px; }
+.vo-abschnitt-kopf .sp { flex: 1; }
+tr.vo-abschnitt.aktiv .vo-abschnitt-kopf b { color: var(--navy2); }
+tr.vo-abschnitt.aktiv td { box-shadow: inset 3px 0 var(--navy2); }
+@media (hover: hover) { tr.vo-abschnitt .pbtn { opacity: 0; } tr.vo-abschnitt:hover .pbtn, tr.vo-abschnitt.aktiv .pbtn { opacity: 1; } }
+/* Gezogene Zeile deutlich hervorheben */
+tr.zieht td { background: color-mix(in srgb, var(--navy2) 16%, var(--bg2)) !important; color: var(--label) !important; }
+tr.zieht td:first-child { box-shadow: inset 3px 0 var(--navy2); }
+tr.zieht { outline: 1.5px solid var(--navy2); outline-offset: -1.5px; }
+.vo-bereich.zieht { background: color-mix(in srgb, var(--navy2) 16%, var(--bg2)); box-shadow: inset 3px 0 var(--navy2), 0 6px 18px rgba(0,0,0,.18); }
