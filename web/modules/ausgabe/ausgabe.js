@@ -70,12 +70,15 @@ BK.modul('ausgabe', {
       inspektor();
     }
     mac.escZu(root, insp, schliessen);
+    // ⌘P / Strg+P: Original-Formular als PDF
+    root.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p' && insp.querySelector('[data-pdf]')) { e.preventDefault(); insp.querySelector('[data-pdf]').click(); }
+    });
 
     function inspektor() {
       const m = alle.find(x => x.id === gewaehlt);
       leeren(insp);
       insp.classList.toggle('zu', !m);
-      insp.classList.add('hat-druck');
       if (!m) return;
       const fertig = m.status === 'erledigt';
       const erhalten = {};
@@ -97,20 +100,8 @@ BK.modul('ausgabe', {
           el('div', el('span', 'Ausgegeben durch'), el('b', b.ausgegeben_von || '–')),
           el('div', el('span', 'Ausgegeben am'), el('b', b.ausgegeben_am ? BK.datum(b.ausgegeben_am, false) : '–'))),
         fertig ? '' : el('div.foot.aus-hinweis', 'Fehlt etwas im Lager? „Erhalten“ anpassen.'),
-        BK.druckblatt({ bereich: 'Formulare', titel: 'Material-Anforderung', dok: 'Material-Anforderung', version: '2015-04-23' },
-          el('h4.dr-h', 'Materialanforderung'),
-          el('table.dr-tab',
-            el('thead', el('tr', el('th', 'Artikel'), el('th', 'Größe'), el('th.num', 'Angeforderte Menge'), el('th.num', 'Erhaltene Menge'), el('th.kreuz', 'Verbraucht'), el('th.kreuz', 'Abgelaufen'))),
-            el('tbody', m.positionen.map(p => el('tr', el('td', p.artikel), el('td', p.groesse || ''), el('td.num', String(p.menge)),
-              el('td.num', p.erhalten != null ? String(p.erhalten) : ''), el('td.kreuz', p.grund === 'verbraucht' ? 'X' : ''), el('td.kreuz', p.grund === 'abgelaufen' ? 'X' : ''))))),
-          el('div.dr-unter',
-            BK.linie('Material angefordert am:', BK.datum(m.erstellt_am)),
-            BK.linie('Material angefordert für Fahrzeug/ Raum:', m.fahrzeug.name),
-            BK.linie('Angefordert durch Mitarbeiter:', m.gemeldet_von + ' (digital)'),
-            BK.linie('Ausgegeben durch Mitarbeiter:', b.ausgegeben_von),
-            BK.linie('Ausgegeben am:', b.ausgegeben_am ? BK.datum(b.ausgegeben_am, false) : ''))),
         el('div.acts',
-          el('button.pbtn', { type: 'button', title: 'Drucken oder als PDF speichern (⌘P / Strg+P)', onclick: () => window.print() }, 'Drucken'),
+          el('button.pbtn', { type: 'button', title: 'Original-Formular als PDF (⌘P / Strg+P)', dataset: { pdf: '' }, onclick: e => mitStatus(e.currentTarget, () => BK.pdf.material(m).catch(f => { alertDialog('PDF nicht erstellt', f.message); return false; })) }, 'PDF'),
           mac.loeschKnopf('Materialanforderung', () => api.meldungLoeschen(m.id), () => { gewaehlt = null; laden(); }),
           fertig ? '' : el('button.pbtn.def', { type: 'button', dataset: { fertig: '' }, title: 'Als ausgegeben markieren (⌘↩ / Strg+↩)', onclick: e => mitStatus(e.currentTarget, () => ausgeben(m, erhalten, true)) }, BK.icon('check'), 'Als ausgegeben markieren')));
     }

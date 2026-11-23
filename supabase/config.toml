@@ -1,0 +1,9 @@
+# Nur für das Hochladen der Edge Functions (.github/workflows/edge-functions.yml).
+# JWT-Prüfung aus: Die Datenbank ruft ohne Login auf, die Funktionen prüfen PUSH_GEHEIMNIS selbst.
+project_id = "lotwccocevnlyymjjxia"
+
+[functions.push-senden]
+verify_jwt = false
+
+[functions.aufraeumen]
+verify_jwt = false

@@ -242,12 +242,10 @@
       method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' },
       body: JSON.stringify({ user_id: sitzung && sitzung.user && sitzung.user.id, schluessel, an }) }),
 
-    // Dieses Gerät für Benachrichtigungen an- oder abmelden (sub = PushSubscription)
+    // Dieses Gerät für Benachrichtigungen anmelden oder erneuern (sub = PushSubscription, Migration 034)
     pushAboSpeichern(sub) {
       const j = sub.toJSON();
-      return mitLogin('/rest/v1/push_abos?on_conflict=endpoint', {
-        method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates' },
-        body: JSON.stringify({ user_id: sitzung && sitzung.user && sitzung.user.id, endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth }) });
+      return rpc('push_abo_speichern', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
     },
     // Nachrichten an Tablets (Migration 031). RLS: Tablet sieht nur eigene und „an alle“.
     nachrichten: () => lesen('nachrichten', 'select=id,fahrzeug_id,text,wichtig,erstellt_am,wer_name,zurueckgezogen_am,fahrzeug:fahrzeuge!nachrichten_fahrzeug_id_fkey(name),gelesen:nachricht_gelesen(fahrzeug_id,am)&order=erstellt_am.desc&limit=200'),

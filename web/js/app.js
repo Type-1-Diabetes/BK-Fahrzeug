@@ -147,6 +147,7 @@
     verlaufStand = null;
     const pruefen = async () => {
       if (!ctx || document.visibilityState !== 'visible' || !navigator.onLine) return;
+      BK.push.pruefen(pushSpeichern);
       // Tablet meldet sich höchstens jede Minute als online (auch nach dem Wiederöffnen)
       if (ctx.ich.tablet_id && Date.now() - letzterPing > 60000) { letzterPing = Date.now(); api.tabletPing().catch(() => {}); }
       if (ctx.ich.tablet_id) nachrichtenZeigen();
@@ -234,7 +235,6 @@
 
   // Nachrichten vom MPGler: Leiste über allen Reitern, bis jemand „Gelesen“ tippt. Dazu ggf. Knopf für Benachrichtigungen.
   let nachrichtenLeiste = null, nachrichtenLauf = 0;
-  const vapidSchluessel = b64 => Uint8Array.from(atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
   async function nachrichtenZeigen() {
     if (!nachrichtenLeiste || !ctx || !ctx.fahrzeug) return;
     const lauf = ++nachrichtenLauf;
@@ -262,30 +262,22 @@
       el('h2', zeilen.length === 1 ? 'Nachricht vom MPGler' : `${zeilen.length} Nachrichten vom MPGler`), ...zeilen));
     fenster.querySelector('.nachricht .btn')?.focus({ preventScroll: true });
   }
-  // Einmal pro Tablet: Benachrichtigungen erlauben, damit Nachrichten auch bei geschlossener App ankommen
+  // Push-Abo beim Server anmelden: Tablet über eigene Funktion, Personal direkt
+  const pushSpeichern = sub => ctx && ctx.ich.tablet_id ? api.tabletPushAbo(sub) : api.pushAboSpeichern(sub);
+
+  // Tablet: Benachrichtigungen erlauben, damit Nachrichten auch bei geschlossener App ankommen. „Später“ = 3 Tage Ruhe.
   async function pushHinweis(hatNachricht) {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined' || Notification.permission === 'denied') return [];
-    let reg, sub;
-    try { reg = await navigator.serviceWorker.ready; sub = await reg.pushManager.getSubscription(); } catch { return []; }
-    if (sub && Notification.permission === 'granted') {
-      // Abo bei jedem Start bestätigen (z. B. nach neuer Kopplung), Fehler still
-      if (!pushHinweis.gemeldet) { pushHinweis.gemeldet = true; api.tabletPushAbo(sub).catch(() => {}); }
-      return [];
-    }
-    let spaeter = false;
-    try { spaeter = !!localStorage.getItem('bk_push_spaeter'); } catch { /* privat */ }
-    if (!hatNachricht && spaeter) return [];
+    const z = BK.push.zustand();
+    if (z === 'fehlt' || z === 'denied' || BK.push.bewusstAus()) return [];
+    if (z === 'granted' && await BK.push.pruefen(pushSpeichern)) return [];  // Recht da, Abo steht
+    if (z === 'default' && !BK.push.fragen() && !hatNachricht) return [];      // „Später“ läuft noch
     return [el('div.nachricht.push',
       el('div.nachricht-ic', icon('inbox')),
       el('div.t', el('b', 'Nachrichten auch bei geschlossener App'), el('span', 'Erlaube Benachrichtigungen, dann meldet sich das Tablet, wenn der MPGler schreibt.')),
-      el('button.btn.sec', { type: 'button', onclick: () => { try { localStorage.setItem('bk_push_spaeter', '1'); } catch { /* privat */ } nachrichtenZeigen(); } }, 'Später'),
+      el('button.btn.sec', { type: 'button', onclick: () => { BK.push.spaeter(); nachrichtenZeigen(); } }, 'Später'),
       el('button.btn', { type: 'button', onclick: async () => {
-        try {
-          if (await Notification.requestPermission() !== 'granted') return nachrichtenZeigen();
-          const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidSchluessel(BK_CONFIG.vapid) });
-          await api.tabletPushAbo(neu);
-          showToast('Benachrichtigungen sind an');
-        } catch (e) { alertDialog('Hat nicht geklappt', e.offline ? 'Dafür braucht das Tablet Netz.' : e.message); }
+        try { if (await BK.push.einschalten(pushSpeichern)) showToast('Benachrichtigungen sind an'); }
+        catch (e) { alertDialog('Hat nicht geklappt', e.offline ? 'Dafür braucht das Tablet Netz.' : e.message); }
         nachrichtenZeigen();
       } }, 'Einschalten'))];
   }
@@ -327,6 +319,7 @@
   async function abmeldenUndStart(hinweis) {
     clearInterval(ampelTimer); ampelStand = null; document.onvisibilitychange = null;
     document.querySelector('.nachricht-fenster')?.remove();
+    await BK.push.aus();  // Server löscht das Tablet-Abo beim Entkoppeln selbst (Migration 031)
     await api.abmelden();
     try { localStorage.removeItem('bk_ich'); localStorage.setItem('bk_startmodus', 'koppeln'); } catch { /* privat */ }
     ctx = null;
@@ -422,6 +415,15 @@
     navigieren(liste.some(m => m.name === letztes) ? letztes : liste[0].name);
     vorladen(liste);
     statusBeobachten();
+    setTimeout(pushFragen, 1500);
+  }
+
+  // Mac: Benachrichtigungen anbieten, solange das Gerät noch nie gefragt wurde
+  async function pushFragen() {
+    if (!BK.push.fragen() || !ctx || ctx.ich.tablet_id || document.querySelector('._ad-open, .blatt-overlay')) return;
+    if (!await confirmDialog('Benachrichtigungen einschalten?', 'Dann meldet sich die App bei neuen Meldungen, auch wenn sie geschlossen ist.', { confirmLabel: 'Einschalten', cancelLabel: 'Später' })) return BK.push.spaeter();
+    try { if (await BK.push.einschalten(pushSpeichern)) showToast('Benachrichtigungen sind an'); }
+    catch (e) { alertDialog('Hat nicht geklappt', e.message); }
   }
 
   // iPad hochkant: Knopf für die Seitenleiste in die Werkzeugleiste, Liste und Akte nacheinander (CSS blendet um)
@@ -506,6 +508,7 @@
 
   async function abmelden() {
     if (!await confirmDialog('Abmelden?', 'Du musst dich danach neu anmelden.')) return;
+    await BK.push.aus(api.pushAboLoeschen);
     await api.abmelden();
     starten();
   }

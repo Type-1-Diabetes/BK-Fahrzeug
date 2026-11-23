@@ -1,12 +1,12 @@
 /* Service Worker: App-Dateien offline verfügbar, Web-Push.
    Aufbau angelehnt an die Website Schrietz (admin/sw.js), erweitert um den Offline-Modus.
    Bei Änderungen an App-Dateien VERSION erhöhen, dann holt sich jedes Gerät die neuen Dateien. */
-const VERSION = 'bk-v83';
+const VERSION = 'bk-v85';
 const DATEIEN = [
   './', 'index.html', 'manifest.webmanifest',
   'icons/logo-256.png', 'icons/banner.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'icons/favicon-16.png',
   'css/basis.css', 'css/komponenten.css',
-  'js/config.js', 'js/dom.js', 'js/icons.js', 'js/api.js', 'js/warteschlange.js', 'js/auswahl.js', 'js/fristen.js', 'js/formular.js', 'js/mac.js', 'js/module-liste.js', 'js/app.js',
+  'js/config.js', 'js/dom.js', 'js/icons.js', 'js/api.js', 'js/warteschlange.js', 'js/auswahl.js', 'js/fristen.js', 'js/formular.js', 'js/mac.js', 'js/pdf-export.js', 'js/push.js', 'js/module-liste.js', 'js/app.js',
   'js/lib/pwa.js', 'js/lib/alert-dialog.js', 'js/lib/ui-helpers.js', 'js/lib/settings-layout.js', 'js/lib/foto-ansicht.js',
   // Tablet-Module, damit das Tablet auch ohne Netz startet
   ...['uebersicht', 'mangel', 'material', 'unfall', 'checkliste', 'sollliste', 'verlauf'].flatMap(m => ['html', 'css', 'js'].map(x => `modules/${m}/${m}.${x}`)),
@@ -36,12 +36,26 @@ self.addEventListener('fetch', e => {
   );
 });
 
+// Jeder Push zeigt eine Benachrichtigung, auch bei kaputten Daten. Sonst entzieht Safari das Abo.
 self.addEventListener('push', e => {
   let d = {};
-  try { d = e.data ? e.data.json() : {}; } catch { d = { title: 'BK Fahrzeug', body: e.data && e.data.text() }; }
-  e.waitUntil(self.registration.showNotification(d.title || 'BK Fahrzeug', {
-    body: d.body || '', icon: 'icons/icon-192.png', tag: d.tag, data: { url: d.url || './' },
-  }));
+  try { d = e.data ? e.data.json() : {}; } catch { try { d = { body: e.data.text() }; } catch { d = {}; } }
+  const titel = typeof d.title === 'string' && d.title ? d.title : 'BK Fahrzeug';
+  e.waitUntil(self.registration.showNotification(titel, {
+    body: typeof d.body === 'string' ? d.body : '', icon: 'icons/icon-192.png',
+    tag: typeof d.tag === 'string' ? d.tag : undefined, data: { url: './' },
+  }).catch(() => self.registration.showNotification('BK Fahrzeug')));
+});
+
+// Browser hat das Abo erneuert oder beendet (Chrome ab 138, Firefox; iOS kennt das nicht): neu abonnieren.
+// Beim Server meldet es die App beim nächsten Öffnen (BK.push.pruefen), offene Fenster sofort.
+self.addEventListener('pushsubscriptionchange', e => {
+  const alt = e.oldSubscription && e.oldSubscription.options;
+  if (!alt || !alt.applicationServerKey) return;
+  e.waitUntil(self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: alt.applicationServerKey })
+    .then(() => self.clients.matchAll({ type: 'window' }))
+    .then(liste => liste.forEach(c => c.postMessage({ typ: 'push-neu' })))
+    .catch(() => {}));
 });
 
 self.addEventListener('notificationclick', e => {

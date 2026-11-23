@@ -62,6 +62,7 @@
             inputEl.autocomplete = opts.typ === 'password' ? 'off' : '';
             cancelBtn.style.display = opts.cancel === false ? 'none' : '';
             confirmBtn.textContent = opts.confirmLabel || (opts.cancel === false ? 'OK' : 'Bestätigen');
+            cancelBtn.textContent = opts.cancelLabel || 'Abbrechen';
 
             overlay.classList.add('_ad-open');
             setTimeout(function () { (opts.input ? inputEl : confirmBtn).focus(); if (opts.input) inputEl.select(); }, 50);
@@ -93,8 +94,9 @@
         });
     }
 
-    window.confirmDialog = function (title, description) {
-        return open({ title: title, desc: description });
+    window.confirmDialog = function (title, description, opts) {
+        opts = opts || {};
+        return open({ title: title, desc: description, confirmLabel: opts.confirmLabel, cancelLabel: opts.cancelLabel });
     };
     window.promptDialog = function (title, description, opts) {
         opts = opts || {};

@@ -159,7 +159,6 @@
         ungesichert = false;
         leeren(insp);
         insp.classList.toggle('zu', !m);
-        insp.classList.add('hat-druck');
         if (!m) return;
         const fz = fzVon(m);
         const werte = altUebernehmen({ ...(m.bearbeitung || {}) });
@@ -178,10 +177,9 @@
               el('span.l', { dataset: { k: f.key } }, f.label),
               el('div', { dataset: { k: f.key } }, feld(f, werte), f.hinweis ? el('div.feld-hinweis', f.hinweis) : null)])))),
           el('div.ih', 'Verlauf'), verlauf,
-          druckMangel(m, werte),
           el('div.acts',
             el('span.ungesichert', { dataset: { ungesichert: '' }, hidden: true }, 'Nicht gespeichert'),
-            el('button.pbtn', { type: 'button', title: 'Drucken oder als PDF speichern (⌘P / Strg+P)', onclick: () => window.print() }, 'Drucken'),
+            el('button.pbtn', { type: 'button', title: 'Original-Formular als PDF (⌘P / Strg+P)', dataset: { pdf: '' }, onclick: e => mitStatus(e.currentTarget, () => BK.pdf.mangel(m, werte).catch(f => { alertDialog('PDF nicht erstellt', f.message); return false; })) }, 'PDF'),
             mac.loeschKnopf('Mängelmeldung', () => api.meldungLoeschen(m.id), () => { ungesichert = false; gewaehlt = null; laden(true); }),
             el('button.pbtn', { type: 'button', onclick: async () => {
               try { if (await mac.ampelAendern(fz, mac.titel(m))) laden(true); } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
@@ -207,42 +205,6 @@
             el('b', e.aktion === 'status' ? mac.STATUS[e.details.nach] || 'Status' : AKTION[e.aktion] || e.aktion),
             ' · ' + mac.kurz(e.am) + (e.wer_name ? ' · ' + e.wer_name : ''))));
         } catch { /* Verlauf ist nur Zusatz */ }
-      }
-
-      // Druck wie das Papierformular, mit dem gespeicherten Stand
-      function druckMangel(m, w) {
-        const d = new Date(m.erstellt_am);
-        const r = w.reparatur;
-        const termin = w.termin ? new Date(w.termin) : null;
-        const tag = v => v ? BK.datum(v, false) : '';
-        return BK.druckblatt({ bereich: 'Formulare', titel: 'Mängelmeldung', dok: 'BK_Formulare_Mängelmeldung', version: '2025-01-14' },
-          el('div.dr-box',
-            el('div.dr-reihe', BK.kreuz(false, 'PKW'), BK.kreuz(m.betrifft !== 'mpg', 'KTW'), BK.kreuz(false, 'RTW'), BK.kreuz(false, 'Gebäude'),
-              BK.kreuz(m.betrifft === 'mpg', 'MPG:'), BK.linie('SN', m.geraet ? m.geraet.seriennummer : m.geraet_frei)),
-            el('div.dr-zeile',
-              el('div', el('span', 'Amtl. Kennzeichen / Ort / Gegenstand:'), el('b', [m.fahrzeug.kennzeichen, mac.titel(m)].filter(Boolean).join(' · '))),
-              el('div', el('span', 'Funkruf:'), el('b', m.fahrzeug.name)),
-              el('div', el('span', 'Datum:'), el('b', d.toLocaleDateString('de-DE'))),
-              el('div', el('span', 'Zeit:'), el('b', d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })))),
-            el('div.dr-text', m.beschreibung || ''),
-            el('div.dr-reihe', BK.linie('Gemeldet durch:', m.gemeldet_von), BK.linie('Unterschrift:', 'digital, ' + BK.datum(m.erstellt_am)))),
-          el('div.dr-box',
-            el('div', el('h4', 'Teamleitung / Geschäftführung informiert'),
-              el('div.dr-reihe', el('b', 'TL'), BK.kreuz(w.info_tl_wie === 'telefonisch', 'Telefonisch'), BK.kreuz(w.info_tl_wie === 'E-Mail', 'E-Mail'),
-                el('b', 'GF'), BK.kreuz(w.info_gf_wie === 'telefonisch', 'Telefonisch'), BK.kreuz(w.info_gf_wie === 'E-Mail', 'E-Mail'), BK.kreuz(w.info_gf_wie === 'Fax', 'Fax'))),
-            el('div', el('h4', 'Gesichtet'),
-              el('div.dr-reihe', BK.linie('Name:', w.gesichtet_name), BK.kreuz(!!w.fotografiert, 'Schaden Fotografiert'), BK.linie('Datum:', tag(w.gesichtet_datum))),
-              el('div', 'Bemerkung:'), el('div.dr-text.klein', w.gesichtet_bemerkung || '')),
-            el('div', el('h4', 'Reparatur'),
-              el('div.dr-felder',
-                el('div.dr-reihe', BK.kreuz(r === 'intern', 'Erledigt intern, von'), BK.linie('', w.intern_von)),
-                el('div.dr-reihe', BK.kreuz(r === 'extern', 'Reparatur extern durch:'), BK.linie('', w.extern_durch)),
-                el('div.dr-reihe', BK.kreuz(!!termin, 'Termin am:'), BK.linie('', termin ? termin.toLocaleDateString('de-DE') : ''),
-                  BK.linie('um', termin ? termin.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : ''), BK.linie('KV:', w.kv ? 'angefordert' : '')),
-                el('div.dr-reihe', BK.kreuz(r === 'instand', 'Instandgesetzt / wieder einsatzbereit am:'), BK.linie('', tag(w.einsatzbereit_am)), BK.kreuz(r === 'unreparabel', 'unreparabel'))),
-              el('div', 'Bemerkung:'), el('div.dr-text.klein', w.reparatur_bemerkung || ''))),
-          el('div.dr-unter', BK.linie('Mängelbericht für richtig befunden (Datum & Unterschrift nur durch Leitstelle, FDL oder BL)',
-            [w.befunden_name, tag(w.befunden_datum)].filter(Boolean).join(', '))));
       }
 
       async function sichern(m, werte, neuerStatus) {
@@ -272,9 +234,10 @@
         if (!exportCSV('maengel-' + new Date().toISOString().slice(0, 10) + '.csv', zeilen)) alertDialog('Nichts zu exportieren', 'Die Liste ist leer.');
       };
 
-      // ⌘S / Strg+S speichert die offene Mängelmeldung
+      // ⌘S / Strg+S speichert die offene Mängelmeldung, ⌘P / Strg+P erstellt das PDF
       root.addEventListener('keydown', e => {
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); insp.querySelector('[data-sichern]')?.click(); }
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p' && insp.querySelector('[data-pdf]')) { e.preventDefault(); insp.querySelector('[data-pdf]').click(); }
       });
       BK.beiNeu(() => { if (!ungesichert) laden(true); });
       await laden();  // Wechsel wartet auf die Daten (kein leeres Gerüst)

@@ -22,3 +22,6 @@
 .schalter:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 2px; }
 .es-geraet { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .es-geraet p { margin: 0; flex: 1; min-width: 220px; color: var(--label2); line-height: 1.4; }
+/* Benachrichtigungen auf diesem Gerät: Status und Knöpfe */
+.es-geraet .es-an { color: var(--ok-ink); font-weight: 500; }
+.es-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }

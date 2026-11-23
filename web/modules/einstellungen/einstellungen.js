@@ -34,40 +34,36 @@ BK.modul('einstellungen', {
       if (sl) sl.clean();
     }
 
-    // Dieses Gerät an- oder abmelden (Web Push über den Service Worker)
+    // Dieses Gerät an- oder abmelden (Web Push, gemeinsamer Baustein js/push.js)
     const geraet = root.querySelector('[data-geraet]');
-    const schluessel = b64 => Uint8Array.from(atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const android = /Android/.test(navigator.userAgent);
     const installiert = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    // Wo man das Recht wieder erlaubt, je nach Gerät
+    const freigeben = () => ios ? 'Einstellungen › Mitteilungen › BK Fahrzeug › Mitteilungen erlauben.'
+      : android ? 'Lange auf das App-Symbol tippen › App-Info › Benachrichtigungen › erlauben.'
+      : installiert ? 'Im App-Fenster oben rechts ⋯ › App-Info oder Website-Einstellungen › Benachrichtigungen › Zulassen.'
+      : 'Links in der Adresszeile auf das Symbol klicken › Benachrichtigungen › Zulassen. Danach die Seite neu laden.';
 
     async function geraetZeigen() {
       leeren(geraet);
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        return geraet.append(el('p', ios && !installiert
-          ? 'Auf dem iPad gehen Benachrichtigungen nur, wenn die App auf dem Home-Bildschirm liegt: Teilen › „Zum Home-Bildschirm“, dann von dort öffnen.'
-          : 'Dieser Browser kann keine Benachrichtigungen empfangen.'));
-      }
-      if (Notification.permission === 'denied') {
-        return geraet.append(el('p', 'Benachrichtigungen sind für diese Seite im Browser blockiert. Bitte in den Browser-Einstellungen erlauben.'));
-      }
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription();
-      const knopf = el('button', { type: 'button', class: sub ? 'pbtn' : 'pbtn def' }, sub ? 'Ausschalten' : 'Einschalten');
-      knopf.onclick = async () => {
-        knopf.disabled = true;
-        try {
-          if (sub) {
-            await api.pushAboLoeschen(sub.endpoint).catch(() => {});
-            await sub.unsubscribe();
-          } else {
-            if (await Notification.requestPermission() !== 'granted') return geraetZeigen();
-            const neu = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: schluessel(BK_CONFIG.vapid) });
-            await api.pushAboSpeichern(neu);
-          }
-        } catch (e) { alertDialog('Hat nicht geklappt', e.message); }
+      const z = BK.push.zustand();
+      if (z === 'fehlt') return geraet.append(el('p', ios && !installiert
+        ? 'Auf dem iPad gehen Benachrichtigungen nur in der App vom Home-Bildschirm.'
+        : 'Dieser Browser kann keine Benachrichtigungen empfangen.'));
+      if (z === 'denied') return geraet.append(el('p', 'Benachrichtigungen sind blockiert. So erlaubst du sie: ' + freigeben()));
+      const { sub } = await BK.push.abo();
+      const an = z === 'granted' && sub;
+      const knopf = (text, def, fn) => el('button', { type: 'button', class: def ? 'pbtn def' : 'pbtn', onclick: e => mitStatus(e.currentTarget, async () => {
+        try { await fn(); } catch (f) { alertDialog('Hat nicht geklappt', f.message); }
         geraetZeigen();
-      };
-      geraet.append(sub ? '' : el('p', 'Auf diesem Gerät kommen noch keine Benachrichtigungen.'), knopf);
+      }) }, text);
+      geraet.append(
+        el('p', { class: an ? 'es-an' : null }, an ? 'Benachrichtigungen sind auf diesem Gerät an.' : 'Auf diesem Gerät kommen noch keine Benachrichtigungen.'),
+        el('div.es-knoepfe', an
+          ? [knopf('Test', false, async () => { const { reg } = await BK.push.abo(); await reg.showNotification('BK Fahrzeug', { body: 'So sieht eine Benachrichtigung aus.', icon: 'icons/icon-192.png', tag: 'test' }); }),
+             knopf('Ausschalten', false, () => BK.push.aus(api.pushAboLoeschen, true))]
+          : [knopf('Einschalten', true, async () => { if (!await BK.push.einschalten(api.pushAboSpeichern)) alertDialog('Nicht erlaubt', 'Ohne Erlaubnis kommen keine Benachrichtigungen. ' + freigeben()); })]));
     }
     geraetZeigen().catch(e => geraet.append(el('p', e.message)));
 

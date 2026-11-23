@@ -63,7 +63,7 @@ async function schicken(abos: any[], payload: string, ttl: number) {
   let gesendet = 0;
   await Promise.all((abos || []).filter(a => PUSH_HOST.test(a.endpoint)).map(async a => {
     try {
-      await webpush.sendNotification({ endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } }, payload, { TTL: ttl });
+      await webpush.sendNotification({ endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } }, payload, { TTL: ttl, urgency: 'high' });
       gesendet++;
     } catch (e: any) {
       if (e.statusCode === 404 || e.statusCode === 410) await db.from('push_abos').delete().eq('id', a.id);
@@ -113,7 +113,7 @@ Deno.serve(async req => {
   let gesendet = 0;
   await Promise.all((abos || []).filter(a => PUSH_HOST.test(a.endpoint)).map(async a => {
     try {
-      await webpush.sendNotification({ endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } }, payload, { TTL: 60 * 60 * 24 });
+      await webpush.sendNotification({ endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } }, payload, { TTL: 60 * 60 * 24, urgency: 'high' });
       gesendet++;
     } catch (e: any) {
       // Abo abgelaufen oder vom Gerät entfernt: löschen

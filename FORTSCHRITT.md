@@ -497,3 +497,31 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Handy: Werte ohne Spaltenkopf beschriftet: „Verletzte: Nein“ (Unfälle), „2 Artikel“ (Material), „Abweichungen: 1“ (Überprüfungen). Tabellen haben dafür die Klassen `tab-unfaelle`, `tab-ausgabe`, `tab-gegenz`.
 - Handy: Vorlage bearbeiten scrollt als Ganzes, die Bereichsliste wird nicht mehr abgeschnitten.
 - Pixel-Vergleich Mac/iPad: nur die Knöpfe mit Symbol anders (gewollt), sonst gleich.
+
+## PDF-Export mit den Original-Vorlagen (2026-11-23, bk-v84)
+- Mängel und Materialanforderungen (Mac): Knopf „PDF“ (auch ⌘P / Strg+P) füllt die Original-Vorlage aus und lädt sie als PDF herunter. Seite, Schrift und Layout 1:1 wie das Papier, nur die Werte kommen dazu.
+  - Mängelmeldung: `web/vorlagen/maengelmeldung.pdf` (vom Nutzer). Art (Kreis), SN, Kennzeichen, Gegenstand, Funkruf, Datum, Zeit, Beschreibung auf den Linien, Gemeldet durch, „digital“ + Zeit statt Unterschrift, TL/GF informiert, Gesichtet, Reparatur (Termin und Datum einzeln in die Lücken __.__.__), Bemerkungen, für richtig befunden.
+  - Material-Anforderung: `web/vorlagen/material-anforderung.pdf` (aus `Material-Anforderung.doc` per LibreOffice). 21 Zeilen je Seite, mehr Artikel = weitere Seite mit gleicher Vorlage (dort steht weiter „Seite 1 von 1“). Verbr./Abgel. als X, erhaltene Menge, angefordert am/für/durch, ausgegeben durch/am.
+- Neu: `web/js/pdf-export.js` (`BK.pdf.mangel`, `BK.pdf.material`), `web/js/lib/pdf-lib.min.js` (pdf-lib 1.17.1, MIT, wird erst beim ersten Export geladen). Dateiname ohne Umlaute (Chromium verwirft sonst den Namen).
+- Alter HTML-Druck für Mängel und Material entfernt. Unfälle und Überprüfungen drucken weiter im HTML-Stil.
+- Fix Druck: Detailbereich wurde auf A4 als schmales, schwebendes Blatt gedruckt (Hochformat-Regel) bzw. hatte die gezogene Breite. Jetzt volle Seite, Unfall-Druck 1 statt 2 Seiten.
+- Getestet in Chromium mit Testdaten: beide PDFs erzeugt und als Bild geprüft (Mängel voll ausgefüllt, Material mit 23 Artikeln = 2 Seiten), Unfall- und Überprüfungs-Druck. Nicht in Safari und nicht auf dem iPad getestet.
+
+## Benachrichtigungen zuverlässig, auch nach Wochen ohne Nutzung (2026-11-23, bk-v85, Migration 034)
+- Recherche: iOS kann Abos von Home-Bildschirm-Apps nach längerer Pause still verlieren und kennt `pushsubscriptionchange` nicht. Chrome meldet ein neues Abo erst ab Version 138 per `pushsubscriptionchange`. Chromes automatischer Entzug des Rechts trifft nur Seiten mit vielen ungelesenen Meldungen und lässt installierte Apps aus. Safari entzieht das Abo, wenn ein Push keine Benachrichtigung zeigt. Android hält Pushes mit Dringlichkeit „normal“ im Energiesparmodus zurück.
+- Neu `web/js/push.js` (`BK.push`): Zustand, Einschalten (nur per Tipp), Prüfen, Ausschalten, „Später“ = 3 Tage.
+- Bei jedem Start, beim Zurückkehren in die App und alle 10 Minuten: Ist das Recht da, wird das Abo sichergestellt (fehlt es, neu abonnieren) und beim Server erneuert. Mac und Tablet.
+- Mac: fragt beim Start einmal „Benachrichtigungen einschalten?“ (Einschalten / Später), solange das Gerät noch nie entschieden hat. Tablet: Leiste wie bisher, „Später“ jetzt 3 Tage statt für immer.
+- Einstellungen › Benachrichtigungen: Status, „Einschalten“, „Test“ (lokale Probe), „Ausschalten“ (bleibt dann aus, kein automatisches Wieder-Anmelden). Blockiert: kurze Anleitung je Gerät (iPad/iPhone, Android, installierte App, Browser).
+- Service Worker: zeigt bei jedem Push eine Benachrichtigung, auch bei kaputten Daten. `pushsubscriptionchange` abonniert neu und meldet es offenen Fenstern.
+- Server (`push-senden`): Dringlichkeit „high“ bei allen Pushes.
+- Sicherheit: Abmelden am Mac löscht das Push-Abo dieses Geräts beim Server und im Browser (vorher bekam das Gerät weiter Meldungen der abgemeldeten Person). Entkoppeln beendet es auch im Browser.
+- Migration 034: `push_abo_speichern` (Personal, Upsert mit Übernahme von Schlüssel und Besitzer), `tablet_push_abo` erneuert statt „schon da“, Spalte `push_abos.bestaetigt_am`.
+- `confirmDialog` kann eigene Knopftexte (`confirmLabel`, `cancelLabel`).
+- Getestet in Chromium mit nachgebildetem Push-Dienst und Recht: Frage am Mac, Später, Erneuern bei jedem Start, Ausschalten bleibt aus, Wieder einschalten, Abmelden löscht, Tablet-Leiste. Nicht getestet: echte Zustellung, iOS, Android, `pushsubscriptionchange`.
+- 034 ist ausgeführt (laut Nutzer, 2026-11-23). Offen: `push-senden` neu deployen (Knopf „Edge Functions“).
+
+## Edge Functions per Knopf hochladen (2026-11-23)
+- Neu `.github/workflows/edge-functions.yml`: GitHub › Actions › „Edge Functions“ › „Run workflow“ lädt `push-senden` und `aufraeumen` zu Supabase hoch (JWT-Prüfung aus). Nur von Hand, nur diese zwei Namen. Braucht das Repo-Secret `SUPABASE_ACCESS_TOKEN` (ist angelegt, laut Nutzer).
+- Neu `supabase/config.toml`: `verify_jwt = false` für beide Funktionen, damit die Einstellung beim Hochladen nicht zurückspringt.
+- Noch nicht gelaufen (Datei muss erst auf `main`).
