@@ -25,7 +25,7 @@ BK.modul('geraete', {
       const q = suche.value.trim().toLowerCase();
       const l = typen.filter(t => !q || [t.name, t.hersteller].join(' ').toLowerCase().includes(q));
       leeren(tbody);
-      if (!l.length) tbody.append(el('tr', el('td.mleer', { colspan: 4 }, typen.length ? 'Nichts gefunden.' : 'Noch keine Geräteart. Oben rechts „Neue Geräteart“.')));
+      if (!l.length) tbody.append(el('tr', el('td.mleer', { colspan: 4 }, typen.length ? 'Nichts gefunden.' : 'Noch keine Geräteart.')));
       for (const t of l) tbody.append(el('tr', { dataset: { id: t.id }, class: t.id === gewaehlt ? 'sel' : null, onclick: () => waehlen(t.id) },
         el('td', t.name), el('td', t.hersteller || '–'), el('td', PRUEF[t.pruefart || '']),
         el('td', imEinsatz.get(t.id) ? `${imEinsatz.get(t.id)} KTW` : '–')));

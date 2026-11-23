@@ -28,13 +28,12 @@ BK.modul('unfall', {
       ] },
       { titel: 'Schaden', felder: [
         { name: 'hergang', typ: 'textarea', label: 'Hergang', pflicht: true, max: 2000, platzhalter: 'Was ist passiert? Der Reihe nach.' },
-        { name: 'schaden_ktw', typ: 'mehrfach', label: 'Schaden am KTW',
-          optionen: [['vorne', 'Vorne'], ['hinten', 'Hinten'], ['links', 'Links'], ['rechts', 'Rechts'], ['dach', 'Dach'], ['innen', 'Innenraum']] },
+        { name: 'schaden_ktw', typ: 'ktw', label: 'Wo ist der KTW beschädigt?', hinweis: 'Fläche antippen. Front ist rechts.' },
         { name: 'fahrbereit', typ: 'segment', label: 'KTW noch fahrbereit?', pflicht: true, optionen: JA_NEIN },
         { name: 'schaden_fremd', typ: 'textarea', label: 'Schaden bei anderen', max: 1000, platzhalter: 'z. B. Stoßstange hinten eingedrückt' },
         ...(geraete.length ? [{ name: 'geraete', typ: 'mehrfach', label: 'Geräte betroffen',
           optionen: geraete.map(g => [g.id, g.name]), hinweis: 'Für jedes Gerät entsteht eine Mängelmeldung „Nach Unfall prüfen“.' }] : []),
-        { name: 'fotos', typ: 'fotos', label: 'Fotos', max: 5, hinweis: 'Höchstens 5 Fotos. Am besten Schäden und Kennzeichen.' },
+        { name: 'fotos', typ: 'fotos', label: 'Fotos', max: 5, hinweis: 'Schäden und Kennzeichen fotografieren.' },
       ] },
       { titel: 'Verletzte', felder: [
         { name: 'verletzt', typ: 'segment', label: 'Ist jemand verletzt?', pflicht: true, optionen: JA_NEIN },

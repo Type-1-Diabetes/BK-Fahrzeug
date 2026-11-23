@@ -30,6 +30,21 @@ select.field { appearance: none; min-height: 36px; }
 .segc button, .mseg button { position: relative; isolation: isolate; }
 .segc button.on::before, .mseg button.on::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
   background: var(--bg2); box-shadow: 0 1px 3px rgba(0,0,0,.14); transform-origin: left center; }
+/* KTW von oben (formular.js „ktw“): Flächen antippen */
+.ktw-wahl { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--bg2); border-radius: 12px; }
+.ktw-svg { display: block; width: 100%; max-width: 560px; margin: 0 auto; overflow: visible; -webkit-tap-highlight-color: transparent; }
+.ktw-deko { fill: var(--label3); }
+.ktw-fl { cursor: pointer; outline: none; }
+.ktw-linien { fill: none; stroke: var(--label3); stroke-width: 1.5; stroke-linecap: round; pointer-events: none; }
+.ktw-fl path { fill: var(--fill); stroke: var(--bg2); stroke-width: 3; transition: fill .15s ease; }
+.ktw-fl text { fill: var(--label2); font-size: 15px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; transition: fill .15s ease; }
+@media (hover: hover) { .ktw-fl:hover path { fill: var(--fill2); } }
+.ktw-fl:active path { fill: var(--fill2); }
+.ktw-fl.on path { fill: color-mix(in srgb, var(--bad) 22%, var(--bg2)); }
+.ktw-fl.on text { fill: var(--bad-ink); font-weight: 600; }
+.ktw-fl:focus-visible path { stroke: color-mix(in srgb, var(--brand) 55%, transparent); }
+.ktw-wahl .chips { justify-content: center; }
+.ktw-wahl .chips button.on { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad-ink); }
 /* Mehrfachauswahl (formular.js „mehrfach“): antippen = an/aus, Haken erscheint */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chips button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px 0 12px; border-radius: 22px; background: var(--fill); font-size: 15px;
@@ -169,6 +184,7 @@ table.tab tbody tr.sel td { background: var(--navy2); color: #fff; }
 ._ad-box { width: min(380px, 100%); background: var(--bg2); border-radius: 14px; padding: 20px; box-shadow: var(--schatten-fenster); }
 ._ad-title { font-weight: 600; font-size: 17px; }
 ._ad-desc { color: var(--label2); margin-top: 6px; font-size: 15px; }
+._ad-desc:empty { display: none; }
 ._ad-input { width: 100%; margin-top: 12px; padding: 10px 12px; border-radius: 9px; border: 0; background: var(--fill); font: inherit; color: var(--label); }
 ._ad-footer { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 ._ad-footer button { flex: 1; min-height: 44px; border-radius: 10px; font-weight: 600; }

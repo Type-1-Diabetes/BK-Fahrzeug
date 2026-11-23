@@ -22,7 +22,7 @@ BK.modul('mangel', {
         platzhalter: 'z. B. Trage, Schiebetür, Blaulicht', wenn: w => w.betrifft === 'fahrzeug' },
       { name: 'geraet_id', typ: 'auswahl', label: 'Gerät', pflicht: true, platzhalter: 'Gerät wählen',
         optionen: [...geraete.map(g => [g.id, geraetText(g)]), ['anders', 'Anderes Gerät']],
-        hinweis: 'Seriennummer und Hersteller kommen aus der Geräteliste dieses KTW.', wenn: w => w.betrifft === 'mpg' },
+        wenn: w => w.betrifft === 'mpg' },
       { name: 'geraet_frei', typ: 'text', label: 'Welches Gerät?', pflicht: true, max: 120,
         platzhalter: 'Name und Seriennummer', wenn: w => w.betrifft === 'mpg' && w.geraet_id === 'anders' },
       { name: 'beschreibung', typ: 'textarea', label: 'Beschreibung', pflicht: true, max: 2000,

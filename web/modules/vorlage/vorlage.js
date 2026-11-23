@@ -97,7 +97,7 @@
               el('button.tb', { type: 'button', title: 'Nach oben (⌥↑)', 'aria-label': p.artikel + ' nach oben', disabled: j === 0, onclick: e => { e.stopPropagation(); schieben('position', p.id, -1); } }, icon('chevU')),
               el('button.tb', { type: 'button', title: 'Nach unten (⌥↓)', 'aria-label': p.artikel + ' nach unten', disabled: j === t.b.positionen.length - 1, onclick: e => { e.stopPropagation(); schieben('position', p.id, 1); } }, icon('chevD')))))));
         }
-        if (!x.positionen.length) tbody.append(el('tr', el('td.mleer', { colspan: 8 }, 'Noch keine Position. Oben rechts „Neue Position“.')));
+        if (!x.positionen.length) tbody.append(el('tr', el('td.mleer', { colspan: 8 }, 'Noch keine Position.')));
         inspektor();
       }
 
@@ -125,7 +125,7 @@
 
       // Gruppe = Text am Bereich. Umbenennen/Löschen ändert alle Bereiche mit diesem Gruppennamen.
       async function gruppeUmbenennen(alt) {
-        const neu = await promptDialog('Gruppe umbenennen', 'So steht die Überschrift auf dem Tablet und in der Liste.', { value: alt, placeholder: 'z. B. Patientenraum', confirmLabel: 'Speichern' });
+        const neu = await promptDialog('Gruppe umbenennen', '', { value: alt, placeholder: 'z. B. Patientenraum', confirmLabel: 'Speichern' });
         if (neu == null || !neu.trim() || neu.trim() === alt) return;
         ordnen(async () => {
           for (const b of bereiche.filter(x => x.gruppe === alt)) await api.bereichSpeichern(b.id, vorlage.id, b.name, b.farbe || '', neu.trim().slice(0, 60));
@@ -254,7 +254,7 @@
           const sel = el('select.tf', { 'aria-label': 'Farbe' }, ...FARBEN.map(([k, t]) => el('option', { value: k, selected: k === aktuell }, t)));
           const zu = wert => { overlay.remove(); fertig(wert); };
           const overlay = el('div.code-overlay', el('div.code-box', { role: 'dialog', 'aria-modal': 'true' },
-            el('h2', 'Farbe des Bereichs'), el('p', 'Die Farbe erscheint als Streifen, wie auf der Papierliste.'), sel,
+            el('h2', 'Farbe des Bereichs'), sel,
             el('div.code-acts', el('button.pbtn', { type: 'button', onclick: () => zu(null) }, 'Abbrechen'), el('button.pbtn.def', { type: 'button', onclick: () => zu(sel.value) }, 'Speichern'))));
           overlay.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.querySelector('.auswahl-liste')) zu(null); });
           document.body.append(overlay);

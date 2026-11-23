@@ -26,7 +26,7 @@ BK.modul('nachrichten', {
 
     function zeichnen() {
       leeren(tbody);
-      if (!liste.length) tbody.append(el('tr', el('td.mleer', { colspan: 5 }, 'Noch keine Nachricht. Oben rechts „Neue Nachricht“.')));
+      if (!liste.length) tbody.append(el('tr', el('td.mleer', { colspan: 5 }, 'Noch keine Nachricht.')));
       for (const n of liste) {
         const [text, art, gel] = stand(n);
         tbody.append(el('tr', { dataset: { id: n.id }, class: n.id === gewaehlt ? 'sel' : null, onclick: () => waehlen(n.id) },

@@ -443,7 +443,7 @@
       let w = 0;
       try { w = Number(localStorage.getItem(schluessel)) || 0; } catch { /* privat */ }
       if (w) insp.style.width = w + 'px';
-      const griff = el('div.insp-griff', { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': 'Breite des Detailbereichs', title: 'Ziehen ändert die Breite. Doppelklick: Standard.' });
+      const griff = el('div.insp-griff', { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': 'Breite des Detailbereichs', title: 'Breite ziehen' });
       insp.before(griff);
       griff.addEventListener('dblclick', () => { insp.style.width = ''; try { localStorage.removeItem(schluessel); } catch { /* privat */ } });
       griff.addEventListener('pointerdown', e => {

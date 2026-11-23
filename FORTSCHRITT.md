@@ -467,3 +467,13 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Fix: In Fahrzeuge › Akte ließ sich am Handy nicht wischen. Ursache: Die Akte (`.vfile`) war ein eigener Scrollbereich mit `overscroll-behavior: contain`, aber nie scrollbar, und schluckte so das Wischen. Jetzt `overflow: visible`, es scrollt `.fz-inhalt`.
 - Akte: Knopf „Unfallbericht erstellen“ (Blatt mit Modul `unfall`) und Liste „offene Unfälle“ über den Mängeln, Antippen öffnet den Unfall unter Meldungen › Unfälle.
 - Getestet in Chromium mit Testdaten (Pixel 7, Touch-Wischen, dunkel): scrollt, Unfälle sichtbar.
+
+## Unfall: Schaden am KTW als Grafik (2026-11-23, bk-v80)
+- „Schaden am KTW“ heißt jetzt „Wo ist der KTW beschädigt?“: KTW von oben (Front rechts, ohne Marke) mit antippbaren Flächen Vorne, Hinten, Links, Rechts, Dach, darunter Knopf „Innenraum“. Gewählte Flächen rot. Per Tastatur (Tab, Enter/Leertaste) bedienbar.
+- `formular.js`: neuer Feldtyp `ktw`, gleiche Werte wie vorher (vorne, hinten, links, rechts, dach, innen), Mac-Akte und Export unverändert.
+- Getestet in Chromium mit Testdaten (Tablet quer hell, hochkant dunkel): Antippen, Senden-Inhalt stimmt.
+
+## Texte gekürzt: überflüssige Hinweise raus (2026-11-23, bk-v81)
+- Gestrichen: Hinweis unter „Gerät“ (Mängelmeldung), Text im Dialog „Gruppe umbenennen“ und unter „Farbe des Bereichs“ (Vorlage), „Oben rechts ‚Neue …‘“ bei leeren Listen (Geräte, Vorlage, Nachrichten).
+- Unfall-Fotos: „Schäden und Kennzeichen fotografieren.“ Tooltip am Breiten-Griff: „Breite ziehen“.
+- Dialoge ohne Beschreibung zeigen keine leere Zeile mehr (`._ad-desc:empty`).
