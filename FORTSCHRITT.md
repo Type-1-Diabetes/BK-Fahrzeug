@@ -384,7 +384,7 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 ## Demo-Knopf nur mit PIN (2026-10-29, bk-v64, Migration 027)
 - „Als MPGler anmelden“ fragt eine 4-stellige PIN ab. Die Datenbank prüft sie (`demo_anmelden(p_pin)`), PIN gehasht in `intern.konfig` ('demo_pin'), nicht im Repo.
 - Fehlversuche: höchstens 5 in 15 Minuten je Sitzung und je IP (`intern.demo_versuche`), parallel gesperrt.
-- Offen: 027 im SQL-Editor ausführen und PIN setzen (Befehl oben in der Migration). Bis dahin klappt der Demo-Login nicht. Nicht im Browser getestet.
+- 027 ist ausgeführt und die PIN gesetzt (laut Nutzer, 2026-11-23).
 
 ## Überprüfung durch MPGler, TÜV, Fotos, Handy (2026-10-29, bk-v65, Migration 028)
 - **Koppeln (iOS):** Code-Felder ohne eigenes iOS-Padding/Aussehen (`appearance: none`, `padding: 0`). Auf dem Handy teilen sich die 8 Felder die Breite. Vorher lief die Karte bei 375 px über den Rand.
@@ -397,7 +397,7 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - **Fotos** öffnen in der App (`js/lib/foto-ansicht.js`): Vollbild, ←/→ und Wischen, Doppeltipp zoomt, Esc/✕ schließt.
 - **Handy (≤ 600 px):** Werkzeugleiste bricht um, Tabellen als Karten, Inspektor/Blätter im Vollbild, Kennzahlen zweispaltig. Handy quer und iPad hochkant: Seitenleiste zum Ausklappen, Inspektor öffnet nicht mehr von selbst (verdeckte sonst die Liste).
 - Getestet in Chromium mit Testdaten (Fake-API, nicht im Repo): Tablet 1180×820, Mac 1280×800, iPad hochkant 820×1180, Handy 390×844 und 375 px. Ablauf Beginnen → Abhaken → Abweichung → Suche → Nicht vorhanden → Abschließen (Rückfrage „nicht geprüft“) → Materialvorschlag → Anfordern, TÜV speichern, Mangel aus der Akte öffnen, Fotos blättern. Keine Konsolenfehler.
-- **Offen:** Migration 028 im SQL-Editor ausführen (vorher klappt „Überprüfung beginnen“ nicht, die alten Tablet-Funktionen sind dann weg). Auf echtem iPad/iPhone (Safari) prüfen: Code-Felder, Foto-Ansicht (Wischen), Überprüfungs-Blatt. Alte Einträge in der Warteschlange eines Tablets („Checkliste abschließen“) schlagen nach 028 fehl → dort verwerfen.
+- 028 ist ausgeführt (laut Nutzer, 2026-11-23). **Offen:** Auf echtem iPad/iPhone (Safari) prüfen: Code-Felder, Foto-Ansicht (Wischen), Überprüfungs-Blatt. Alte Einträge in der Warteschlange eines Tablets („Checkliste abschließen“) schlagen nach 028 fehl → dort verwerfen.
 - `mac.kurz()` zeigte „01.06.. 10:00“ (doppelter Punkt). Behoben in bk-v77.
 
 ## Überprüfung größer, Taschen-Gruppen, Vorlage per Drag & Drop (2026-10-29, bk-v67, Migration 029)
@@ -431,7 +431,7 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Migration 030: Tabelle `geraete_typen` (RLS, GRANT), `geraete.typ_id`, RPCs `geraetetyp_speichern/_loeschen`, `geraet_speichern/_loeschen` (Besitz geprüft). Demo-Geräte: Namen in den Katalog übernommen, an den KTW gelöscht; Meldungen behalten den Gerätenamen als Text.
 - Auswahllisten: Maus-Hover scrollt die Liste nicht mehr, beim Öffnen steht die Auswahl mittig, nur die Liste scrollt (nie die Seite), Scrollen am Listenende schiebt die Seite nicht mehr weg.
 - Getestet in Chromium mit Testdaten: Geräteart anlegen, Gerät am KTW hinzufügen, Liste offen/Hover/Scrollen. Keine Fehler.
-- Offen: 030 im SQL-Editor ausführen. Danach Geräte je KTW neu vergeben.
+- 030 ist ausgeführt und die Geräte sind neu vergeben (laut Nutzer, 2026-11-23).
 
 ## Nachrichten an Tablets (2026-10-29, bk-v72, Migration 031)
 - MPGler: Verwaltung › **Nachrichten** (Modul `nachrichten`): an einen KTW oder an alle, optional „wichtig“ (rot). Liste mit Status (Offen / Gelesen / Zurückgezogen) und „x von y gelesen“, Inspektor zeigt pro KTW, wann gelesen. Zurückziehen nimmt sie von allen Tablets.
@@ -454,7 +454,7 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Migration 032: Art `unfall`, Modul `unfall` für alle KTW, Tabelle `unfall_details` (Beteiligte, Verletzte; RLS: nur MPGler, nie das Tablet; GRANT), `meldung_anlegen` erweitert, `unfaelle_loeschen_alt` (nur service_role), pg_cron täglich 03:17 UTC.
 - Löschen nach 90 Tagen: Edge Function `unfall-loeschen` löscht zuerst die Fotos im Speicher, dann die Meldung (mit Details), Verlauf-Eintrag „Unfallbericht gelöscht“. Bei Fehler bricht sie ab und versucht es am nächsten Tag.
 - Getestet in Chromium mit nachgebildeten Daten (Tablet 1180×820 und 820×1180, Mac 1280×800 hell/dunkel): Schritte, Pflichtfelder, Senden-Inhalt an `meldung_anlegen`, Akte. Keine Fehler. Nicht gegen die echte DB, kein Push, kein Löschjob getestet.
-- 032 und 033 sind ausgeführt (laut Nutzer, 2026-11-23). Offen: `aufraeumen` deployen (Verify JWT aus, Secret PUSH_GEHEIMNIS wie bei push-senden). `push-senden` neu deployen.
+- 032 und 033 sind ausgeführt (laut Nutzer, 2026-11-23). `aufraeumen` und `push-senden` sind deployt (Knopf „Edge Functions“, 2026-11-23).
 
 ## Fotos werden mitgelöscht (2026-11-20, Migration 033)
 - Vorher blieben Fotos gelöschter Meldungen im Speicher. Jetzt merkt ein Trigger auf `public.fotos` jeden gelöschten Pfad (`intern.fotos_weg`), egal ob von Hand, mit der Meldung oder nach 90 Tagen.
