@@ -25,6 +25,9 @@ async function nachricht(v: any, fz: any): Promise<Nachricht | null> {
       const n = m.positionen.length;
       return { schluessel: 'neues_material', title: `Material angefordert · ${fz.name}`, body: `${n} Artikel · ${m.gemeldet_von}`, tag: 'material-' + v.meldung_id };
     }
+    if (m.art === 'unfall') {
+      return { schluessel: 'neuer_unfall', title: `Unfall · ${fz.name}`, body: `${m.gegenstand || 'Ort unbekannt'} (${m.gemeldet_von})`, tag: 'unfall-' + v.meldung_id };
+    }
     const was = (m.geraet && m.geraet.name) || m.gegenstand || m.geraet_frei || 'Mangel';
     return { schluessel: 'neuer_mangel', title: `Neuer Mangel · ${fz.name}`, body: `${was}: ${(m.beschreibung || '').slice(0, 120)} (${m.gemeldet_von})`, tag: 'mangel-' + v.meldung_id };
   }

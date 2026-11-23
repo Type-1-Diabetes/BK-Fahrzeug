@@ -224,8 +224,8 @@ BK.modul('fahrzeuge', {
       if (reiter === 'meldungen') {
         const ms = meldungen.filter(m => m.fahrzeug_id === f.id).slice(0, 50);
         inhalt.append(tabelle(['Status', 'Meldung', 'Art', 'Gemeldet', 'Von'],
-          ms.map(m => el('tr', { dataset: { klick: '' }, onclick: () => ctx.oeffnen(m.art === 'material' ? 'ausgabe' : 'maengel') },
-            el('td', mac.pill(m.status)), el('td', mac.titel(m)), el('td', m.art === 'material' ? 'Materialanforderung' : 'Mängelmeldung'), el('td', mac.kurz(m.erstellt_am)), el('td', m.gemeldet_von))),
+          ms.map(m => el('tr', { dataset: { klick: '' }, onclick: () => ctx.oeffnen({ material: 'ausgabe', unfall: 'unfaelle' }[m.art] || 'maengel') },
+            el('td', mac.pill(m.status)), el('td', mac.titel(m)), el('td', { material: 'Materialanforderung', unfall: 'Unfallbericht' }[m.art] || 'Mängelmeldung'), el('td', mac.kurz(m.erstellt_am)), el('td', m.gemeldet_von))),
           'Noch keine Meldungen.'));
       } else if (reiter === 'checklisten') {
         const cs = checklisten.filter(c => c.fahrzeug_id === f.id);
@@ -253,7 +253,7 @@ BK.modul('fahrzeuge', {
               checkliste_abgeschlossen: 'Checkliste abgeschlossen', gegengezeichnet: 'Checkliste gegengezeichnet', checkliste_zurueck: 'Checkliste zurück ans Team',
               tablet_gekoppelt: 'Tablet gekoppelt', tablet_entkoppelt: 'Tablet entkoppelt', tablet_angelegt: 'Tablet angelegt',
               tablet_neuer_code: 'Neuer Kopplungscode', tablet_bearbeitet: 'Tablet bearbeitet', tablet_gesperrt: 'Tablet gesperrt', tablet_entsperrt: 'Tablet entsperrt',
-              meldung_geloescht: e.details.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', checkliste_geloescht: 'Checkliste gelöscht', checkliste_abgebrochen: 'Überprüfung abgebrochen',
+              meldung_geloescht: { material: 'Materialanforderung gelöscht', unfall: 'Unfallbericht gelöscht' }[e.details.art] || 'Mängelmeldung gelöscht', checkliste_geloescht: 'Checkliste gelöscht', checkliste_abgebrochen: 'Überprüfung abgebrochen',
               checkliste_geprueft: 'Fahrzeug Überprüfung abgeschlossen', tuev: 'TÜV bis ' + (e.details.bis || '–'),
               geraet: 'Gerät gespeichert: ' + (e.details.name || ''), geraet_geloescht: 'Gerät entfernt: ' + (e.details.name || '') })[e.aktion] || BK.aktionText(e.aktion)),
             el('td', e.wer_name || '–'))), 'Noch nichts passiert.'));

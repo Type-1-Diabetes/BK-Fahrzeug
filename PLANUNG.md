@@ -69,6 +69,12 @@ Das ist die Vorlage für die **Checklisten pro Fahrzeug** (Abschnitt 3).
 - **In der App:** Pro Bereich eine Seite mit großen Zeilen. Standard ist „vollständig“, nur Abweichungen tippt man an (Ist-Menge, Verfallsdatum). Fehlendes wird mit einem Tipp zur Materialanforderung.
 - **Import:** Die Liste wird einmal in die App übernommen (als Vorlage „KTW Standard“). Admins können sie pro Fahrzeug anpassen (Seriennummern sind pro Fahrzeug verschieden).
 
+### Unfallbericht (ohne Papiervorlage, seit Nov. 2026)
+
+- Tablet: unter „Melden“ als dritter Umschalter, 4 Schritte: Unfall, Beteiligte, Schaden, Verletzte. Mac: Meldungen › Unfälle.
+- Inhalt angelehnt an den Europäischen Unfallbericht und die KFZ-Schadenmeldung des DRK, ergänzt um Fahrt, Sonderrechte, Polizei, verletztes Team (Arzt, arbeitsunfähig). Vom Patienten kein Name.
+- Beteiligte, Zeugen und Verletzte sieht nur der MPGler, nicht das Tablet. Unfallberichte werden 90 Tage nach dem Melden mit Fotos gelöscht.
+
 ## 2b. Fahrzeugstatus (Ampel)
 
 - Zwei Status pro Fahrzeug:

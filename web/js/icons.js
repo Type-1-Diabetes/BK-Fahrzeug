@@ -6,6 +6,7 @@
     box: '<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
     list: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    unfall: '<path d="M2 17v-5l2-4h7l3 4h1.5a2 2 0 0 1 2 2v3h-1.5"/><circle cx="6" cy="17" r="2"/><circle cx="14" cy="17" r="2"/><path d="M8 17h4M19.5 4l-1 2.5M22.5 8l-2.4.9M22 12.5h-1.8"/>',
     car: '<path d="M3 15V9l2-4h9l3 4h2a2 2 0 0 1 2 2v4h-2"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/><path d="M9 16h6"/>',
     inbox: '<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v6H3v-6z"/>',
     tablet: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M11 18h2"/>',

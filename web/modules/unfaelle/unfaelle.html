@@ -1,0 +1,23 @@
+<div class="tool">
+  <div><h1>Unfälle</h1><div class="sub" data-sub></div></div>
+  <span class="sp"></span>
+  <div class="mseg" role="tablist" aria-label="Status" data-status>
+    <button type="button" data-v="alle" class="on">Alle</button>
+    <button type="button" data-v="offen">Offen</button>
+    <button type="button" data-v="in_bearbeitung">In Bearbeitung</button>
+    <button type="button" data-v="erledigt">Erledigt</button>
+  </div>
+  <span data-neu></span>
+  <select class="tf auto" aria-label="KTW" data-ktw><option value="">Alle KTW</option></select>
+  <button type="button" class="tb" data-export title="Als Tabelle (CSV) herunterladen"></button>
+  <input class="search" type="search" placeholder="Suchen" aria-label="Suchen" data-suche>
+</div>
+<div class="mbody">
+  <div class="tablewrap">
+    <table class="tab">
+      <thead><tr><th>Status</th><th>Unfallort</th><th>KTW</th><th>Verletzte</th><th>Unfall am</th><th>Von</th></tr></thead>
+      <tbody data-liste></tbody>
+    </table>
+  </div>
+  <aside class="insp" data-insp></aside>
+</div>

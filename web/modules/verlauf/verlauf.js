@@ -4,7 +4,7 @@
 
   // Text für einen Verlaufseintrag. m = Meldung (falls vorhanden)
   const AKTION = {
-    gemeldet: (d, m) => [m && m.art === 'material' ? 'Materialanforderung' : 'Mängelmeldung', 'wrench'],
+    gemeldet: (d, m) => (m && m.art === 'material') ? ['Materialanforderung', 'wrench'] : (m && m.art === 'unfall') || d.art === 'unfall' ? ['Unfallbericht', 'unfall'] : ['Mängelmeldung', 'wrench'],
     status: d => [{ offen: 'Wieder offen', in_bearbeitung: 'In Bearbeitung', erledigt: 'Erledigt' }[d.nach] || 'Status geändert', d.nach === 'erledigt' ? 'check' : 'wrench'],
     bearbeitet: () => ['Bearbeitet', 'pen'],
     ausgegeben: () => ['Material ausgegeben', 'box'],
@@ -22,7 +22,7 @@
     tablet_gesperrt: () => ['Tablet gesperrt', 'tablet'],
     tablet_entsperrt: () => ['Tablet entsperrt', 'tablet'],
     fahrzeug_ausgeblendet: () => ['KTW ausgeblendet', 'alert'],
-    meldung_geloescht: d => [d.art === 'material' ? 'Materialanforderung gelöscht' : 'Mängelmeldung gelöscht', 'alert'],
+    meldung_geloescht: d => [{ material: 'Materialanforderung gelöscht', unfall: 'Unfallbericht gelöscht' }[d.art] || 'Mängelmeldung gelöscht', 'alert'],
     checkliste_geloescht: () => ['Checkliste gelöscht', 'list'],
     checkliste_abgebrochen: () => ['Überprüfung abgebrochen', 'list'],
     checkliste_geprueft: () => ['Fahrzeug Überprüfung abgeschlossen', 'check'],
@@ -30,7 +30,7 @@
   };
   // Das Team sieht nur, was das Fahrzeug betrifft. Tablet- und Systemeinträge nur im MPGler-Portal (auch per RLS, Migration 028).
   const FUERS_TEAM = new Set(['gemeldet', 'status', 'bearbeitet', 'ausgegeben', 'teilweise_ausgegeben', 'ampel', 'meldung_geloescht', 'checkliste_geprueft', 'tuev']);
-  const FARBE = { wrench: 'f-rot', box: 'f-blau', list: 'f-navy', check: 'f-gruen', alert: 'f-rot', pen: 'f-orange', tablet: 'f-navy' };
+  const FARBE = { unfall: 'f-rot', wrench: 'f-rot', box: 'f-blau', list: 'f-navy', check: 'f-gruen', alert: 'f-rot', pen: 'f-orange', tablet: 'f-navy' };
 
   BK.modul('verlauf', {
     async start(root, ctx) {
@@ -41,7 +41,7 @@
       const zeit = d => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
       const titelVon = e => e.typ === 'meldung'
-        ? (e.daten.art === 'material' ? `Materialanforderung: ${e.daten.positionen.length} Artikel` : (e.daten.gegenstand || e.daten.geraet_frei || 'Mängelmeldung'))
+        ? (e.daten.art === 'material' ? `Materialanforderung: ${e.daten.positionen.length} Artikel` : e.daten.art === 'unfall' ? 'Unfall: ' + e.daten.gegenstand : (e.daten.gegenstand || e.daten.geraet_frei || 'Mängelmeldung'))
         : e.typ === 'checkliste_abschliessen' ? 'Checkliste abschließen' : 'Checkliste: Eintrag';
 
       abmelden = BK.warteschlange.beiAenderung(liste => {
@@ -66,7 +66,7 @@
         const [alleEintraege, meldungen] = await Promise.all([api.verlauf({ fahrzeugId: fz.id, limit: 200 }), api.meldungen({ fahrzeugId: fz.id })]);
         const eintraege = alleEintraege.filter(v => FUERS_TEAM.has(v.aktion));
         const mNach = Object.fromEntries(meldungen.map(m => [m.id, m]));
-        const titel = m => m.art === 'material' ? `Material: ${m.positionen.length} Artikel` : (m.geraet ? m.geraet.name : (m.gegenstand || m.geraet_frei));
+        const titel = m => m.art === 'material' ? `Material: ${m.positionen.length} Artikel` : m.art === 'unfall' ? 'Unfall: ' + m.gegenstand : (m.geraet ? m.geraet.name : (m.gegenstand || m.geraet_frei));
         leeren(vBox);
         if (!eintraege.length) return vBox.append(el('div.leer', 'Noch nichts passiert.'));
         const heute = new Date().toDateString();

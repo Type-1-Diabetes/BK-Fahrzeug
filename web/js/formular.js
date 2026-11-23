@@ -1,6 +1,6 @@
 /* Formulare aus einer Beschreibung bauen. Ein neues Feld braucht keinen neuen Code.
    Feld: { name, typ, label, pflicht, platzhalter, optionen: [[wert, text]], standard, hinweis, wenn: werte => bool, max }
-   Typen: text, textarea, segment, auswahl, zahl, fotos */
+   Typen: text, textarea, segment, mehrfach, auswahl, zahl, datumzeit, fotos */
 (function () {
   'use strict';
   const { el } = BK;
@@ -27,6 +27,20 @@
           }
           break;
         }
+        case 'mehrfach': {
+          // Mehrere antippen (Wert: Liste), gleiche Optik wie das Segment
+          werte[f.name] = werte[f.name] || [];
+          eingabe = el('div.chips', { role: 'group', 'aria-label': f.label });
+          for (const [wert, text] of f.optionen) {
+            eingabe.append(el('button', { type: 'button', 'aria-pressed': String(werte[f.name].includes(wert)), class: werte[f.name].includes(wert) ? 'on' : null,
+              onclick: () => { const l = werte[f.name]; l.includes(wert) ? l.splice(l.indexOf(wert), 1) : l.push(wert); aktualisieren(); } }, BK.icon('check'), text));
+          }
+          break;
+        }
+        case 'datumzeit':
+          eingabe = el('input.field', { id, type: 'datetime-local', step: 60, max: lokal(new Date()), value: werte[f.name] || '',
+            onchange: e => { werte[f.name] = e.target.value || null; } });
+          break;
         case 'auswahl':
           eingabe = el('select.field', { id, onchange: e => { werte[f.name] = e.target.value || null; aktualisieren(); } },
             el('option', { value: '' }, f.platzhalter || 'Bitte wählen'),
@@ -43,7 +57,7 @@
           eingabe = el('input.field', { id, type: 'text', placeholder: f.platzhalter, maxlength: f.max || 200, autocomplete: f.autocomplete || 'off',
             value: werte[f.name] || '', oninput: e => { werte[f.name] = e.target.value; } });
       }
-      const listeTyp = ['text', 'textarea', 'zahl', 'auswahl', undefined].includes(f.typ);
+      const listeTyp = ['text', 'textarea', 'zahl', 'auswahl', 'datumzeit', undefined].includes(f.typ);
       return el('div.fblock', { dataset: { feld: f.name } },
         f.label ? el('label.sect', { for: listeTyp ? id : null }, f.label + (f.pflicht ? '' : ' (optional)')) : null,
         listeTyp ? el('div.list', el('div.row', eingabe)) : eingabe,
@@ -56,7 +70,7 @@
       for (const f of felder) {
         const alt = bloecke.get(f.name);
         const sichtbar = !f.wenn || f.wenn(werte);
-        if (f.typ === 'segment' || f.typ === 'auswahl') {
+        if (f.typ === 'segment' || f.typ === 'mehrfach' || f.typ === 'auswahl') {
           const neu = feld(f);
           alt.replaceWith(neu);
           bloecke.set(f.name, neu);
@@ -94,6 +108,9 @@
     };
   }
 
+  // Datum für datetime-local in Ortszeit: JJJJ-MM-TTTHH:MM
+  const lokal = d => new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
+
   // Fotos: verkleinert auf max. 1600 px, als JPEG. Höchstens f.max (Standard 5).
   function fotoFeld(f, werte) {
     werte[f.name] = werte[f.name] || [];
@@ -127,5 +144,5 @@
     return new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.8));
   }
 
-  window.BK.formular = { bauen };
+  window.BK.formular = { bauen, lokal };
 })();

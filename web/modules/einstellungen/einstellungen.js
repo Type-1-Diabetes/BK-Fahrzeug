@@ -7,6 +7,7 @@ BK.modul('einstellungen', {
       ['ampel_rot', 'KTW nicht einsatzbereit', 'Sobald ein KTW auf Rot gesetzt wird.', 'Fahrzeuge'],
       ['neuer_mangel', 'Neue Mängelmeldung', 'Ein Team meldet einen Mangel.', 'Meldungen'],
       ['neues_material', 'Neue Materialanforderung', 'Ein Team fordert Material an.', 'Meldungen'],
+      ['neuer_unfall', 'Neuer Unfallbericht', 'Ein Team meldet einen Unfall.', 'Meldungen'],
       ['checkliste_fertig', 'Checkliste zum Gegenzeichnen', 'Ein Team hat die Checkliste abgeschlossen.', 'Checklisten'],
       ['checkliste_ueberfaellig', 'Checkliste überfällig', 'Das Quartal ist um und die Checkliste fehlt.', 'Checklisten'],
     ];

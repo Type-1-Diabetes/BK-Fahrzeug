@@ -499,6 +499,7 @@
       setzen('fahrzeuge', fahrzeuge.length);
       setzen('maengel', meldungen.filter(m => m.art === 'mangel').length);
       setzen('ausgabe', meldungen.filter(m => m.art === 'material').length);
+      setzen('unfaelle', meldungen.filter(m => m.art === 'unfall').length, true);
       setzen('gegenzeichnen', checklisten.filter(c => c.abgeschlossen_am).length, true);
     } catch { /* Zahlen sind nur Zusatz */ }
   }

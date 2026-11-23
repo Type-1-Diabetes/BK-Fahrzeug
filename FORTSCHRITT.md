@@ -443,3 +443,22 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Fix (bk-v73): Nachrichten-Liste lud nicht („Hat nicht geklappt“), dadurch auch keine KTW-Auswahl und keine Anzeige auf dem Tablet. Ursache: `nachricht_gelesen` verbindet Nachrichten und Fahrzeuge, die Abfrage `fahrzeuge(name)` war für PostgREST mehrdeutig (PGRST201). Jetzt `fahrzeuge!nachrichten_fahrzeug_id_fkey(name)`. Nicht gegen die echte DB getestet.
 - Fix (bk-v74): Tablet-Übersicht zeigte den TÜV unter „Prüffristen“ nicht, wenn er nach dem Start eingetragen wurde. Die Prüffristen wurden mit dem alten KTW-Stand gezeichnet; jetzt erst nach dem Laden des KTW. Mit Testdaten geprüft.
 - bk-v75: Tablet-Reiter und Kachel „Checkliste“ mit dem Listen-Symbol wie früher die Fahrzeug Überprüfung. Ungelesene Nachrichten erscheinen als Fenster über allem (Hintergrund unscharf), bis „Gelesen“; der Hinweis „Benachrichtigungen einschalten“ bleibt als Leiste. Mit Testdaten geprüft.
+
+## Unfallbericht (2026-11-20, bk-v78, Migration 032)
+- Tablet: Reiter „Melden“ hat jetzt drei Umschalter (Mängelmeldung, Materialanforderung, **Unfall**). Modul `unfall`: 4 Schritte mit Schrittleiste (Unfall, Beteiligte, Schaden, Verletzte), Weiter prüft Pflichtfelder, Schritte gleiten in Richtung (von rechts/links), antippen springt zu einem erreichten Schritt. Senden über die Warteschlange (offline wie Mängel), Fotos bis 5.
+- Inhalt: Unfallzeit, Ort, Fahrt (leer/mit Patient), Sonderrechte, Fahrer, Beifahrer, Polizei (Dienststelle, Vorgang). Beteiligte (bis 5: Kennzeichen, Fahrer, Kontakt, Versicherung, Nr.), Zeugen. Hergang, Schaden am KTW (Mehrfachauswahl), fahrbereit, Schaden bei anderen, betroffene Geräte. Verletzte (Team mit Name, Verletzung, Arzt, arbeitsunfähig; Patient ohne Namen; Andere). Gemeldet durch.
+- Betroffene Geräte: je Gerät entsteht automatisch eine Mängelmeldung „Nach Unfall prüfen“.
+- Mac: Meldungen › **Unfälle** (Modul `unfaelle`): Tabelle, Akte mit dem Bericht vom Team, Bearbeitung (Informiert: Leitstelle/TL/GF, Versicherung, Reparatur wie Mängel, Geprüft), Ampel, Drucken, Löschen, CSV, „+ Neu“ für ein KTW. Zahl offener Unfälle rot in der Seitenleiste. Hinweis in der Akte, wann der Bericht gelöscht wird.
+- `formular.js`: neue Feldtypen `mehrfach` (Chips) und `datumzeit`. Neues Icon `unfall`. Umschalter `.reiter-wahl` breiter (3 Reiter).
+- Push „Unfall · KTW“ (Schlüssel `neuer_unfall`, abschaltbar unter Einstellungen) in `push-senden`.
+- Migration 032: Art `unfall`, Modul `unfall` für alle KTW, Tabelle `unfall_details` (Beteiligte, Verletzte; RLS: nur MPGler, nie das Tablet; GRANT), `meldung_anlegen` erweitert, `unfaelle_loeschen_alt` (nur service_role), pg_cron täglich 03:17 UTC.
+- Löschen nach 90 Tagen: Edge Function `unfall-loeschen` löscht zuerst die Fotos im Speicher, dann die Meldung (mit Details), Verlauf-Eintrag „Unfallbericht gelöscht“. Bei Fehler bricht sie ab und versucht es am nächsten Tag.
+- Getestet in Chromium mit nachgebildeten Daten (Tablet 1180×820 und 820×1180, Mac 1280×800 hell/dunkel): Schritte, Pflichtfelder, Senden-Inhalt an `meldung_anlegen`, Akte. Keine Fehler. Nicht gegen die echte DB, kein Push, kein Löschjob getestet.
+- Offen: 032 und 033 im SQL-Editor ausführen (pg_cron muss aktiv sein). `aufraeumen` deployen (Verify JWT aus, Secret PUSH_GEHEIMNIS wie bei push-senden). `push-senden` neu deployen.
+
+## Fotos werden mitgelöscht (2026-11-20, Migration 033)
+- Vorher blieben Fotos gelöschter Meldungen im Speicher. Jetzt merkt ein Trigger auf `public.fotos` jeden gelöschten Pfad (`intern.fotos_weg`), egal ob von Hand, mit der Meldung oder nach 90 Tagen.
+- Edge Function `unfall-loeschen` heißt jetzt `aufraeumen`: täglich 03:17 UTC erst Unfälle älter als 90 Tage löschen (`unfaelle_loeschen_alt()`, jetzt ohne Parameter, ganz in der DB), dann die gemerkten Fotos aus dem Speicher. Schlägt das fehl, bleibt die Liste für den nächsten Tag.
+- 033 trägt einmal alle alten Reste ein (Dateien ohne Eintrag in `fotos`, älter als 1 Tag).
+- Pfade kommen nur aus der DB. Neue RPCs `fotos_weg_holen`, `fotos_weg_erledigt` nur für service_role.
+- Nicht getestet (keine Verbindung zur DB). Gelöschte Fotos verschwinden spätestens nach einem Tag.

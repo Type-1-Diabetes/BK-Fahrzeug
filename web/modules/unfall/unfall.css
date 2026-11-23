@@ -1,0 +1,36 @@
+/* Modul Unfallbericht (Tablet): vier Schritte, Aufbau wie die Mängelmeldung */
+.unfall { max-width: 760px; margin: 0 auto; padding-bottom: 24px; }
+.unfall .fblock[hidden] { display: none; }
+.uf-kopf { grid-template-columns: 1fr 1fr; margin-top: 16px; }
+
+/* Schritte: Nummer im Kreis, aktueller Schritt navy, erledigte mit Haken-Farbe */
+.uf-schritte { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; counter-reset: none; }
+.uf-schritte li { position: relative; }
+.uf-schritte button { width: 100%; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 12px; color: var(--label2); text-align: left; }
+.uf-schritte button:disabled { color: var(--label3); }
+.uf-nr { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600;
+  background: var(--fill); font-variant-numeric: tabular-nums; transition: background-color .2s ease, color .2s ease; }
+.uf-titel { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Fortschrittsstrich unter den Schritten */
+.uf-schritte li::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px; border-radius: 2px; background: var(--fill);
+  transform-origin: left; }
+.uf-schritte li.fertig::after, .uf-schritte li.on::after { background: var(--navy2); }
+.uf-schritte li.fertig .uf-nr { background: color-mix(in srgb, var(--navy2) 14%, transparent); color: var(--tint); }
+.uf-schritte li.on button { color: var(--label); font-weight: 600; }
+.uf-schritte li.on .uf-nr { background: var(--navy2); color: #fff; }
+.uf-schritte li.on::after { animation: uf-strich .3s cubic-bezier(0.25, 1, 0.5, 1) both; }
+@keyframes uf-strich { from { transform: scaleX(0); } }
+@media (max-width: 600px) { .uf-titel { display: none; } .uf-schritte button { justify-content: center; } .uf-schritte li.on .uf-titel { display: block; } }
+
+/* Beteiligte als eigene Gruppen mit Überschrift */
+.uf-gegner { margin-top: 20px; }
+.uf-gegner-kopf { display: flex; align-items: center; justify-content: space-between; margin: 0 0 -12px; padding: 0 4px 0 16px; }
+.uf-gegner-kopf h3 { font-size: 20px; font-weight: 700; }
+.uf-weg { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--label2); }
+.uf-neu { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; margin-top: 16px; padding: 0 16px; border-radius: 12px;
+  background: var(--bg2); color: var(--tint); font-size: 17px; }
+.uf-neu:active { background: var(--fill2); }
+
+.uf-knoepfe { display: flex; gap: 12px; margin-top: 28px; }
+.uf-knoepfe .btn { flex: 1; }
+.uf-knoepfe .btn.sec { flex: 0 0 auto; min-width: 140px; }

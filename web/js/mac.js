@@ -12,6 +12,7 @@
     pill: s => BK.el('span', { class: 'pill mp ' + s }, STATUS[s] || s),
     titel: m => m.art === 'material'
       ? `Materialanforderung: ${m.positionen.length} Artikel`
+      : m.art === 'unfall' ? 'Unfall: ' + (m.gegenstand || '')
       : (m.geraet ? m.geraet.name : (m.gegenstand || m.geraet_frei || 'Mangel')),
     kurz: d => {
       const t = new Date(d), heute = new Date();

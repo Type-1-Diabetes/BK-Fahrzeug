@@ -30,6 +30,14 @@ select.field { appearance: none; min-height: 36px; }
 .segc button, .mseg button { position: relative; isolation: isolate; }
 .segc button.on::before, .mseg button.on::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
   background: var(--bg2); box-shadow: 0 1px 3px rgba(0,0,0,.14); transform-origin: left center; }
+/* Mehrfachauswahl (formular.js „mehrfach“): antippen = an/aus, Haken erscheint */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px 0 12px; border-radius: 22px; background: var(--fill); font-size: 15px;
+  transition: background-color .15s ease, color .15s ease; }
+.chips button .i { width: 16px; height: 16px; stroke-width: 2.4; opacity: .28; transform: scale(.8); transition: opacity .15s ease, transform .2s cubic-bezier(0.22, 1, 0.36, 1); }
+.chips button.on { background: color-mix(in srgb, var(--navy2) 14%, transparent); color: var(--tint); font-weight: 600; }
+.chips button.on .i { opacity: 1; transform: none; }
+.chips button:active { transform: scale(.97); }
 .photo { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
 .ph { position: relative; width: 96px; height: 96px; border-radius: 10px; background: var(--fill); display: grid; place-items: center; color: var(--tint); font-size: 28px; overflow: hidden; }
 .ph img { width: 100%; height: 100%; object-fit: cover; }
@@ -81,8 +89,8 @@ select.field { appearance: none; min-height: 36px; }
 .content { flex: 1; overflow: auto; padding: 0 28px 28px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 .large { font-size: 32px; font-weight: 700; padding: 6px 0 12px; }
 .reiter-leiste { flex: none; padding: 4px max(28px, env(safe-area-inset-right)) 8px max(28px, env(safe-area-inset-left)); }
-.reiter-wahl { max-width: 480px; margin: 0 auto; }
-.reiter-wahl button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+.reiter-wahl { max-width: 680px; margin: 0 auto; }
+.reiter-wahl button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; flex: 1 1 0; padding: 0 14px; white-space: nowrap; }
 .reiter-wahl button svg { font-size: 22px; }
 @media (max-width: 900px) {
   .brandmini span:last-child { font-size: 0; }

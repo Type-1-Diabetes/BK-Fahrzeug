@@ -184,6 +184,8 @@
     },
     // Mac (MPGler/Admin): direkt senden, Fahrzeug steht in daten.fahrzeug_id
     meldungAnlegen: (daten, fotos = []) => api._senden.meldung({ daten: { ...daten, client_id: crypto.randomUUID() }, fotos }),
+    // Unfälle (Migration 032): Details mit Beteiligten nur für Personal (RLS), das Tablet bekommt sie nicht
+    unfaelle: () => lesen('meldungen', 'select=id,fahrzeug_id,art,gegenstand,beschreibung,gemeldet_von,status,bearbeitung,erstellt_am,erledigt_am,fahrzeug:fahrzeuge(name,kennzeichen),fotos(id,pfad),unfall:unfall_details(daten)&art=eq.unfall&order=erstellt_am.desc'),
     meldungBearbeiten: (id, status, bearbeitung) => rpc('meldung_bearbeiten', { p_meldung: id, p_status: status, p_bearbeitung: bearbeitung }),
     materialAusgeben: (id, positionen, erledigt) => rpc('material_ausgeben', { p_meldung: id, p_positionen: positionen, p_erledigt: erledigt }),
     async fotoUrl(pfad) {

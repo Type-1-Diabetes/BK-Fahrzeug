@@ -72,11 +72,12 @@ BK.modul('uebersicht', {
         for (const m of meldungen) {
           const titel = m.art === 'material'
             ? `Materialanforderung: ${m.positionen.length} Artikel`
+            : m.art === 'unfall' ? 'Unfall: ' + m.gegenstand
             : [m.geraet ? m.geraet.name : (m.gegenstand || m.geraet_frei), m.beschreibung].filter(Boolean).join(': ');
           const farbe = m.status === 'erledigt' ? 'f-gruen' : m.art === 'material' ? 'f-blau' : m.status === 'offen' ? 'f-rot' : 'f-orange';
           liste.append(el('div.row',
-            el('div', { class: 'ico ' + farbe }, icon(m.status === 'erledigt' ? 'check' : m.art === 'material' ? 'box' : 'wrench')),
-            el('div.t', el('b', titel), el('span', [m.art === 'material' ? 'Materialanforderung' : 'Mängelmeldung', timeAgo(m.erstellt_am), m.gemeldet_von].join(' · '))),
+            el('div', { class: 'ico ' + farbe }, icon(m.status === 'erledigt' ? 'check' : { material: 'box', unfall: 'unfall' }[m.art] || 'wrench')),
+            el('div.t', el('b', titel), el('span', [{ material: 'Materialanforderung', unfall: 'Unfallbericht' }[m.art] || 'Mängelmeldung', timeAgo(m.erstellt_am), m.gemeldet_von].join(' · '))),
             el('span', { class: 'pill ' + m.status }, STATUS[m.status])));
         }
       } catch (e) {
