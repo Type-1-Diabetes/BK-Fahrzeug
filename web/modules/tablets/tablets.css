@@ -20,3 +20,9 @@
 .neu-modus { display: flex; margin-top: 4px; } .neu-modus button { flex: 1; }
 .neu-ausblenden { margin-right: auto; }
 @media (pointer: coarse) { .neu-box .neu-name { height: 44px; font-size: 16px; } }
+/* Handy: Karte je Tablet, Knöpfe in eigener Zeile */
+@media (max-width: 600px) {
+  .tablets-inhalt table.tab td { height: auto; padding: 0; border-bottom: 0; }
+  .huelle-mac .tablets-inhalt table.tab td:last-child:not([colspan]) { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; text-align: left; margin-top: 6px; }
+  .tablets-inhalt td .pbtn + .pbtn { margin-left: 0; }
+}

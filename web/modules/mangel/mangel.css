@@ -1,12 +1,5 @@
 /* Modul Mangel melden (Tablet): von oben nach unten wie das Papierformular */
 .mangel { max-width: 760px; margin: 0 auto; padding-bottom: 24px; }
 .mangel .fblock[hidden] { display: none; }
-/* Kopfzeile wie auf dem Blatt: Kennzeichen, Funkruf, Datum, Zeit */
-.mkopf { display: grid; grid-template-columns: 1.4fr 1fr 1fr .8fr; background: var(--bg2); border-radius: 12px; overflow: hidden; margin-top: 24px; }
-.mkopf > div { padding: 10px 16px; min-width: 0; }
-.mkopf > div + div { border-left: .5px solid var(--sep); }
-.mkopf span { display: block; font-size: 13px; color: var(--label2); }
-.mkopf b { display: block; margin-top: 2px; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-@media (max-width: 600px) { .mkopf { grid-template-columns: 1fr 1fr; } .mkopf > div:nth-child(3) { border-left: 0; } .mkopf > div:nth-child(n+3) { border-top: .5px solid var(--sep); } }
 /* Unterschriftslinie: Name, Zeit und Tablet statt Unterschrift */
 .msenden { width: 100%; margin-top: 24px; }

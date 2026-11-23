@@ -2,3 +2,7 @@
 .uf-lesen .kv > div { -webkit-user-select: text; user-select: text; overflow-wrap: anywhere; }
 .uf-marken { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .uf-loeschen { margin-top: 10px; font-size: 12px; color: var(--label2); }
+/* Handy: Bericht vom Team dichter (nur Lesen, keine 44-px-Felder) */
+@media (max-width: 600px) {
+  .huelle-mac .uf-lesen .kv > div { min-height: 0; }
+}

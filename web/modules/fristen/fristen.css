@@ -7,3 +7,9 @@
 .fr-zeile .fr-info { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; font-weight: 400; }
 .fr-tage { display: inline-flex; align-items: center; gap: 6px; color: var(--label2); white-space: nowrap; }
 .fr-tage .tf { width: 52px; text-align: right; }
+/* Handy: Titel, Auswahl, dann Tage und Knopf untereinander */
+@media (max-width: 600px) {
+  .fr-inhalt { padding: 14px 12px; }
+  .fr-zeile { grid-template-columns: 1fr auto; }
+  .fr-zeile > b, .fr-zeile > select, .fr-zeile > .auswahl-knopf { grid-column: 1 / -1; }
+}

@@ -477,3 +477,23 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Gestrichen: Hinweis unter „Gerät“ (Mängelmeldung), Text im Dialog „Gruppe umbenennen“ und unter „Farbe des Bereichs“ (Vorlage), „Oben rechts ‚Neue …‘“ bei leeren Listen (Geräte, Vorlage, Nachrichten).
 - Unfall-Fotos: „Schäden und Kennzeichen fotografieren.“ Tooltip am Breiten-Griff: „Breite ziehen“.
 - Dialoge ohne Beschreibung zeigen keine leere Zeile mehr (`._ad-desc:empty`).
+
+## MPGler-Bereich am Handy geprüft und angepasst (2026-11-23, bk-v82)
+- Geprüft mit Testdaten in Chromium: Pixel 7 (412 px) und iPhone SE (375 px), alle MPGler-Module mit Liste und Detail, Unfall-Blatt.
+- Nur `@media (max-width: 600px)` geändert. Pixel-Vergleich alter/neuer Stand auf Mac 1280×800, iPad quer und hochkant: alle Ansichten gleich (einziger Unterschied: Uhrzeit der Testdaten).
+- Kopfleiste: Knöpfe, KTW-Auswahl und Export in eigener Zeile unter dem Titel, Titel nicht mehr gequetscht oder überlappt („Mängelmeldungen“ lag unter „Export“). Status-Leiste mit weniger Innenabstand.
+- Fristen: Zeile lief über den Rand. Jetzt Titel, Auswahl, darunter Tage und Speichern.
+- Tablets: Knöpfe liefen über den Rand. Jetzt Karte je Tablet, Knöpfe umbrechen.
+- Einstellungen: Seitenliste links ließ den Inhalt über den Rand laufen. Jetzt Leiste oben (Benachrichtigungen, Konto, App).
+- Vorlage bearbeiten: Position als Karte (Griff, Artikel, Pfeile; darunter Hinweis, Wo, Soll, Prüfung), Nr. ausgeblendet.
+- Unfälle: Bericht vom Team dichter (keine 44-px-Zeilen nur zum Lesen).
+- Fix (alle Geräte): Kopf Kennzeichen/Funkruf im Unfall-Blatt war ohne Stil, wenn vorher keine Mängelmeldung geladen war. `.mkopf` steht jetzt in `komponenten.css` statt `mangel.css`.
+- Wichtig für künftige Modul-CSS: Module werden vorgeladen, ihre CSS gilt global. Handy-Regeln immer an Klassen des Moduls binden (z. B. `tbody[data-positionen]`).
+
+## Handy-Feinschliff nach echten Screenshots (2026-11-23, bk-v83)
+- Geprüft zusätzlich mit 320 px Breite (entspricht großer Systemschrift am Android-Handy), dunkel.
+- Knöpfe mit Symbol (alle Geräte): Abstand zwischen Symbol und Text („✓ Als ausgegeben markieren“, „☰ Ganze Liste ansehen“). `.pbtn:has(> svg.i)` als inline-flex mit 6 px Abstand.
+- Handy: Status-Leisten schmaler (14 px, bis 360 px Breite 13 px), damit „Ausgegeben“/„Erledigt“ nicht abgeschnitten werden.
+- Handy: Werte ohne Spaltenkopf beschriftet: „Verletzte: Nein“ (Unfälle), „2 Artikel“ (Material), „Abweichungen: 1“ (Überprüfungen). Tabellen haben dafür die Klassen `tab-unfaelle`, `tab-ausgabe`, `tab-gegenz`.
+- Handy: Vorlage bearbeiten scrollt als Ganzes, die Bereichsliste wird nicht mehr abgeschnitten.
+- Pixel-Vergleich Mac/iPad: nur die Knöpfe mit Symbol anders (gewollt), sonst gleich.
