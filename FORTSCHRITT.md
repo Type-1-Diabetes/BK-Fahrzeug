@@ -519,9 +519,10 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Migration 034: `push_abo_speichern` (Personal, Upsert mit Übernahme von Schlüssel und Besitzer), `tablet_push_abo` erneuert statt „schon da“, Spalte `push_abos.bestaetigt_am`.
 - `confirmDialog` kann eigene Knopftexte (`confirmLabel`, `cancelLabel`).
 - Getestet in Chromium mit nachgebildetem Push-Dienst und Recht: Frage am Mac, Später, Erneuern bei jedem Start, Ausschalten bleibt aus, Wieder einschalten, Abmelden löscht, Tablet-Leiste. Nicht getestet: echte Zustellung, iOS, Android, `pushsubscriptionchange`.
-- 034 ist ausgeführt (laut Nutzer, 2026-11-23). Offen: `push-senden` neu deployen (Knopf „Edge Functions“).
+- 034 ist ausgeführt (laut Nutzer, 2026-11-23). `push-senden` ist neu deployt (Knopf „Edge Functions“).
 
 ## Edge Functions per Knopf hochladen (2026-11-23)
 - Neu `.github/workflows/edge-functions.yml`: GitHub › Actions › „Edge Functions“ › „Run workflow“ lädt `push-senden` und `aufraeumen` zu Supabase hoch (JWT-Prüfung aus). Nur von Hand, nur diese zwei Namen. Braucht das Repo-Secret `SUPABASE_ACCESS_TOKEN` (ist angelegt, laut Nutzer).
 - Neu `supabase/config.toml`: `verify_jwt = false` für beide Funktionen, damit die Einstellung beim Hochladen nicht zurückspringt.
-- Noch nicht gelaufen (Datei muss erst auf `main`).
+- 2026-11-23: gelaufen, `push-senden` und `aufraeumen` sind auf Supabase (Lauf #2). Supabase CLI fest auf 2.122.1, „latest“ scheiterte am GitHub-Abfragelimit.
+- Offen: Im Dashboard prüfen, dass bei beiden „Enforce JWT Verification“ aus ist. Push am echten Gerät testen.
