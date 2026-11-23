@@ -2,6 +2,8 @@
 .fz-inhalt { flex: 1; overflow: auto; }
 .fz-liste { padding: 4px 22px 28px; }
 .fz-akte .fz-liste { display: none; }
+/* Akte scrollt mit .fz-inhalt. Eigener Scrollbereich (contain) schluckte sonst das Wischen am Handy. */
+.fz-inhalt > .vfile { overflow: visible; }
 .fz-akte [data-wachen], .fz-akte .search { display: none; }
 .fz-wache { font-size: 13px; font-weight: 600; color: var(--label2); margin: 18px 2px 10px; }
 .fz-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }

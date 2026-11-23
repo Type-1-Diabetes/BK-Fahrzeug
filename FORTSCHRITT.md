@@ -454,7 +454,7 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - Migration 032: Art `unfall`, Modul `unfall` für alle KTW, Tabelle `unfall_details` (Beteiligte, Verletzte; RLS: nur MPGler, nie das Tablet; GRANT), `meldung_anlegen` erweitert, `unfaelle_loeschen_alt` (nur service_role), pg_cron täglich 03:17 UTC.
 - Löschen nach 90 Tagen: Edge Function `unfall-loeschen` löscht zuerst die Fotos im Speicher, dann die Meldung (mit Details), Verlauf-Eintrag „Unfallbericht gelöscht“. Bei Fehler bricht sie ab und versucht es am nächsten Tag.
 - Getestet in Chromium mit nachgebildeten Daten (Tablet 1180×820 und 820×1180, Mac 1280×800 hell/dunkel): Schritte, Pflichtfelder, Senden-Inhalt an `meldung_anlegen`, Akte. Keine Fehler. Nicht gegen die echte DB, kein Push, kein Löschjob getestet.
-- Offen: 032 und 033 im SQL-Editor ausführen (pg_cron muss aktiv sein). `aufraeumen` deployen (Verify JWT aus, Secret PUSH_GEHEIMNIS wie bei push-senden). `push-senden` neu deployen.
+- 032 und 033 sind ausgeführt (laut Nutzer, 2026-11-23). Offen: `aufraeumen` deployen (Verify JWT aus, Secret PUSH_GEHEIMNIS wie bei push-senden). `push-senden` neu deployen.
 
 ## Fotos werden mitgelöscht (2026-11-20, Migration 033)
 - Vorher blieben Fotos gelöschter Meldungen im Speicher. Jetzt merkt ein Trigger auf `public.fotos` jeden gelöschten Pfad (`intern.fotos_weg`), egal ob von Hand, mit der Meldung oder nach 90 Tagen.
@@ -462,3 +462,8 @@ Erledigt aus der alten Liste: Migrationen 007 und 010 sind eingespielt, „Neues
 - 033 trägt einmal alle alten Reste ein (Dateien ohne Eintrag in `fotos`, älter als 1 Tag).
 - Pfade kommen nur aus der DB. Neue RPCs `fotos_weg_holen`, `fotos_weg_erledigt` nur für service_role.
 - Nicht getestet (keine Verbindung zur DB). Gelöschte Fotos verschwinden spätestens nach einem Tag.
+
+## Fahrzeug-Akte: Scrollen am Handy, Unfälle (2026-11-23, bk-v79)
+- Fix: In Fahrzeuge › Akte ließ sich am Handy nicht wischen. Ursache: Die Akte (`.vfile`) war ein eigener Scrollbereich mit `overscroll-behavior: contain`, aber nie scrollbar, und schluckte so das Wischen. Jetzt `overflow: visible`, es scrollt `.fz-inhalt`.
+- Akte: Knopf „Unfallbericht erstellen“ (Blatt mit Modul `unfall`) und Liste „offene Unfälle“ über den Mängeln, Antippen öffnet den Unfall unter Meldungen › Unfälle.
+- Getestet in Chromium mit Testdaten (Pixel 7, Touch-Wischen, dunkel): scrollt, Unfälle sichtbar.

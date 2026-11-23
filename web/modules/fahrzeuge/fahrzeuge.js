@@ -181,7 +181,7 @@ BK.modul('fahrzeuge', {
       if (f.id !== gewaehlt) return;
       leeren(akte);
       const tab = tablets.filter(t => t.fahrzeug_id === f.id && t.zuletzt_online).sort((a, b) => b.zuletzt_online.localeCompare(a.zuletzt_online))[0];
-      const mg = offeneVon(f, 'mangel'), mt = offeneVon(f, 'material');
+      const mg = offeneVon(f, 'mangel'), mt = offeneVon(f, 'material'), uf = offeneVon(f, 'unfall');
       const [ck, ckText] = checkStand(f);
       const t = tuev(f);
       const inhalt = el('div');
@@ -196,9 +196,14 @@ BK.modul('fahrzeuge', {
           el('span.fz-trenner'),
           el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('mangel', f, laden) }, BK.icon('wrench'), 'Mängelmeldung erstellen'),
           el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('material', f, laden) }, BK.icon('box'), 'Materialanforderung erstellen'),
+          el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('unfall', f, laden) }, BK.icon('unfall'), 'Unfallbericht erstellen'),
           f.vorlage_id ? el('button.pbtn.gross', { type: 'button', onclick: () => BK.blatt('checkliste', f, () => { api.frischLesen(); laden(); }, { gross: true }) }, BK.icon('list'), 'Fahrzeug Überprüfung') : null,
           el('button.pbtn.gross', { type: 'button', onclick: () => tuevDialog(f) }, BK.icon('clock'), f.tuev_bis ? 'TÜV ändern' : 'TÜV eintragen')),
-        // Offene Mängel bleiben oben, bis sie behoben sind
+        // Offene Unfälle und Mängel bleiben oben, bis sie erledigt sind
+        uf.length ? el('section.fz-maengel', el('h3', uf.length === 1 ? '1 offener Unfall' : `${uf.length} offene Unfälle`),
+          el('div.fz-maengel-liste', uf.map(m => el('button.fz-mangel', { type: 'button', title: 'In Unfälle öffnen', onclick: () => ctx.oeffnen('unfaelle', { meldung: m.id }) },
+            mac.pill(m.status), el('span.fz-mangel-t', el('b', m.gegenstand), m.beschreibung ? el('span', m.beschreibung) : null),
+            el('span.fz-mangel-d', mac.kurz(m.erstellt_am)), BK.icon('chevR'))))) : '',
         mg.length ? el('section.fz-maengel', el('h3', mg.length === 1 ? '1 offener Mangel' : `${mg.length} offene Mängel`),
           el('div.fz-maengel-liste', mg.map(m => el('button.fz-mangel', { type: 'button', title: 'In Mängelmeldungen öffnen', onclick: () => ctx.oeffnen('maengel', { meldung: m.id }) },
             mac.pill(m.status), el('span.fz-mangel-t', el('b', mac.titel(m)), m.beschreibung ? el('span', m.beschreibung) : null),
